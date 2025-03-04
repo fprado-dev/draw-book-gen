@@ -19,16 +19,7 @@ export default function GeneratePanel() {
   const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
-    console.log({
-      introduction,
-      style,
-      artStyle,
-      themeCollection,
-      aspectRatio,
-      difficultyLevel,
-    })
     setLoading(true);
-    // TODO: Implement image generation and line art conversion
     setLoading(false);
   };
 

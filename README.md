@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Coloring Book Generator
 
-## Getting Started
+An innovative web application that uses AI to generate custom coloring pages for various purposes - from educational materials to professional coloring books.
 
-First, run the development server:
+## Features
+
+- **AI-Powered Generation**: Create unique coloring pages using advanced AI algorithms
+- **Multiple Art Styles**: Choose from various styles including Kawaii, Lowpoly, and more
+- **Customization Options**: Control line weight, detail level, and design elements
+- **Print-Ready Output**: All generated pages are optimized at 300 DPI for professional printing
+- **User-Friendly Interface**: Intuitive design tools for easy page creation
+- **Instant Downloads**: Get your coloring pages immediately after generation
+
+## Prerequisites
+
+Before you begin, ensure you have installed:
+- [Node.js](https://nodejs.org/) (version 18 or higher)
+- [npm](https://www.npmjs.com/) (usually comes with Node.js)
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone [your-repository-url]
+cd draw-book-gen
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+## Development
+
+To start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+draw-book-gen/
+├── src/
+│   ├── app/          # Next.js app directory
+│   ├── components/   # Reusable UI components
+│   ├── contexts/     # React contexts
+│   ├── lib/          # Utility functions
+│   ├── services/     # External service integrations
+│   └── types/        # TypeScript type definitions
+├── public/          # Static files
+└── [configuration files]
+```
 
-## Learn More
+## Technology Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework**: [Next.js](https://nextjs.org/) with React
+- **Styling**: Tailwind CSS
+- **UI Components**: Custom components with shadcn/ui
+- **Type Safety**: TypeScript
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Target Users
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Teachers creating educational materials
+- Parents looking for personalized coloring activities
+- Businesses developing branded coloring books
+- Artists generating base templates
+- Publishers producing coloring books
+- Therapists designing mindfulness activities
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

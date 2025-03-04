@@ -5,7 +5,6 @@ export function middleware(request: NextRequest) {
   const authCookie = request.cookies.get('auth-user');
   const isUserAuthenticated = authCookie?.value ? JSON.parse(authCookie.value) : null;
   const isAuthPage = request.nextUrl.pathname === '/sign-in' || request.nextUrl.pathname === '/sign-up' || request.nextUrl.pathname === '/';
-  console.log(request.cookies.getAll())
   
   if (isUserAuthenticated) {
     if (isAuthPage) {

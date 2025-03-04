@@ -84,7 +84,6 @@ export default function ProjectDetailsPage() {
       </div>
     )
   }
-  console.log(project)
   return (
     <div className="container mx-auto py-6 ">
       <div className="flex flex-col gap-6 mb-8">
