@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Square, RectangleHorizontal, Settings2Icon } from 'lucide-react';
+import { Square, RectangleHorizontal, Settings2Icon, BookCheckIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 export default function GeneratePanel() {
@@ -17,6 +17,15 @@ export default function GeneratePanel() {
   const [aspectRatio, setAspectRatio] = useState('portrait');
   const [difficultyLevel, setDifficultyLevel] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<number[]>([]);
+
+  const handleImageSelect = (index: number) => {
+    setSelectedImages(prev =>
+      prev.includes(index)
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -144,6 +153,8 @@ export default function GeneratePanel() {
           <CardHeader className="flex flex-row items-center justify-between space-x-4">
             <CardTitle>Preview</CardTitle>
             <div className="flex items-center gap-2">
+
+
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className="cursor-pointer">
@@ -151,7 +162,7 @@ export default function GeneratePanel() {
                     <Settings2Icon className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[400px] sm:max-w-none">
+                <SheetContent side="left" className="w-[600px] sm:max-w-none">
                   <SheetHeader className="py-4">
                     <SheetTitle>Configuration</SheetTitle>
                   </SheetHeader>
@@ -162,39 +173,37 @@ export default function GeneratePanel() {
             </div>
           </CardHeader>
           <CardContent className="relative flex gap-4">
-            <div className="w-[450px] h-[700px] border-2 border-dashed border-slate-200 rounded-lg p-4 flex items-center justify-center bg-white">
-              <div className="flex flex-col items-center justify-center gap-4">
-                <Image
-                  src="/window.svg"
-                  alt="Main preview placeholder"
-                  width={120}
-                  height={60}
-                  className="opacity-20"
-                />
-                <p className="text-slate-500 text-center">
-                  Main preview will appear here
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 flex-1">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i}
-                  className="flex-1 border-2 border-dashed bg-white rounded-lg flex items-center justify-center  ">
-                  <div className="flex flex-col items-center justify-center gap-2">
+            {[0, 1, 2].map((index) => (
+              <div key={index} className="relative w-[450px] h-[700px] border-2 border-dashed border-slate-200 rounded-lg p-4 flex flex-col bg-white">
+                <div className="flex items-center gap-2 mb-4">
+                  <input
+                    type="checkbox"
+                    id={`image-${index}`}
+                    checked={selectedImages.includes(index)}
+                    onChange={() => handleImageSelect(index)}
+                    className="w-4 h-4 cursor-pointer"
+                  />
+                  <label htmlFor={`image-${index}`} className="text-sm text-gray-600 cursor-pointer">
+                    Select this image
+                  </label>
+                </div>
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="flex flex-col items-center justify-center gap-4">
                     <Image
                       src="/window.svg"
-                      alt={`Preview placeholder ${i}`}
-                      width={40}
-                      height={40}
+                      alt="Main preview placeholder"
+                      width={120}
+                      height={60}
                       className="opacity-20"
                     />
-                    <p className="text-slate-500 text-center text-sm">
-                      Preview {i}
+                    <p className="text-slate-500 text-center">
+                      Main preview will appear here
                     </p>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+
           </CardContent>
         </Card>
       </div>

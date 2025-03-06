@@ -30,6 +30,13 @@ cd draw-book-gen
 npm install
 ```
 
+3. Set up environment variables:
+   - Copy the `.env.example` file to `.env`
+   - Fill in your Firebase configuration values
+```bash
+cp .env.example .env
+```
+
 ## Development
 
 To start the development server:
