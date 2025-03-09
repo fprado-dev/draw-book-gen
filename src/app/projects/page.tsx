@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button'
 import { PlusIcon, Pencil, Trash, Search } from 'lucide-react'
 import { useProjectFiltering } from '@/types/project'
 import { toast } from "sonner"
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth'
-import { app } from '@/services/firebase'
-import { getDatabase, ref, set, get, remove, child, update } from 'firebase/database'
+import { User } from '@supabase/supabase-js'
+import { supabase } from '@/services/supabase'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Select,
   SelectContent,
@@ -44,9 +44,9 @@ import { useRouter } from 'next/navigation'
 
 export default function ProjectsPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [projects, setProjects] = useState<Project[]>([])
   const [newProjectTitle, setNewProjectTitle] = useState('')
   const [newProjectColor, setNewProjectColor] = useState('#6366f1')
   const [editingProject, setEditingProject] = useState<Project | null>(null)
@@ -56,150 +56,163 @@ export default function ProjectsPage() {
     title: '',
     sortOrder: 'newest' as 'newest' | 'oldest'
   })
+  const [user, setUser] = useState<User | null>(null)
 
-  const [user, setUser] = useState<User | null>()
-  const database = getDatabase(app)
-
-  const projectsList = useProjectFiltering(projects, filters)
   useEffect(() => {
-    const auth = getAuth(app)
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
-      if (user) {
-        // Load projects when user is authenticated
-        loadUserProjects(user.uid)
-      } else {
-        setProjects([])
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
     })
 
-    return () => unsubscribe()
+    return () => subscription.unsubscribe()
   }, [])
 
-  const [isLoading, setIsLoading] = useState(true)
-  const loadUserProjects = async (userId: string) => {
-    setIsLoading(true)
-    try {
-      const dbRef = ref(database)
-      const snapshot = await get(child(dbRef, `projects/${userId}`))
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ['projects', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return []
+      const { data: projectsData, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id)
 
-      if (snapshot.exists()) {
-        const projectsData = snapshot.val()
-        const projectsList = Object.values(projectsData).map((project: any) => ({
-          ...project,
-          createdAt: new Date(project.createdAt),
-          updatedAt: new Date(project.updatedAt)
-        }))
-        setProjects(projectsList as Project[])
-      } else {
-        setProjects([])
+      if (error) throw error
+
+      return projectsData?.map(project => ({
+        ...project,
+        created_at: new Date(project.created_at),
+        updated_at: new Date(project.updated_at)
+      })) || []
+    },
+    enabled: !!user?.id
+  })
+
+  const projectsList = useProjectFiltering(projects, filters)
+
+  const createProjectMutation = useMutation({
+    mutationFn: async () => {
+      if (!newProjectTitle.trim() || !user) return
+
+      const { data: existingProject, error: checkError } = await supabase
+        .from('projects')
+        .select('title')
+        .eq('user_id', user.id)
+        .eq('title', newProjectTitle)
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError
       }
-    } catch (error) {
-      console.error('Error loading projects:', error)
-      toast.error('Failed to load projects')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
-  const createProject = async () => {
-    if (!newProjectTitle.trim() || !user) return
-
-    try {
-      // Check if project with same title exists
-      const projectsRef = ref(database, `projects/${user.uid}`)
-      const snapshot = await get(projectsRef)
-
-      if (snapshot.exists()) {
-        const projects = Object.values(snapshot.val())
-        const projectExists = projects.some((project: any) =>
-          project.title.toLowerCase() === newProjectTitle.toLowerCase()
-        )
-
-        if (projectExists) {
-          toast.error('A project with this title already exists')
-          return
-        }
+      if (existingProject) {
+        throw new Error('A project with this title already exists')
       }
 
       const projectId = Date.now().toString()
-      await set(ref(database, `projects/${user.uid}/${projectId}`), {
+      const newProject = {
         id: projectId,
         title: newProjectTitle,
         color: newProjectColor,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        userId: user.uid,
-        userName: user.displayName || ""
-      })
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: user.id,
+        user_name: user.user_metadata?.full_name || ""
+      }
 
-      setProjects([...projects, {
-        id: projectId,
-        title: newProjectTitle,
-        color: newProjectColor,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userId: user.uid,
-        userName: user.displayName || ""
-      }])
+      const { error } = await supabase
+        .from('projects')
+        .insert([newProject])
+
+      if (error) throw error
+
+      return newProject
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
       setNewProjectTitle('')
       setNewProjectColor('#6366f1')
       setOpen(false)
-
       toast("Project created", {
         description: `Successfully created project "${newProjectTitle}!"`
       })
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error creating project:', error)
-      toast.error('Failed to create project')
+      toast.error(error instanceof Error ? error.message : 'Failed to create project')
     }
-  }
+  })
 
-  const updateProject = async (id: string, newTitle: string, color: string) => {
-    if (!user) return
+  const updateProjectMutation = useMutation({
+    mutationFn: async ({ id, newTitle, color }: { id: string; newTitle: string; color: string }) => {
+      if (!user) return
 
-    const updatedProject = {
-      title: newTitle,
-      color,
-      updatedAt: new Date().toISOString()
-    }
+      const updatedProject = {
+        title: newTitle,
+        color,
+        updated_at: new Date().toISOString()
+      }
 
-    try {
-      await update(ref(database, `projects/${user.uid}/${id}`), updatedProject)
+      const { error } = await supabase
+        .from('projects')
+        .update(updatedProject)
+        .eq('id', id)
+        .eq('user_id', user.id)
 
-      const updatedProjects = projects.map(project =>
-        project.id === id
-          ? { ...project, title: newTitle, updatedAt: new Date(), color }
-          : project
-      )
-      setProjects(updatedProjects)
+      if (error) throw error
+
+      return { id, newTitle, color }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
       setEditingProject(null)
-
       toast("Project updated", {
-        description: `Successfully updated project "${newTitle}!"`
+        description: `Successfully updated project "${data?.newTitle}!"`
       })
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error updating project:', error)
       toast.error('Failed to update project')
     }
-  }
+  })
 
-  const deleteProject = async (id: string) => {
-    if (!user) return
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) return
 
-    try {
-      await remove(ref(database, `projects/${user.uid}/${id}`))
-      const updatedProjects = projects.filter(project => project.id !== id)
-      setProjects(updatedProjects)
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id)
 
+      if (error) throw error
+
+      return id
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setDeleteDialogOpen(false)
+      setProjectToDelete(null)
       toast("Project Deleted", {
         description: `Successfully deleted project!`,
         richColors: true
       })
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error deleting project:', error)
       toast.error('Failed to delete project')
     }
+  })
+
+  const createProject = () => {
+    createProjectMutation.mutate()
+  }
+
+  const updateProject = (id: string, newTitle: string, color: string) => {
+    updateProjectMutation.mutate({ id, newTitle, color })
+  }
+
+  const deleteProject = (id: string) => {
+    deleteProjectMutation.mutate(id)
   }
 
   const handleEdit = (project: Project) => {
@@ -215,11 +228,8 @@ export default function ProjectsPage() {
   const handleConfirmDelete = () => {
     if (projectToDelete) {
       deleteProject(projectToDelete.id)
-      setDeleteDialogOpen(false)
-      setProjectToDelete(null)
     }
   }
-
 
   const handleViewProjectId = async (projectId: string) => {
     router.push(`/projects/${projectId}`)
@@ -289,7 +299,7 @@ export default function ProjectsPage() {
             </Popover>
           </div>
           <p className="text-sm text-gray-500">
-            Last edited {new Date(project.updatedAt).toLocaleDateString()}
+            Last edited {new Date(project.updated_at).toLocaleDateString()}
           </p>
         </div>
       </div>
@@ -390,40 +400,11 @@ export default function ProjectsPage() {
               />
             </div>
           </div>
-          <div className="w-40">
-            <Select
-              value={filters.sortOrder}
-              onValueChange={(value: 'newest' | 'oldest') =>
-                setFilters(prev => ({ ...prev, sortOrder: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sort by date" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {isLoading ? (
-            [...Array(4)].map((_, index) => (
-              <div key={index} className="border rounded-lg overflow-hidden min-h-28 animate-pulse">
-                <div className="h-2 bg-slate-200" />
-                <div className="p-4">
-                  <div className="flex justify-between items-center">
-                    <div className="h-4 w-1/2 bg-slate-200 rounded" />
-                    <div className="h-8 w-8 bg-slate-200 rounded" />
-                  </div>
-                  <div className="h-4 w-1/3 bg-slate-200 rounded mt-2" />
-                </div>
-              </div>
-            ))
-          ) : renderListProjects()}
-        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {renderListProjects()}
       </div>
     </div>
   )

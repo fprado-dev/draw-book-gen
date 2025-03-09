@@ -7,77 +7,57 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { getUserProfile, updateUserProfile } from "@/services/update-user";
-import { getAuth, updateProfile } from "firebase/auth";
+import { supabase } from "@/services/supabase";
+
 
 export default function ProfilePage() {
   const router = useRouter();
-  const auth = getAuth();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [birthdate, setBirthdate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState({
-    firstName: "",
-    lastName: "",
-    birthdate: "",
-    email: ""
-  });
 
   useEffect(() => {
-    const loadProfile = async () => {
-      const user = auth.currentUser;
-      if (!user) {
-        router.push("/sign-in");
+    const fetchUserProfile = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+
+      if (error || !session) {
+        router.push('/sign-in');
         return;
       }
 
-      const { profile: userProfile, error } = await getUserProfile(user.uid);
-      if (error) {
-        setError(error);
-        toast.error("Failed to load profile");
-        return;
-      }
+      const user = session.user;
+      setEmail(user.email || "");
 
-      if (userProfile) {
-        setProfile(userProfile);
-      }
+      const fullName = user.user_metadata?.full_name || "";
+      const [first, ...rest] = fullName.split(" ");
+      setFirstName(first || "");
+      setLastName(rest.join(" ") || "");
+      setBirthdate(user.user_metadata?.birthdate || "");
     };
 
-    loadProfile();
-  }, [router, auth]);
+    fetchUserProfile();
+  }, [router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setIsLoading(true);
 
     try {
-      const user = auth.currentUser;
-      if (!user) {
-        router.push("/sign-in");
-        return;
-      }
-
-      const { success, error } = await updateUserProfile(user.uid, profile);
-      if (error) {
-        setError(error);
-        toast.error("Failed to update profile");
-        return;
-      }
-
-      if (success) {
-        await updateProfile(user, {
-          displayName: `${profile.firstName} ${profile.lastName}`,
-        });
-        // Force a re-authentication to update the user state
-        const auth = getAuth();
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          await currentUser.reload();
+      const { data: { user }, error } = await supabase.auth.updateUser({
+        data: {
+          full_name: `${firstName} ${lastName}`,
+          birthdate: birthdate
         }
+      });
+
+      if (error) {
+        toast.error("Failed to update profile");
+      } else {
         toast.success("Profile updated successfully");
       }
-    } catch (err) {
-      setError("An unexpected error occurred");
+    } catch (error) {
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -91,56 +71,48 @@ export default function ProfilePage() {
           <CardTitle className="text-2xl">Edit Profile</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-4">
-              <div className="grid gap-2">
+          <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
-                  value={profile.firstName}
-                  onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   required
                 />
               </div>
-              <div className="grid gap-2">
+              <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
-                  value={profile.lastName}
-                  onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="birthdate">Birthdate</Label>
-                <Input
-                  id="birthdate"
-                  type="date"
-                  value={profile.birthdate}
-                  onChange={(e) => setProfile({ ...profile, birthdate: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  disabled
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                   required
                 />
               </div>
             </div>
-            {error && (
-              <p className="text-sm text-red-500">{error}</p>
-            )}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? "Saving changes..." : "Save changes"}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                disabled
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="birthdate">Birthdate</Label>
+              <Input
+                id="birthdate"
+                type="date"
+                value={birthdate}
+                onChange={(e) => setBirthdate(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Updating..." : "Update Profile"}
             </Button>
           </form>
         </CardContent>

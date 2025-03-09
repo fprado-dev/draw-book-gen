@@ -4,14 +4,16 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookCheckIcon, BookTextIcon, CalendarIcon, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, BookCheckIcon, BookTextIcon, CalendarIcon, Eye, EyeOff, Settings2Icon } from 'lucide-react';
 import { Ebook } from '@/types/ebook';
-import { getEbook } from '@/services/ebook';
-import { getAuth } from 'firebase/auth';
-import { app } from '@/services/firebase';
+import { getEbook } from '@/services/ebook.service';
+import { supabase } from '@/services/supabase';
 import { toast } from 'sonner';
-import GeneratePanel from '../../components/generate-panel';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import GeneratePanel from '@/app/books/components/generate-panel';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useBookImages } from '@/contexts/BookImagesContext';
+import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
 
 interface SelectedImage {
   id: number;
@@ -23,45 +25,50 @@ export default function EbookPage() {
   const params = useParams();
   const router = useRouter();
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
-  const [ebook, setEbook] = useState<Ebook | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showPreview, setShowPreview] = useState(false);
-  const user = getAuth(app).currentUser;
+  const [user, setUser] = useState<any>(null);
+  const { images } = useBookImages();
 
   useEffect(() => {
-    const fetchEbook = async () => {
-      if (!user) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setUser(session.user);
+      } else {
         router.push('/sign-in');
-        return;
       }
+    });
 
-      try {
-        const { ebook: ebookData, error } = await getEbook(
-          user.uid,
-          params.id as string,
-          params.bookId as string
-        );
+    return () => subscription.unsubscribe();
+  }, []);
 
-        if (error) {
-          toast.error(error);
-          router.push(`/projects/${params.id}`);
-          return;
+  const { data: ebook, isLoading: loading, error } = useQuery({
+    queryKey: ['ebook', user?.id, params.bookId],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data: ebook, error } = await supabase
+        .from('ebooks')
+        .select('*')
+        .eq('id', params.bookId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error('Book not found');
         }
-
-        if (ebookData) {
-          setEbook(ebookData);
-        }
-      } catch (error) {
-        console.error('Error fetching ebook:', error);
-        toast.error('Failed to load ebook');
-        router.push(`/projects/${params.id}`);
-      } finally {
-        setLoading(false);
+        throw new Error(error.message);
       }
-    };
+      return ebook;
+    },
+    enabled: !!user,
+  });
 
-    fetchEbook();
-  }, [user, params.id, params.bookId, router]);
+  useEffect(() => {
+    if (error) {
+      toast.error('Failed to load ebook');
+      router.push('/projects');
+    }
+  }, [error, router, params.projectId]);
 
   if (loading) {
     return (
@@ -154,23 +161,20 @@ export default function EbookPage() {
         </Card>
 
         <div className="flex justify-between items-center mb-4">
-          <Button
-            variant="outline"
-            onClick={() => setShowPreview(!showPreview)}
-            className="flex items-center gap-2"
-          >
-            {showPreview ? (
-              <>
-                <EyeOff className="h-4 w-4" />
-                Hide Preview
-              </>
-            ) : (
-              <>
-                <Eye className="h-4 w-4" />
-                Show Generate Panel
-              </>
-            )}
-          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="cursor-pointer">
+                Generate with AI
+                <Settings2Icon className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[600px] sm:max-w-none">
+              <SheetHeader className="py-4">
+                <SheetTitle>Configuration</SheetTitle>
+              </SheetHeader>
+              <GeneratePanel bookId={ebook.id} />
+            </SheetContent>
+          </Sheet>
           <Sheet modal={true}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="cursor-pointer">
@@ -207,25 +211,24 @@ export default function EbookPage() {
             </SheetContent>
           </Sheet>
         </div>
-        {showPreview && <GeneratePanel />}
         <div>
           <h2 className="text-2xl font-bold py-5">AI Generated Images</h2>
 
-          <div className="grid md:grid-cols-5 gap-4 mb-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
-              <div key={index} className="flex flex-col items-center gap-2">
-                <div className="relative w-full">
-                  <input
-                    type="checkbox"
-                    checked={selectedImages.some(img => img.id === index)}
-                    onChange={() => handleImageSelect(index)}
-                    className="absolute top-2 left-2 w-4 h-4 cursor-pointer z-10"
-                  />
-                  <div className="w-full h-56 bg-slate-100 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-200">
-                    <BookTextIcon className="w-12 h-12 text-slate-400" />
+          <div className="grid md:grid-cols-4 gap-4 mb-6">
+            {images.filter(image => image.bookId === ebook.id).map((image) => (
+              <div key={image.id} className="flex flex-col items-center gap-2">
+                <div
+                  className="relative w-full cursor-pointer transition-all duration-200"
+                  onClick={() => handleImageSelect(image.id)}
+                >
+                  <div className={`w-full h-96 bg-slate-100 rounded-lg flex border-2 ${selectedImages.some(img => img.id === image.id) ? 'border-primary border-solid' : 'border-dashed border-slate-200'}`}>
+                    <Image alt="teste" height={384} width={600} src={image.url} />
                   </div>
+                  {selectedImages.some(img => img.id === image.id) && (
+                    <div className="absolute inset-0 bg-primary/10 rounded-lg pointer-events-none" />
+                  )}
                 </div>
-                <p className="text-sm text-gray-600">Image {index}</p>
+                <p className="text-sm text-gray-600">Image {image.id}</p>
               </div>
             ))}
           </div>

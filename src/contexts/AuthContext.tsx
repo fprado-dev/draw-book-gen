@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { app } from '@/services/firebase';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '@/services/supabase';
 
 type AuthContextType = {
   user: User | null;
@@ -16,16 +16,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
       if (typeof window !== 'undefined') {
-        if (user) {
+        if (session?.user) {
           const userData = {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL
+            uid: session.user.id,
+            email: session.user.email,
+            displayName: session.user.user_metadata?.full_name,
+            photoURL: session.user.user_metadata?.avatar_url
           };
           document.cookie = `auth-user=${JSON.stringify(userData)}; path=/; max-age=86400; SameSite=Lax`;
           sessionStorage.setItem('auth-user', JSON.stringify(userData));
@@ -37,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   return (

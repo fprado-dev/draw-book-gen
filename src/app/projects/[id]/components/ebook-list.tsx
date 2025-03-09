@@ -6,39 +6,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Ebook, EbookSize } from '@/types/ebook';
-import { getProjectEbooks, updateEbook, deleteEbook } from '@/services/ebook';
+import { Ebook } from '@/types/ebook';
+import { getProjectEbooks, updateEbook, deleteEbook } from '@/services/ebook.service';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { Book, Pencil, Trash, CalendarIcon, BookTextIcon } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
+import { Pencil, Trash, CalendarIcon, BookTextIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { useParams, useRouter } from 'next/navigation';
+import React from 'react';
+import { supabase } from '@/services/supabase';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-interface EbookListProps {
-  userId: string;
-  projectId: string;
+interface EbookListProps { }
+
+type TParams = {
+  id: string;
 }
 
-export function EbookList({ userId, projectId }: EbookListProps) {
-  const router = useRouter()
-  const [ebooks, setEbooks] = useState<Ebook[]>([]);
-  const [loading, setLoading] = useState(true);
+const EbookList = React.memo(function EbookList({ }: EbookListProps) {
+  const router = useRouter();
+  const params = useParams<TParams>();
+  const [user, setUser] = useState<any>(null);
+  const queryClient = useQueryClient();
+
   const [editingEbook, setEditingEbook] = useState<Ebook | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -47,25 +38,64 @@ export function EbookList({ userId, projectId }: EbookListProps) {
   const [editSize, setEditSize] = useState<string>('');
 
   useEffect(() => {
-    loadEbooks();
-  }, [userId, projectId]);
-
-  const loadEbooks = async () => {
-    setLoading(true);
-    try {
-      const { ebooks, error } = await getProjectEbooks(userId, projectId);
-      if (error) {
-        toast.error(error);
-        return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setUser(session.user);
+      } else {
+        router.push('/sign-in');
       }
-      setEbooks(ebooks);
-    } catch (error) {
-      console.error('Error loading ebooks:', error);
-      toast.error('Failed to load ebooks');
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
+  const { data: ebooks = [], isLoading } = useQuery({
+    queryKey: ['ebooks', user?.id, params.id],
+    queryFn: async () => {
+      console.log({ params })
+      if (!user) return [];
+      const { ebooks, error } = await getProjectEbooks(user.id, params.id);
+      if (error) throw new Error(error);
+      return ebooks;
+    },
+    enabled: !!user,
+  });
+
+  const updateEbookMutation = useMutation({
+    mutationFn: async ({ userId, projectId, ebookId, data }: { userId: string; projectId: string; ebookId: string; data: any }) => {
+      const { success, error } = await updateEbook(userId, projectId, ebookId, data);
+      if (error) throw new Error(error);
+      return success;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ebooks'] });
+      toast.success('Book updated successfully');
+      setEditDialogOpen(false);
+      setEditingEbook(null);
+    },
+    onError: (error) => {
+      console.error('Error updating book:', error);
+      toast.error('Failed to update book');
+    },
+  });
+
+  const deleteEbookMutation = useMutation({
+    mutationFn: async ({ userId, projectId, ebookId }: { userId: string; projectId: string; ebookId: string }) => {
+      const { success, error } = await deleteEbook(userId, projectId, ebookId);
+      if (error) throw new Error(error);
+      return success;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ebooks'] });
+      toast.success('Book deleted successfully');
+      setDeleteDialogOpen(false);
+      setEbookToDelete(null);
+    },
+    onError: (error) => {
+      console.error('Error deleting book:', error);
+      toast.error('Failed to delete book');
+    },
+  });
 
   const handleEdit = (ebook: Ebook) => {
     setEditingEbook(ebook);
@@ -75,55 +105,30 @@ export function EbookList({ userId, projectId }: EbookListProps) {
   };
 
   const handleUpdate = async () => {
-    if (!editingEbook || !editTitle.trim() || !editSize) return;
+    if (!editingEbook || !editTitle.trim() || !editSize || !user) return;
 
-    try {
-      const { success, error } = await updateEbook(userId, projectId, editingEbook.id, {
+    updateEbookMutation.mutate({
+      userId: user.id,
+      projectId: params.id,
+      ebookId: editingEbook.id,
+      data: {
         title: editTitle,
         size: editSize,
-      });
-
-      if (error) {
-        toast.error(error);
-        return;
-      }
-
-      if (success) {
-        toast.success('Book updated successfully');
-        setEditDialogOpen(false);
-        setEditingEbook(null);
-        loadEbooks();
-      }
-    } catch (error) {
-      console.error('Error updating book:', error);
-      toast.error('Failed to update book');
-    }
+      },
+    });
   };
 
   const handleDelete = async () => {
-    if (!ebookToDelete) return;
+    if (!ebookToDelete || !user) return;
 
-    try {
-      const { success, error } = await deleteEbook(userId, projectId, ebookToDelete.id);
-
-      if (error) {
-        toast.error(error);
-        return;
-      }
-
-      if (success) {
-        toast.success('Book deleted successfully');
-        setDeleteDialogOpen(false);
-        setEbookToDelete(null);
-        loadEbooks();
-      }
-    } catch (error) {
-      console.error('Error deleting book:', error);
-      toast.error('Failed to delete book');
-    }
+    deleteEbookMutation.mutate({
+      userId: user.id,
+      projectId: params.id,
+      ebookId: ebookToDelete.id,
+    });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[...Array(3)].map((_, index) => (
@@ -168,7 +173,7 @@ export function EbookList({ userId, projectId }: EbookListProps) {
                 <div className="space-y-1">
                   <CardTitle
                     className="flex items-center gap-2 cursor-pointer hover:underline"
-                    onClick={() => router.push(`/projects/${projectId}/books/${ebook.id}`)}
+                    onClick={() => router.push(`/books/${ebook.id}`)}
                   >
                     {ebook.title}
                   </CardTitle>
@@ -275,4 +280,6 @@ export function EbookList({ userId, projectId }: EbookListProps) {
       </AlertDialog>
     </div>
   );
-}
+});
+
+export { EbookList };

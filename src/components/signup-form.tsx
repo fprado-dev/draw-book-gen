@@ -9,11 +9,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
-import { signUpWithEmailAndPassword } from "@/services/login-firebase";
-import { createUserProfile } from "@/services/create-user";
+import { signUpWithEmailAndPassword } from "@/services/auth-supabase";
 import { useState } from "react";
-import { updateProfile } from "firebase/auth"
 import { toast } from "sonner"
+import { supabase } from "@/services/supabase"
 
 export function SignUpForm({
   className,
@@ -69,6 +68,7 @@ export function SignUpForm({
       }
 
       const { user, error } = await signUpWithEmailAndPassword(email, password);
+
       if (error) {
         // Map Firebase error messages to user-friendly messages
         if (error.includes("email-already-in-use")) {
@@ -86,22 +86,27 @@ export function SignUpForm({
       }
 
       if (user) {
-        const { error: profileError } = await createUserProfile(user.uid, {
-          firstName,
-          lastName,
-          birthdate,
-          email
-        });
+        try {
+          // Wait for auth session to be established
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-        await updateProfile(user, {
-          displayName: `${firstName} ${lastName}`,
-        });
+          if (sessionError || !session) {
+            console.error("Error getting auth session:", sessionError);
+            toast.error("Failed to update display name");
+          } else {
+            // Update the user's display name
+            const { data: { user: updatedUser }, error: updateError } = await supabase.auth.updateUser({
+              data: { full_name: `${firstName} ${lastName}` }
+            });
 
-        if (profileError) {
-          setError("Failed to create user profile");
-          setIsUploading(false);
-          toast.error("Failed to create user profile");
-          return;
+            if (updateError) {
+              console.error("Error updating display name:", updateError);
+              toast.error("Failed to update display name");
+            }
+          }
+        } catch (err) {
+          console.error("Error updating user profile:", err);
+          toast.error("Failed to update display name");
         }
       }
 

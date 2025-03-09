@@ -6,15 +6,12 @@ import { Project } from '@/types/project'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CalendarIcon, Clock, Palette, ArrowLeft, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import GeneratePanel from './components/generate-panel'
-import { getAuth } from 'firebase/auth'
-import { getDatabase, ref, get } from 'firebase/database'
-import { app } from '@/services/firebase'
+import { supabase } from '@/services/supabase'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { createEbook } from '@/services/ebook'
+import { createEbook } from '@/services/ebook.service'
 import { toast } from 'sonner'
 import { EbookList } from './components/ebook-list';
 
@@ -22,28 +19,48 @@ export default function ProjectDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const [project, setProject] = useState<Project | null>(null)
-
   const [showNewBookSheet, setShowNewBookSheet] = useState(false)
   const [newBookTitle, setNewBookTitle] = useState('')
   const [newBookSize, setNewBookSize] = useState('')
-  const user = getAuth(app).currentUser
-  const database = getDatabase(app)
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setUser(session.user)
+      } else {
+        router.push('/sign-in')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   useEffect(() => {
     const fetchProject = async () => {
       if (!user) {
-        router.push('/sign-in')
         return
       }
 
       try {
-        const projectRef = ref(database, `projects/${user.uid}/${params.id}`)
-        const snapshot = await get(projectRef)
+        const { data: projectData, error } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('id', params.id)
+          .eq('user_id', user.id)
+          .single()
 
-        if (snapshot.exists()) {
-          const projectData = snapshot.val()
+        if (error) {
+          console.error('Error fetching project:', error)
+          router.push('/projects')
+          return
+        }
+
+        if (projectData) {
           setProject({
             ...projectData,
+            created_at: new Date(projectData.createdAt),
+            updated_at: new Date(projectData.updatedAt)
           })
         } else {
           console.error('Project not found')
@@ -54,8 +71,11 @@ export default function ProjectDetailsPage() {
         router.push('/projects')
       }
     }
-    fetchProject()
-  }, [user, params.id, database, router])
+
+    if (user) {
+      fetchProject()
+    }
+  }, [user, params.id, router])
 
   const handleCreateBook = async () => {
     if (!newBookTitle.trim() || !newBookSize || !user) {
@@ -64,7 +84,7 @@ export default function ProjectDetailsPage() {
     }
 
     try {
-      const { ebook, error } = await createEbook(user.uid, params.id as string, {
+      const { ebook, error } = await createEbook(user.id, params.id as string, {
         title: newBookTitle,
         size: newBookSize,
       })
@@ -79,6 +99,7 @@ export default function ProjectDetailsPage() {
         setShowNewBookSheet(false)
         setNewBookTitle('')
         setNewBookSize('')
+
       }
     } catch (error) {
       console.error('Error creating book:', error)
@@ -108,6 +129,7 @@ export default function ProjectDetailsPage() {
       </div>
     )
   }
+
   return (
     <div className="container mx-auto py-6 ">
       <div className="flex flex-col gap-6 mb-8">
@@ -130,7 +152,7 @@ export default function ProjectDetailsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm">
-                {new Date(project.createdAt).toLocaleDateString()}
+                {new Date(project.created_at).toLocaleDateString()}
               </p>
             </CardContent>
           </Card>
@@ -144,7 +166,7 @@ export default function ProjectDetailsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm">
-                {new Date(project.updatedAt).toLocaleDateString()}
+                {new Date(project.updated_at).toLocaleDateString()}
               </p>
             </CardContent>
           </Card>
@@ -223,7 +245,7 @@ export default function ProjectDetailsPage() {
       </div>
 
       <div className="mt-8">
-        <EbookList userId={user?.uid || ''} projectId={params.id as string} />
+        <EbookList />
       </div>
     </div>
   )

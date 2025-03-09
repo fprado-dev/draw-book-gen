@@ -13,9 +13,9 @@ export function useProjectFiltering(projects: Project[], filters: ProjectFilterO
     // Sort by date
     filteredProjects.sort((a, b) => {
       if (filters.sortOrder === 'newest') {
-        return b.createdAt.getTime() - a.createdAt.getTime();
+        return b.created_at.getTime() - a.created_at.getTime();
       } else {
-        return a.createdAt.getTime() - b.createdAt.getTime();
+        return a.created_at.getTime() - b.created_at.getTime();
       }
     });
 
@@ -27,10 +27,10 @@ export interface Project {
   id: string;
   title: string;
   color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId?: string;
-  userName?: string;
+  created_at: Date;
+  updated_at: Date;
+  user_id?: string;
+  user_name?: string;
 }
 export type ProjectFilterOptions = {
   title?: string;

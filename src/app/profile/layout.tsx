@@ -2,8 +2,8 @@
 
 
 
-import { app } from '@/services/firebase';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { supabase } from '@/services/supabase';
+import { User } from '@supabase/supabase-js';
 
 import { useEffect, useState } from 'react';
 import { HeaderLayout } from "@/components/header/header";
@@ -15,17 +15,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | undefined>()
   useEffect(() => {
-    const auth = getAuth(app)
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setUser(session.user)
       } else {
-        setUser(null)
+        setUser(undefined)
       }
     })
-    return () => unsubscribe()
+    return () => subscription.unsubscribe()
   }, [])
 
 
