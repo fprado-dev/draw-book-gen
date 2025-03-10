@@ -10,24 +10,30 @@ import { Ebook } from '@/types/ebook';
 import { getProjectEbooks, updateEbook, deleteEbook } from '@/services/ebook.service';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { Pencil, Trash, CalendarIcon, BookTextIcon } from 'lucide-react';
+import { Pencil, Trash, CalendarIcon, BookTextIcon, PlusIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useParams, useRouter } from 'next/navigation';
 import React from 'react';
 import { supabase } from '@/services/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { formatDate } from '@/lib/date';
+import { User } from '@supabase/supabase-js';
 
-interface EbookListProps { }
 
-type TParams = {
-  id: string;
+type EbookListProps = {
+  isLoading: boolean;
+  ebooks: Ebook[];
 }
 
-const EbookList = React.memo(function EbookList({ }: EbookListProps) {
+type TEbookParams = {
+  id: string
+}
+
+const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
   const router = useRouter();
-  const params = useParams<TParams>();
-  const [user, setUser] = useState<any>(null);
+  const params = useParams<TEbookParams>();
+  const [user, setUser] = useState<User>();
   const queryClient = useQueryClient();
 
   const [editingEbook, setEditingEbook] = useState<Ebook | null>(null);
@@ -49,17 +55,7 @@ const EbookList = React.memo(function EbookList({ }: EbookListProps) {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const { data: ebooks = [], isLoading } = useQuery({
-    queryKey: ['ebooks', user?.id, params.id],
-    queryFn: async () => {
-      console.log({ params })
-      if (!user) return [];
-      const { ebooks, error } = await getProjectEbooks(user.id, params.id);
-      if (error) throw new Error(error);
-      return ebooks;
-    },
-    enabled: !!user,
-  });
+
 
   const updateEbookMutation = useMutation({
     mutationFn: async ({ userId, projectId, ebookId, data }: { userId: string; projectId: string; ebookId: string; data: any }) => {
@@ -148,77 +144,89 @@ const EbookList = React.memo(function EbookList({ }: EbookListProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Books</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {ebooks.map((ebook) => (
-          <Card key={ebook.id}>
-            <CardHeader>
-              <div className="flex flex-col gap-4">
-                <div className="w-full h-40 bg-slate-100 rounded-md overflow-hidden flex items-center justify-center">
-                  {ebook.thumbnailUrl ? (
-                    <Image
-                      src={ebook.thumbnailUrl}
-                      alt={ebook.title}
-                      width={100}
-                      height={100}
-                      className="object-cover"
-                    />
-                  ) : (
-                    <BookTextIcon
-                      width={100}
-                      height={100}
-                      className="object-cover text-gray-300"
-                    />
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <CardTitle
-                    className="flex items-center gap-2 cursor-pointer hover:underline"
-                    onClick={() => router.push(`/books/${ebook.id}`)}
-                  >
-                    {ebook.title}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <CalendarIcon className="h-3 w-3" />
-                    {new Date(ebook.createdAt).toLocaleDateString()}
+      {ebooks.length === 0 ? (
+        <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+          <h3 className="mb-2 text-lg font-medium">No books yet</h3>
+          <p className="mb-4 text-sm text-gray-500">
+            Create your first book to start generating AI-powered illustrations
+          </p>
+
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {ebooks.map((ebook) => {
+            return (
+              <Card key={ebook.id}>
+                <CardHeader>
+                  <div className="flex flex-col gap-4">
+                    <div className="w-full h-40 bg-slate-100 rounded-md overflow-hidden flex items-center justify-center">
+                      {ebook.thumbnailUrl ? (
+                        <Image
+                          src={ebook.thumbnailUrl}
+                          alt={ebook.title}
+                          width={100}
+                          height={100}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <BookTextIcon
+                          width={100}
+                          height={100}
+                          className="object-cover text-gray-300"
+                        />
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <CardTitle
+                        className="flex items-center gap-2 cursor-pointer hover:underline"
+                        onClick={() => router.push(`/books/${ebook.id}`)}
+                      >
+                        {ebook.title}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <CalendarIcon className="h-3 w-3" />
+                        {formatDate(ebook.created_at)}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${ebook.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
+                          {ebook.status || 'Draft'}
+                        </span>
+                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${ebook.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
+                          {ebook.size}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${ebook.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                      {ebook.status || 'Draft'}
-                    </span>
-                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${ebook.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                      {ebook.size}
-                    </span>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(ebook)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-600 hover:bg-red-100"
+                        onClick={() => {
+                          setEbookToDelete(ebook);
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(ebook)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-600 hover:bg-red-100"
-                    onClick={() => {
-                      setEbookToDelete(ebook);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
@@ -280,6 +288,6 @@ const EbookList = React.memo(function EbookList({ }: EbookListProps) {
       </AlertDialog>
     </div>
   );
-});
+};
 
 export { EbookList };

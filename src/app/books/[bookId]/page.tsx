@@ -14,6 +14,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { useBookImages } from '@/contexts/BookImagesContext';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
+import { formatDate } from '@/lib/date';
+import { User } from '@supabase/supabase-js';
 
 interface SelectedImage {
   id: number;
@@ -25,31 +27,29 @@ export default function EbookPage() {
   const params = useParams();
   const router = useRouter();
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
-  const [showPreview, setShowPreview] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const { images } = useBookImages();
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        setUser(session.user);
-      } else {
+  const { data: session } = useQuery({
+    queryKey: ['auth-session'],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
         router.push('/sign-in');
+        return null;
       }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+      return session;
+    },
+  });
 
   const { data: ebook, isLoading: loading, error } = useQuery({
-    queryKey: ['ebook', user?.id, params.bookId],
+    queryKey: ['ebook', session?.user?.id, params.bookId],
     queryFn: async () => {
-      if (!user) return null;
+      if (!session?.user?.id) return null;
       const { data: ebook, error } = await supabase
         .from('ebooks')
         .select('*')
         .eq('id', params.bookId)
-        .eq('user_id', user.id)
+        .eq('user_id', session.user.id)
         .single();
 
       if (error) {
@@ -58,9 +58,9 @@ export default function EbookPage() {
         }
         throw new Error(error.message);
       }
-      return ebook;
+      return ebook as Ebook;
     },
-    enabled: !!user,
+    enabled: !!session?.user?.id,
   });
 
   useEffect(() => {
@@ -145,14 +145,14 @@ export default function EbookPage() {
                   <p className="text-sm text-gray-500">Created At</p>
                   <div className="flex items-center gap-2">
                     <CalendarIcon className="h-4 w-4" />
-                    {new Date(ebook.createdAt).toLocaleDateString()}
+                    {formatDate(ebook.created_at)}
                   </div>
                 </div>
                 <div className="space-y-2">
                   <p className="text-sm text-gray-500">Last Updated</p>
                   <div className="flex items-center gap-2">
                     <CalendarIcon className="h-4 w-4" />
-                    {new Date(ebook.updatedAt).toLocaleDateString()}
+                    {formatDate(ebook.updated_at)}
                   </div>
                 </div>
               </div>

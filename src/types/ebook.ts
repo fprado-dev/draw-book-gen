@@ -5,8 +5,8 @@ export interface Ebook {
   projectId: string;
   userId: string;
   thumbnailUrl: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
   status: 'draft' | 'published';
   pages: {
     id: string;

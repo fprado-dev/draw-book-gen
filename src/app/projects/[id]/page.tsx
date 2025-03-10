@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Project } from '@/types/project'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CalendarIcon, Clock, Palette, ArrowLeft, Plus } from 'lucide-react'
@@ -11,103 +11,104 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { createEbook } from '@/services/ebook.service'
+import { createEbook, getProjectEbooks } from '@/services/ebook.service'
 import { toast } from 'sonner'
-import { EbookList } from './components/ebook-list';
+import { EbookList } from './components/ebook-list'
+import { formatDate } from '@/lib/date'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 export default function ProjectDetailsPage() {
   const params = useParams()
   const router = useRouter()
-  const [project, setProject] = useState<Project | null>(null)
+  const queryClient = useQueryClient()
   const [showNewBookSheet, setShowNewBookSheet] = useState(false)
   const [newBookTitle, setNewBookTitle] = useState('')
   const [newBookSize, setNewBookSize] = useState('')
-  const [user, setUser] = useState<any>(null)
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        setUser(session.user)
-      } else {
+  const { data: session } = useQuery({
+    queryKey: ['auth-session'],
+    queryFn: async () => {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error || !session) {
         router.push('/sign-in')
+        return null
       }
-    })
+      return session
+    },
+  })
 
-    return () => subscription.unsubscribe()
-  }, [])
+  const { data: project, isLoading } = useQuery({
+    queryKey: ['project', params.id, session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return null
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      if (!user) {
-        return
-      }
+      const { data: projectData, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', params.id)
+        .eq('user_id', session.user.id)
+        .single()
 
-      try {
-        const { data: projectData, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('id', params.id)
-          .eq('user_id', user.id)
-          .single()
-
-        if (error) {
-          console.error('Error fetching project:', error)
-          router.push('/projects')
-          return
-        }
-
-        if (projectData) {
-          setProject({
-            ...projectData,
-            created_at: new Date(projectData.createdAt),
-            updated_at: new Date(projectData.updatedAt)
-          })
-        } else {
-          console.error('Project not found')
-          router.push('/projects')
-        }
-      } catch (error) {
+      if (error) {
         console.error('Error fetching project:', error)
         router.push('/projects')
+        return null
       }
-    }
 
-    if (user) {
-      fetchProject()
-    }
-  }, [user, params.id, router])
+      if (!projectData) {
+        console.error('Project not found')
+        router.push('/projects')
+        return null
+      }
 
-  const handleCreateBook = async () => {
-    if (!newBookTitle.trim() || !newBookSize || !user) {
-      toast.error('Please fill in all required fields')
-      return
-    }
+      return {
+        ...projectData as Project,
+      }
+    },
+    enabled: !!session?.user?.id,
+  })
 
-    try {
-      const { ebook, error } = await createEbook(user.id, params.id as string, {
+  const { data: ebooks = [], isLoading: isLoadingEbooks } = useQuery({
+    queryKey: ['ebooks'],
+    refetchOnMount: true,
+    queryFn: async () => {
+      if (!session?.user) return [];
+      const { ebooks, error } = await getProjectEbooks(session?.user.id, project?.id);
+      if (error) throw new Error(error);
+      return ebooks;
+    },
+  });
+
+  const createBookMutation = useMutation({
+    mutationFn: async () => {
+      if (!newBookTitle.trim() || !newBookSize || !session?.user) {
+        throw new Error('Please fill in all required fields')
+      }
+
+      const { ebook, error } = await createEbook(session.user.id, params.id as string, {
         title: newBookTitle,
         size: newBookSize,
       })
 
-      if (error) {
-        toast.error(error)
-        return
-      }
+      if (error) throw new Error(error)
+      return ebook
+    },
 
-      if (ebook) {
-        toast.success('Book created successfully')
-        setShowNewBookSheet(false)
-        setNewBookTitle('')
-        setNewBookSize('')
-
-      }
-    } catch (error) {
+    onSuccess: () => {
+      queryClient.fetchQuery({ queryKey: ['ebooks'] })
+      toast.success('Book created successfully')
+      setShowNewBookSheet(false)
+      setNewBookTitle('')
+      setNewBookSize('')
+    },
+    onError: (error) => {
       console.error('Error creating book:', error)
-      toast.error('Failed to create book')
-    }
-  }
+      toast.error(error instanceof Error ? error.message : 'Failed to create book')
+    },
+  })
 
-  if (!project) {
+  console.log({ ebooks })
+  if (isLoading) {
     return (
       <div className="container mx-auto py-6">
         <div className="flex flex-col gap-6 mb-8">
@@ -129,6 +130,8 @@ export default function ProjectDetailsPage() {
       </div>
     )
   }
+
+  if (!project) return null
 
   return (
     <div className="container mx-auto py-6 ">
@@ -152,7 +155,7 @@ export default function ProjectDetailsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm">
-                {new Date(project.created_at).toLocaleDateString()}
+                {formatDate(project.created_at)}
               </p>
             </CardContent>
           </Card>
@@ -166,7 +169,7 @@ export default function ProjectDetailsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm">
-                {new Date(project.updated_at).toLocaleDateString()}
+                {formatDate(project.updated_at)}
               </p>
             </CardContent>
           </Card>
@@ -236,8 +239,12 @@ export default function ProjectDetailsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleCreateBook} className="mt-4">
-                Create Book
+              <Button
+                onClick={() => createBookMutation.mutate()}
+                disabled={createBookMutation.isPending}
+                className="mt-4"
+              >
+                {createBookMutation.isPending ? 'Creating...' : 'Create Book'}
               </Button>
             </div>
           </SheetContent>
@@ -245,7 +252,7 @@ export default function ProjectDetailsPage() {
       </div>
 
       <div className="mt-8">
-        <EbookList />
+        <EbookList ebooks={ebooks} isLoading={isLoadingEbooks} />
       </div>
     </div>
   )

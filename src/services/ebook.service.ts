@@ -30,7 +30,7 @@ export const createEbook = async (userId: string, projectId: string, ebook: Part
   }
 };
 
-export const getProjectEbooks = async (userId: string, projectId: string) => {
+export const getProjectEbooks = async (userId: string, projectId?: string) => {
   try {
     const { data: ebooksData, error } = await supabase
       .from('ebooks')

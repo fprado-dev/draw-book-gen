@@ -7,8 +7,9 @@ import { User } from '@supabase/supabase-js';
 
 import { useEffect, useState } from 'react';
 import { HeaderLayout } from "@/components/header/header";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-
+const queryClient = new QueryClient();
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,9 +32,9 @@ export default function RootLayout({
   return (
 
 
-    <div>
+    <QueryClientProvider client={queryClient}>
       <HeaderLayout user={user} />
       {children}
-    </div>
+    </QueryClientProvider>
   );
 }

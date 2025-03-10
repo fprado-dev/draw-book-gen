@@ -41,6 +41,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useRouter } from 'next/navigation'
+import { formatDate } from '@/lib/date'
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -107,7 +108,7 @@ export default function ProjectsPage() {
         throw new Error('A project with this title already exists')
       }
 
-      const projectId = Date.now().toString()
+      const projectId = crypto.randomUUID()
       const newProject = {
         id: projectId,
         title: newProjectTitle,
@@ -115,7 +116,6 @@ export default function ProjectsPage() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         user_id: user.id,
-        user_name: user.user_metadata?.full_name || ""
       }
 
       const { error } = await supabase
@@ -178,6 +178,24 @@ export default function ProjectsPage() {
     mutationFn: async (id: string) => {
       if (!user) return
 
+      // First, delete all associated ebooks
+      const { data: ebooks, error: ebooksError } = await supabase
+        .from('ebooks')
+        .select('id')
+        .eq('project_id', id)
+
+      if (ebooksError) throw ebooksError
+
+      if (ebooks && ebooks.length > 0) {
+        const { error: deleteEbooksError } = await supabase
+          .from('ebooks')
+          .delete()
+          .eq('project_id', id)
+
+        if (deleteEbooksError) throw deleteEbooksError
+      }
+
+      // Then delete the project
       const { error } = await supabase
         .from('projects')
         .delete()
@@ -299,7 +317,7 @@ export default function ProjectsPage() {
             </Popover>
           </div>
           <p className="text-sm text-gray-500">
-            Last edited {new Date(project.updated_at).toLocaleDateString()}
+            Last edited {formatDate(project.updated_at)}
           </p>
         </div>
       </div>
@@ -404,7 +422,26 @@ export default function ProjectsPage() {
 
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {renderListProjects()}
+        {projectsList.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+            <div className="mb-4 rounded-full bg-slate-100 p-3">
+              <PlusIcon className="h-6 w-6 text-slate-600" />
+            </div>
+            <h3 className="mb-2 text-lg font-medium">No projects yet</h3>
+            <p className="mb-4 text-sm text-gray-500">
+              Create your first project to start generating AI-powered illustrations
+            </p>
+            <Button
+              onClick={() => setOpen(true)}
+              className="cursor-pointer bg-slate-600 hover:bg-slate-700"
+            >
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Create New Project
+            </Button>
+          </div>
+        ) : (
+          renderListProjects()
+        )}
       </div>
     </div>
   )

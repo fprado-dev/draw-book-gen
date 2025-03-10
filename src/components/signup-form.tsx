@@ -13,6 +13,7 @@ import { signUpWithEmailAndPassword } from "@/services/auth-supabase";
 import { useState } from "react";
 import { toast } from "sonner"
 import { supabase } from "@/services/supabase"
+import { useMutation } from "@tanstack/react-query"
 
 export function SignUpForm({
   className,
@@ -23,99 +24,62 @@ export function SignUpForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [birthdate, setBirthdate] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsUploading(true);
-
-    try {
+  const signUpMutation = useMutation({
+    mutationFn: async () => {
       // Validate required fields
-      if (!email || !password || !confirmPassword || !firstName || !lastName || !birthdate) {
-        setError("All fields are required");
-        toast.error("All fields are required");
-        setIsUploading(false);
-        return;
+      if (!email || !password || !confirmPassword) {
+        throw new Error("All fields are required");
       }
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        setError("Please enter a valid email address");
-        toast.error("Please enter a valid email address");
-        setIsUploading(false);
-        return;
+        throw new Error("Please enter a valid email address");
       }
 
       // Validate password length
       if (password.length < 6) {
-        setError("Password must be at least 6 characters long");
-        toast.error("Password must be at least 6 characters long");
-        setIsUploading(false);
-        return;
+        throw new Error("Password must be at least 6 characters long");
       }
 
       if (password !== confirmPassword) {
-        setError("Passwords do not match");
-        toast.error("Passwords do not match");
-        setIsUploading(false);
-        return;
+        throw new Error("Passwords do not match");
       }
 
       const { user, error } = await signUpWithEmailAndPassword(email, password);
 
       if (error) {
-        // Map Firebase error messages to user-friendly messages
         if (error.includes("email-already-in-use")) {
-          setError("This email is already registered");
-          toast.error("This email is already registered");
+          throw new Error("This email is already registered");
         } else if (error.includes("invalid-email")) {
-          setError("Invalid email format");
-          toast.error("Invalid email format");
+          throw new Error("Invalid email format");
         } else {
-          setError(error);
-          toast.error("An unexpected error occurred. Please try again later.");
-        }
-        setIsUploading(false);
-        return;
-      }
-
-      if (user) {
-        try {
-          // Wait for auth session to be established
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-          if (sessionError || !session) {
-            console.error("Error getting auth session:", sessionError);
-            toast.error("Failed to update display name");
-          } else {
-            // Update the user's display name
-            const { data: { user: updatedUser }, error: updateError } = await supabase.auth.updateUser({
-              data: { full_name: `${firstName} ${lastName}` }
-            });
-
-            if (updateError) {
-              console.error("Error updating display name:", updateError);
-              toast.error("Failed to update display name");
-            }
-          }
-        } catch (err) {
-          console.error("Error updating user profile:", err);
-          toast.error("Failed to update display name");
+          throw new Error(error);
         }
       }
 
-      router.push("/projects");
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again later.");
-    } finally {
-      setIsUploading(false);
+      if (!user) {
+        throw new Error("Failed to create account");
+      }
+
+      return user;
+    },
+    onSuccess: () => {
+      router.push("/sign-in");
+      toast.success("Account created! Please check your email to verify your account before logging in.");
+    },
+    onError: (error: Error) => {
+      setError(error.message);
+      toast.error(error.message);
     }
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    signUpMutation.mutate();
   };
 
   return (
@@ -133,36 +97,6 @@ export function SignUpForm({
                 </span>
               </div>
               <div className="grid gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    required
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    required
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="birthdate">Birthdate</Label>
-                  <Input
-                    id="birthdate"
-                    type="date"
-                    required
-                    value={birthdate}
-                    onChange={(e) => setBirthdate(e.target.value)}
-                  />
-                </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -204,9 +138,9 @@ export function SignUpForm({
                 <Button
                   onClick={handleSubmit}
                   className="hover:cursor-pointer w-full"
-                  disabled={isUploading}
+                  disabled={signUpMutation.isPending}
                 >
-                  {isUploading ? "Creating account..." : "Sign up"}
+                  {signUpMutation.isPending ? "Creating account..." : "Sign up"}
                 </Button>
               </div>
               <div className="text-center text-sm">
