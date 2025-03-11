@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { formatImageUrl } from '@/lib/image-utils';
 
 type GeneratedImage = {
   bookId: string;
@@ -28,12 +29,15 @@ export function BookImagesProvider({ children }: { children: React.ReactNode }) 
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
 
   const addImage = useCallback((bookId: string, url: string = "https://placehold.co/600x384@2x.png") => {
+    // Format the URL to ensure base64 images are properly handled
+    const formattedUrl = formatImageUrl(url);
+    
     setImages(prev => [
       ...prev,
       {
         bookId,
         id: Date.now(),
-        url,
+        url: formattedUrl,
         selected: false,
         order: prev.length + 1,
         createdAt: new Date()

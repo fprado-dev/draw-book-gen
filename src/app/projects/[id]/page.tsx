@@ -70,7 +70,7 @@ export default function ProjectDetailsPage() {
 
   const { data: ebooks = [], isLoading: isLoadingEbooks } = useQuery({
     queryKey: ['ebooks'],
-    refetchOnMount: true,
+    enabled: !!session?.user && !!project?.id,
     queryFn: async () => {
       if (!session?.user) return [];
       const { ebooks, error } = await getProjectEbooks(session?.user.id, project?.id);
