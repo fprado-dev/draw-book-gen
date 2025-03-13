@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Ebook } from '@/types/ebook';
+import { TEbook } from '@/types/ebook';
 
 export const createEbook = async (userId: string, projectId: string, ebook: Partial<Ebook>) => {
   try {

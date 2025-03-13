@@ -3,18 +3,11 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { PlusIcon, Pencil, Trash, Search } from 'lucide-react'
-import { useProjectFiltering } from '@/types/project'
 import { toast } from "sonner"
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/services/supabase'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+
 import {
   Dialog,
   DialogContent,
@@ -23,7 +16,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Project } from '@/types/project'
 import {
   Popover,
   PopoverContent,
@@ -43,7 +35,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { formatDate } from '@/lib/date'
 import * as ProjectServices from '@/services/projects.service'
-import { TProject } from '@/types/TProjects'
+import { TProject, TUpdateProject } from '@/types/TProjects'
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -70,7 +62,7 @@ export default function ProjectsPage() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const { data: projectList, error, isLoading } = useQuery({
+  const { data: projectList, error, isLoading: isLoadingProjects } = useQuery({
     queryKey: ['projects'],
     queryFn: ProjectServices.getAllProjects,
     enabled: !!user?.id
@@ -109,30 +101,16 @@ export default function ProjectsPage() {
   })
 
   const updateProjectMutation = useMutation({
-    mutationFn: async ({ id, newTitle, color }: { id: string; newTitle: string; color: string }) => {
+    mutationFn: async ({ id, title, color }: TUpdateProject) => {
       if (!user) return
 
-      const updatedProject = {
-        title: newTitle,
-        color,
-        updated_at: new Date().toISOString()
-      }
-
-      const { error } = await supabase
-        .from('projects')
-        .update(updatedProject)
-        .eq('id', id)
-        .eq('user_id', user.id)
-
-      if (error) throw error
-
-      return { id, newTitle, color }
+      return await ProjectServices.updateProject({ id, title, color })
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
       setEditingProject(null)
       toast("Project updated", {
-        description: `Successfully updated project "${data?.newTitle}!"`
+        description: `Successfully updated project "${data?.title}!"`
       })
     },
     onError: (error) => {
@@ -144,34 +122,7 @@ export default function ProjectsPage() {
   const deleteProjectMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) return
-
-      // First, delete all associated ebooks
-      const { data: ebooks, error: ebooksError } = await supabase
-        .from('ebooks')
-        .select('id')
-        .eq('project_id', id)
-
-      if (ebooksError) throw ebooksError
-
-      if (ebooks && ebooks.length > 0) {
-        const { error: deleteEbooksError } = await supabase
-          .from('ebooks')
-          .delete()
-          .eq('project_id', id)
-
-        if (deleteEbooksError) throw deleteEbooksError
-      }
-
-      // Then delete the project
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id)
-
-      if (error) throw error
-
-      return id
+      return await ProjectServices.deleteProject({ id: id })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
@@ -179,7 +130,6 @@ export default function ProjectsPage() {
       setProjectToDelete(null)
       toast("Project Deleted", {
         description: `Successfully deleted project!`,
-        richColors: true
       })
     },
     onError: (error) => {
@@ -193,7 +143,7 @@ export default function ProjectsPage() {
   }
 
   const updateProject = (id: string, newTitle: string, color: string) => {
-    updateProjectMutation.mutate({ id, newTitle, color })
+    updateProjectMutation.mutate({ id, title: newTitle, color })
   }
 
   const deleteProject = (id: string) => {
@@ -254,7 +204,7 @@ export default function ProjectsPage() {
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
                           This action cannot be undone. This will permanently delete your project
-                          "{projectToDelete?.title}".
+                          "{projectToDelete?.title}" and all books created on this project.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -389,6 +339,22 @@ export default function ProjectsPage() {
 
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {isLoadingProjects && (
+          <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="border rounded-lg overflow-hidden min-h-28 animate-pulse">
+                <div className="h-2 bg-slate-200" />
+                <div className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="h-4 w-48 bg-slate-200 rounded" />
+                    <div className="h-8 w-8 bg-slate-200 rounded" />
+                  </div>
+                  <div className="mt-2 h-4 w-32 bg-slate-200 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         {projectList?.length === 0 ? (
           <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-4 rounded-full bg-slate-100 p-3">

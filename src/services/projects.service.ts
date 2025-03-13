@@ -1,8 +1,6 @@
-import { TNewProject, TProject } from "@/types/TProjects"
+import { TNewProject, TProject, TUpdateProject } from "@/types/TProjects"
 import * as Auth from "./auth.service"
 import { supabase } from "./supabase"
-import { User } from "@supabase/supabase-js"
-
 
 export const getAllProjects = async () => {
   const { user } = await Auth.getCurrentUser()
@@ -13,7 +11,6 @@ export const getAllProjects = async () => {
     .eq('user_id', user.id)
   return data as TProject[]
 }
-
 
 export const createProject = async ({ title, color }: TNewProject) => {
   const { user } = await Auth.getCurrentUser()
@@ -34,4 +31,37 @@ export const createProject = async ({ title, color }: TNewProject) => {
   return newProject
 
 
+}
+
+export const updateProject = async ({ id, color, title }: TUpdateProject) => {
+  const { user } = await Auth.getCurrentUser()
+
+  const updatedProject = {
+    title,
+    color,
+  }
+  const { error } = await supabase
+    .from('projects')
+    .update(updatedProject)
+    .eq('id', id)
+    .eq('user_id', user?.id)
+
+  if (error) throw error
+
+  return { id, title, color }
+}
+
+export const deleteProject = async ({ id }: TUpdateProject) => {
+  const { user } = await Auth.getCurrentUser()
+
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user?.id)
+
+
+  if (error) throw error
+
+  return { id }
 }
