@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BookCheckIcon, CalendarIcon, Settings2Icon } from 'lucide-react';
-import { Ebook } from '@/types/ebook';
+import { TEbook } from '@/types/ebook';
 import { supabase } from '@/services/supabase';
 import { toast } from 'sonner';
 import GeneratePanel from '@/app/books/components/generate-panel';
@@ -59,7 +59,7 @@ export default function EbookPage() {
         }
         throw new Error(error.message);
       }
-      return ebook as Ebook;
+      return ebook as TEbook;
     },
     enabled: !!session?.user?.id,
   });
@@ -159,7 +159,6 @@ export default function EbookPage() {
   // Filter images by bookId
   const bookImages = images.filter(image => image.bookId === params.bookId);
 
-  console.log('Book images:', bookImages)
   return (
     <div className="container mx-auto py-6">
       <div className="space-y-6">

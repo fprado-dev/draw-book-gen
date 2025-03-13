@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
-import { loginWithEmailAndPassword } from "@/services/auth-supabase";
+import { loginWithEmailAndPassword } from "@/services/auth.service";
 import { useState } from "react";
 import { toast } from "sonner"
 

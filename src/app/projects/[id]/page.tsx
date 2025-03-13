@@ -107,7 +107,6 @@ export default function ProjectDetailsPage() {
     },
   })
 
-  console.log({ ebooks })
   if (isLoading) {
     return (
       <div className="container mx-auto py-6">

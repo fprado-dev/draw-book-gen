@@ -42,6 +42,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useRouter } from 'next/navigation'
 import { formatDate } from '@/lib/date'
+import * as ProjectServices from '@/services/projects.service'
+import { TProject } from '@/types/TProjects'
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -50,9 +52,9 @@ export default function ProjectsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [newProjectTitle, setNewProjectTitle] = useState('')
   const [newProjectColor, setNewProjectColor] = useState('#6366f1')
-  const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [editingProject, setEditingProject] = useState<TProject | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
+  const [projectToDelete, setProjectToDelete] = useState<TProject | null>(null)
   const [filters, setFilters] = useState({
     title: '',
     sortOrder: 'newest' as 'newest' | 'oldest'
@@ -61,70 +63,35 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+
       setUser(session?.user || null)
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  const { data: projects = [], isLoading } = useQuery({
-    queryKey: ['projects', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return []
-      const { data: projectsData, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', user.id)
-
-      if (error) throw error
-
-      return projectsData?.map(project => ({
-        ...project,
-        created_at: new Date(project.created_at),
-        updated_at: new Date(project.updated_at)
-      })) || []
-    },
+  const { data: projectList, error, isLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: ProjectServices.getAllProjects,
     enabled: !!user?.id
   })
 
-  const projectsList = useProjectFiltering(projects, filters)
 
+
+  const validateIfTitleProjectExists = (title: string) => {
+    const projectExists = projectList?.some(project => {
+      return project.title.toLowerCase() === title.toLowerCase()
+    })
+    if (projectExists) {
+      throw new Error("Project already exists");
+    }
+
+  }
   const createProjectMutation = useMutation({
     mutationFn: async () => {
       if (!newProjectTitle.trim() || !user) return
-
-      const { data: existingProject, error: checkError } = await supabase
-        .from('projects')
-        .select('title')
-        .eq('user_id', user.id)
-        .eq('title', newProjectTitle)
-        .single()
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError
-      }
-
-      if (existingProject) {
-        throw new Error('A project with this title already exists')
-      }
-
-      const projectId = crypto.randomUUID()
-      const newProject = {
-        id: projectId,
-        title: newProjectTitle,
-        color: newProjectColor,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        user_id: user.id,
-      }
-
-      const { error } = await supabase
-        .from('projects')
-        .insert([newProject])
-
-      if (error) throw error
-
-      return newProject
+      validateIfTitleProjectExists(newProjectTitle)
+      await ProjectServices.createProject({ title: newProjectTitle, color: newProjectColor })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
@@ -233,12 +200,12 @@ export default function ProjectsPage() {
     deleteProjectMutation.mutate(id)
   }
 
-  const handleEdit = (project: Project) => {
+  const handleEdit = (project: TProject) => {
     setEditingProject(project)
     setEditDialogOpen(true)
   }
 
-  const handleDeleteClick = (project: Project) => {
+  const handleDeleteClick = (project: TProject) => {
     setProjectToDelete(project)
     setDeleteDialogOpen(true)
   }
@@ -254,11 +221,11 @@ export default function ProjectsPage() {
   }
 
   const renderListProjects = () => {
-    return projectsList.map((project) => (
+    return projectList?.map((project) => (
       <div key={project.id} className="border rounded-lg overflow-hidden min-h-28 " >
         <div
           className="h-2"
-          style={{ backgroundColor: project.color }}
+          style={{ backgroundColor: project?.color! }}
         />
         <div className="p-4">
           <div className="flex justify-between items-center">
@@ -422,7 +389,7 @@ export default function ProjectsPage() {
 
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projectsList.length === 0 ? (
+        {projectList?.length === 0 ? (
           <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-4 rounded-full bg-slate-100 p-3">
               <PlusIcon className="h-6 w-6 text-slate-600" />

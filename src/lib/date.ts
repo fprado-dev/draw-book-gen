@@ -5,9 +5,8 @@
  */
 export function formatDate(date: string | Date): string {
   if (!date) return '';
-  
+
   const dateObject = typeof date === 'string' ? new Date(date) : date;
-  console.log({dateObject, date})
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',

@@ -1,8 +1,8 @@
 import { toast } from 'sonner';
 
 // API key for Stability AI
-const STABILITY_API_KEY = 'sk-r8ImtlEz0ZWzOeYdx8EpLMovD0F2EbAiX19n10xxfANXy8tn';
-const API_HOST = 'https://api.stability.ai';
+const STABILITY_API_KEY = process.env.NEXT_PUBLIC_STABILITY_API_KEY || '';
+const API_HOST =  process.env.NEXT_PUBLIC_API_HOST || '';
 
 // Define types for the API responses and requests
 type GenerationResponse = {

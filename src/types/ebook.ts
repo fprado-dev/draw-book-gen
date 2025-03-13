@@ -1,4 +1,4 @@
-export interface Ebook {
+export interface TEbook {
   id: string;
   title: string;
   size: string;
@@ -7,6 +7,7 @@ export interface Ebook {
   thumbnailUrl: string;
   created_at: Date;
   updated_at: Date;
+  viewed_at: Date | null
   status: 'draft' | 'published';
   pages: {
     id: string;
