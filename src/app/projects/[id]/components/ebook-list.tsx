@@ -6,122 +6,147 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Ebook } from '@/types/ebook';
-import { getProjectEbooks, updateEbook, deleteEbook } from '@/services/ebook.service';
+import { TBook, TBookStatus } from '@/types/ebook';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { Pencil, Trash, CalendarIcon, BookTextIcon, PlusIcon } from 'lucide-react';
+import { Pencil, Trash, CalendarIcon, BookTextIcon, PlusIcon, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetDescription, SheetClose } from '@/components/ui/sheet';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useParams, useRouter } from 'next/navigation';
 import React from 'react';
-import { supabase } from '@/services/supabase';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@/lib/date';
 import { User } from '@supabase/supabase-js';
+import * as BooksService from "@/services/book.service"
 
+type UnsplashImage = {
+  url: string;
+  thumb: string;
+  description: string | null;
+  author: string;
+};
 
 type EbookListProps = {
   isLoading: boolean;
-  ebooks: Ebook[];
+  books: TBook[];
 }
 
 type TEbookParams = {
   id: string
 }
 
-const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
+const EbookList = ({ books, isLoading }: EbookListProps) => {
   const router = useRouter();
   const params = useParams<TEbookParams>();
   const [user, setUser] = useState<User>();
   const queryClient = useQueryClient();
 
-  const [editingEbook, setEditingEbook] = useState<Ebook | null>(null);
+  const [editingEbook, setEditingEbook] = useState<TBook | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [ebookToDelete, setEbookToDelete] = useState<Ebook | null>(null);
+  const [editBookStatus, setEditStatus] = useState<TBookStatus>('draft')
   const [editTitle, setEditTitle] = useState('');
   const [editSize, setEditSize] = useState<string>('');
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        setUser(session.user);
-      } else {
-        router.push('/sign-in');
-      }
-    });
+  const [thumbnailSheetOpen, setThumbnailSheetOpen] = useState(false);
+  const [unsplashImages, setUnsplashImages] = useState<UnsplashImage[]>([]);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedThumbnail, setSelectedThumbnail] = useState<string>('');
 
-    return () => subscription.unsubscribe();
-  }, [router]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [ebookToDelete, setEbookToDelete] = useState<Partial<TBook> | null>();
 
 
 
-  const updateEbookMutation = useMutation({
-    mutationFn: async ({ userId, projectId, ebookId, data }: { userId: string; projectId: string; ebookId: string; data: any }) => {
-      const { success, error } = await updateEbook(userId, projectId, ebookId, data);
-      if (error) throw new Error(error);
-      return success;
+  const updateBookMutation = useMutation({
+    mutationFn: async () => {
+      return await BooksService.updateBookById({
+        id: editingEbook?.id,
+        title: editTitle,
+        size: editSize,
+        status: editBookStatus,
+        project_id: params.id as string,
+        thumbnail_url: selectedThumbnail || editingEbook?.thumbnail_url,
+      })
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ebooks'] });
-      toast.success('Book updated successfully');
+    onSuccess(book) {
+      toast.success(`Book ${book.title} updated successfully `);
       setEditDialogOpen(false);
-      setEditingEbook(null);
+      queryClient.invalidateQueries({ queryKey: ['books'] });
     },
-    onError: (error) => {
-      console.error('Error updating book:', error);
-      toast.error('Failed to update book');
-    },
-  });
+    onError() {
+      toast.error('Something went wrong while updating book');
+    }
+  })
 
-  const deleteEbookMutation = useMutation({
-    mutationFn: async ({ userId, projectId, ebookId }: { userId: string; projectId: string; ebookId: string }) => {
-      const { success, error } = await deleteEbook(userId, projectId, ebookId);
-      if (error) throw new Error(error);
-      return success;
+  const deleteBookMutation = useMutation({
+    mutationFn: async () => {
+      return await BooksService.deleteBookById({
+        id: ebookToDelete?.id as string
+      })
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ebooks'] });
-      toast.success('Book deleted successfully');
+    onSuccess() {
+      toast.success(`Book ${ebookToDelete?.title} deleted successfully `);
       setDeleteDialogOpen(false);
-      setEbookToDelete(null);
+      queryClient.invalidateQueries({ queryKey: ['books'] });
     },
-    onError: (error) => {
-      console.error('Error deleting book:', error);
-      toast.error('Failed to delete book');
-    },
-  });
+    onError() {
+      toast.error('Something went wrong while deleting book');
+    }
+  })
 
-  const handleEdit = (ebook: Ebook) => {
+  const handleEditStatus = (status: TBookStatus) => {
+    setEditStatus(status);
+  };
+
+  const handleEdit = (ebook: TBook) => {
     setEditingEbook(ebook);
     setEditTitle(ebook.title);
     setEditSize(ebook.size);
+    setEditStatus(ebook.status);
+    setSelectedThumbnail(ebook.thumbnail_url || '');
     setEditDialogOpen(true);
   };
 
   const handleUpdate = async () => {
-    if (!editingEbook || !editTitle.trim() || !editSize || !user) return;
+    updateBookMutation.mutate();
+  };
 
-    updateEbookMutation.mutate({
-      userId: user.id,
-      projectId: params.id,
-      ebookId: editingEbook.id,
-      data: {
-        title: editTitle,
-        size: editSize,
-      },
-    });
+  const handleOpenThumbnailSheet = async () => {
+    if (!editingEbook) return;
+
+    setThumbnailSheetOpen(true);
+    await fetchUnsplashImages(editTitle || 'book cover');
+  };
+
+  const fetchUnsplashImages = async (query: string) => {
+    setIsLoadingImages(true);
+    try {
+      const images = await BooksService.getBookThumbnailOptions(query);
+      setUnsplashImages(images);
+    } catch (error) {
+      toast.error('Failed to fetch images from Unsplash');
+      console.error(error);
+    } finally {
+      setIsLoadingImages(false);
+    }
+  };
+
+  const handleSearchImages = async () => {
+    if (!searchQuery.trim()) return;
+    await fetchUnsplashImages(searchQuery);
+  };
+
+  const handleSelectThumbnail = (url: string) => {
+    setSelectedThumbnail(url);
+    setThumbnailSheetOpen(false);
   };
 
   const handleDelete = async () => {
-    if (!ebookToDelete || !user) return;
+    if (!ebookToDelete) return;
+    deleteBookMutation.mutate();
 
-    deleteEbookMutation.mutate({
-      userId: user.id,
-      projectId: params.id,
-      ebookId: ebookToDelete.id,
-    });
   };
 
   if (isLoading) {
@@ -144,7 +169,7 @@ const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Books</h2>
-      {ebooks.length === 0 ? (
+      {books.length === 0 ? (
         <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
           <h3 className="mb-2 text-lg font-medium">No books yet</h3>
           <p className="mb-4 text-sm text-gray-500">
@@ -154,18 +179,18 @@ const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {ebooks.map((ebook) => {
+          {books.map((ebook) => {
             return (
               <Card key={ebook.id}>
                 <CardHeader>
                   <div className="flex flex-col gap-4">
                     <div className="w-full h-40 bg-slate-100 rounded-md overflow-hidden flex items-center justify-center">
-                      {ebook.thumbnailUrl ? (
+                      {ebook.thumbnail_url ? (
                         <Image
-                          src={ebook.thumbnailUrl}
+                          src={ebook.thumbnail_url}
                           alt={ebook.title}
-                          width={100}
-                          height={100}
+                          width={400}
+                          height={400}
                           className="object-cover"
                         />
                       ) : (
@@ -176,24 +201,24 @@ const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
                         />
                       )}
                     </div>
-                    <div className="space-y-1">
+                    <div className="flex flex-col gap-4">
                       <CardTitle
                         className="flex items-center gap-2 cursor-pointer hover:underline"
                         onClick={() => router.push(`/books/${ebook.id}`)}
                       >
                         {ebook.title}
                       </CardTitle>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <CalendarIcon className="h-3 w-3" />
-                        {formatDate(ebook.created_at)}
-                      </div>
                       <div className="flex items-center gap-2">
                         <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${ebook.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                          {ebook.status || 'Draft'}
+                          {ebook.status.toUpperCase() || 'Draft'}
                         </span>
                         <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${ebook.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
                           {ebook.size}
                         </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <CalendarIcon className="h-3 w-3" />
+                        {`Last time viewed ${formatDate(ebook.last_viewed)}`}
                       </div>
                     </div>
                   </div>
@@ -204,6 +229,7 @@ const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
                       <Button
                         variant="ghost"
                         size="sm"
+                        className='cursor-pointer hover:bg-slate-100'
                         onClick={() => handleEdit(ebook)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -211,7 +237,7 @@ const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-600 hover:text-red-600 hover:bg-red-100"
+                        className="cursor-pointer text-red-600 hover:text-red-600 hover:bg-red-100"
                         onClick={() => {
                           setEbookToDelete(ebook);
                           setDeleteDialogOpen(true);
@@ -235,12 +261,53 @@ const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
+              <Label>Thumbnail</Label>
+              <div className="flex items-center gap-2">
+                {selectedThumbnail ? (
+                  <div className="relative rounded-md overflow-hidden">
+                    <Image
+                      width={400}
+                      height={100}
+                      src={selectedThumbnail}
+                      alt="Selected thumbnail"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-20 h-20 bg-slate-100 rounded-md flex items-center justify-center">
+                    <BookTextIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={handleOpenThumbnailSheet}
+                  type="button"
+                >
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Choose Cover
+                </Button>
+              </div>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="edit-title">Title</Label>
               <Input
                 id="edit-title"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select value={editBookStatus} onValueChange={handleEditStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-size">Book Size</Label>
@@ -259,10 +326,102 @@ const EbookList = ({ ebooks, isLoading }: EbookListProps) => {
                 </SelectContent>
               </Select>
             </div>
+
             <Button onClick={handleUpdate}>Update Book</Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      <Sheet open={thumbnailSheetOpen} onOpenChange={setThumbnailSheetOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-xl md:max-w-2xl overflow-y-auto">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="text-xl">Select a Book Cover</SheetTitle>
+            <SheetDescription>
+              Choose a beautiful cover image for your book from Unsplash
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="space-y-6">
+            {/* Preview of selected thumbnail */}
+            {selectedThumbnail && (
+              <div className="mb-6">
+                <Label className="text-sm font-medium mb-2 block">Current Selection</Label>
+                <div className="relative h-40 rounded-md overflow-hidden border-2 border-primary">
+                  <Image
+                    fill
+                    src={selectedThumbnail}
+                    alt="Selected thumbnail"
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Search bar */}
+            <div className="sticky top-0 z-10 bg-background pt-2 pb-4">
+              <Label className="text-sm font-medium mb-2 block">Search Images</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Search for book covers..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearchImages()}
+                  className="flex-1"
+                />
+                <Button onClick={handleSearchImages}>Search</Button>
+              </div>
+            </div>
+
+            {/* Image results */}
+            <div className="space-y-4">
+              <Label className="text-sm font-medium block">Available Images</Label>
+
+              {isLoadingImages ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[...Array(9)].map((_, index) => (
+                    <div key={index} className="aspect-square bg-slate-200 animate-pulse rounded-md" />
+                  ))}
+                </div>
+              ) : unsplashImages.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {unsplashImages.map((image, index) => (
+                    <div
+                      key={index}
+                      className="group relative aspect-square rounded-md overflow-hidden cursor-pointer hover:opacity-95 transition-all border-2 hover:border-primary"
+                      onClick={() => handleSelectThumbnail(image.url)}
+                    >
+                      <Image
+                        fill
+                        src={image.thumb}
+                        alt={image.description || 'Unsplash image'}
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
+                        <p className="text-white text-xs truncate">{image.description || 'Untitled image'}</p>
+                        <p className="text-white text-xs font-medium">by {image.author}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-slate-50 rounded-md">
+                  <p className="text-gray-500">No images found. Try a different search term.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <SheetFooter className="mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setThumbnailSheetOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

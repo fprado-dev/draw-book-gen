@@ -2,20 +2,23 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Project } from '@/types/project'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CalendarIcon, Clock, Palette, ArrowLeft, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/services/supabase'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { createEbook, getProjectEbooks } from '@/services/ebook.service'
+import { getProjectBooks } from '@/services/book.service'
 import { toast } from 'sonner'
 import { EbookList } from './components/ebook-list'
 import { formatDate } from '@/lib/date'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import * as AuthService from "@/services/auth.service"
+import * as ProjectsService from "@/services/projects.service"
+import * as BooksServices from "@/services/book.service"
+import { TBook, TBookSize } from '@/types/ebook'
+
 
 export default function ProjectDetailsPage() {
   const params = useParams()
@@ -24,90 +27,63 @@ export default function ProjectDetailsPage() {
   const [showNewBookSheet, setShowNewBookSheet] = useState(false)
   const [newBookTitle, setNewBookTitle] = useState('')
   const [newBookSize, setNewBookSize] = useState('')
+  const [newBookStatus] = useState<'draft' | 'published' | 'archived'>('draft')
 
-  const { data: session } = useQuery({
-    queryKey: ['auth-session'],
+
+
+  const { data: project, isLoading: isLoadingProjectInfo } = useQuery({
+    queryKey: ['project'],
     queryFn: async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error || !session) {
-        router.push('/sign-in')
-        return null
-      }
-      return session
+      const project = await ProjectsService.getProjectById({ id: params.id as string })
+
+      return project
     },
+
   })
 
-  const { data: project, isLoading } = useQuery({
-    queryKey: ['project', params.id, session?.user?.id],
+  const { data: books = [], isLoading: isLoadingEbooks } = useQuery({
+    queryKey: ['books'],
     queryFn: async () => {
-      if (!session?.user?.id) return null
 
-      const { data: projectData, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('id', params.id)
-        .eq('user_id', session.user.id)
-        .single()
+      const books = await getProjectBooks({
+        id: params.id as string,
 
-      if (error) {
-        console.error('Error fetching project:', error)
-        router.push('/projects')
-        return null
-      }
-
-      if (!projectData) {
-        console.error('Project not found')
-        router.push('/projects')
-        return null
-      }
-
-      return {
-        ...projectData as Project,
-      }
-    },
-    enabled: !!session?.user?.id,
-  })
-
-  const { data: ebooks = [], isLoading: isLoadingEbooks } = useQuery({
-    queryKey: ['ebooks'],
-    enabled: !!session?.user && !!project?.id,
-    queryFn: async () => {
-      if (!session?.user) return [];
-      const { ebooks, error } = await getProjectEbooks(session?.user.id, project?.id);
-      if (error) throw new Error(error);
-      return ebooks;
+      });
+      return books;
     },
   });
 
   const createBookMutation = useMutation({
     mutationFn: async () => {
-      if (!newBookTitle.trim() || !newBookSize || !session?.user) {
-        throw new Error('Please fill in all required fields')
-      }
-
-      const { ebook, error } = await createEbook(session.user.id, params.id as string, {
+      const newBook = await BooksServices.createBook({
         title: newBookTitle,
-        size: newBookSize,
+        size: newBookSize as TBookSize,
+        status: newBookStatus as 'draft' | 'published' | 'archived',
+        project_id: params.id as string,
       })
-
-      if (error) throw new Error(error)
-      return ebook
+      return newBook
     },
-
-    onSuccess: () => {
-      queryClient.fetchQuery({ queryKey: ['ebooks'] })
-      toast.success('Book created successfully')
+    onSuccess: (book) => {
+      toast.success(`Book created successfully ${book.title}`)
       setShowNewBookSheet(false)
-      setNewBookTitle('')
-      setNewBookSize('')
+      queryClient.invalidateQueries({ queryKey: ['books'] })
     },
     onError: (error) => {
-      console.error('Error creating book:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to create book')
+      toast.error('Something went wrong while creating book')
     },
   })
 
-  if (isLoading) {
+
+
+  const handleCreateBook = async () => {
+    if (!newBookTitle || !newBookSize) {
+      toast.error('Please fill in all fields')
+      return
+    }
+    createBookMutation.mutate()
+  }
+
+  if (isLoadingProjectInfo) {
     return (
       <div className="container mx-auto py-6">
         <div className="flex flex-col gap-6 mb-8">
@@ -130,7 +106,12 @@ export default function ProjectDetailsPage() {
     )
   }
 
-  if (!project) return null
+
+  if (!project) {
+    toast.error('Project not found')
+    router.push('/projects')
+    return null
+  }
 
   return (
     <div className="container mx-auto py-6 ">
@@ -168,7 +149,7 @@ export default function ProjectDetailsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm">
-                {formatDate(project.updated_at)}
+                {formatDate(project!.updated_at)}
               </p>
             </CardContent>
           </Card>
@@ -183,18 +164,18 @@ export default function ProjectDetailsPage() {
             <CardContent className="flex items-center gap-2">
               <div
                 className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: project.color }}
+                style={{ backgroundColor: project!.color }}
               />
-              <p className="text-sm">{project.color.toUpperCase()}</p>
+              <p className="text-sm">{project!.color.toUpperCase()}</p>
             </CardContent>
           </Card>
         </div>
         <div
           className="h-24 rounded-lg relative"
-          style={{ backgroundColor: project.color }}
+          style={{ backgroundColor: project!.color }}
         >
           <div className="absolute bottom-4 left-4">
-            <h1 className="text-4xl font-bold text-white">{project.title}</h1>
+            <h1 className="text-4xl font-bold text-white">{project!.title}</h1>
           </div>
         </div>
       </div>
@@ -238,8 +219,9 @@ export default function ProjectDetailsPage() {
                   </SelectContent>
                 </Select>
               </div>
+
               <Button
-                onClick={() => createBookMutation.mutate()}
+                onClick={handleCreateBook}
                 disabled={createBookMutation.isPending}
                 className="mt-4"
               >
@@ -251,7 +233,7 @@ export default function ProjectDetailsPage() {
       </div>
 
       <div className="mt-8">
-        <EbookList ebooks={ebooks} isLoading={isLoadingEbooks} />
+        <EbookList books={books} isLoading={false} />
       </div>
     </div>
   )

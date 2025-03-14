@@ -1,13 +1,18 @@
 -- Create books table
 create table if not exists public.books (
   id uuid primary key,
-  project_id text references public.projects(id) on delete cascade not null,
+  project_id uuid references public.projects(id) on delete cascade not null,
   user_id uuid references auth.users(id) on delete cascade not null,
-  title text,
   status text check (status in ('draft', 'published', 'archived')) default 'draft',
   pages jsonb default '[]'::jsonb,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+
+  title text not null,
+  size text not null,
+  thumbnail_url text,
+  last_viewed timestamp with time zone default now() not null,
+  constraint size_check check (size in ('5x8', '5.25x8', '5.5x8.5', '6x9', '7x10', '8x10', '8.5x11'))
 );
 
 -- Enable RLS (Row Level Security)

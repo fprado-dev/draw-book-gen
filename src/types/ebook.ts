@@ -1,22 +1,26 @@
-export interface TEbook {
+export interface TBook {
   id: string;
   title: string;
   size: string;
-  projectId: string;
-  userId: string;
-  thumbnailUrl: string;
+  project_id: string;
+  user_id: string;
+  thumbnail_url?: string;
   created_at: Date;
   updated_at: Date;
-  viewed_at: Date | null
-  status: 'draft' | 'published';
-  pages: {
-    id: string;
-    content: string;
-    pageNumber: number;
-  }[];
+  last_viewed: Date
+  status: TBookStatus;
 }
 
-export type EbookSize =
+export type TBookStatus = 'draft' | 'published' | 'archived'
+export interface TBookCreate {
+  title: string;
+  size: TBookSize;
+  project_id: string;
+  thumbnail_url?: string;
+  status: TBookStatus;
+}
+
+export type TBookSize =
   | '5x8'
   | '5.25x8'
   | '5.5x8.5'
