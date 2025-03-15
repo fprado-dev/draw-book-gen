@@ -4,11 +4,11 @@ const unsplashApi = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || '',
 });
 
-export const getThumbnailOptions = async (query: string = 'book cover') => {
+export const getThumbnailOptions = async (query: string = 'patterns') => {
   try {
     const result = await unsplashApi.search.getPhotos({
       query,
-      perPage: 10,
+      perPage: 20,
       orientation: 'landscape',
 
     });

@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { formatImageUrl } from '@/lib/image-utils';
 
-type GeneratedImage = {
+export type GeneratedImage = {
   bookId: string;
   id: number;
   url: string;

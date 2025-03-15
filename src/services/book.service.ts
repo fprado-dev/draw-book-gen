@@ -23,6 +23,18 @@ export const getProjectBooks = async ({ id }: Partial<TProject>) => {
   return data as TBook[];
 };
 
+export const getBookById = async ({ id }: Partial<TBook>) => {
+  const { user } = await AuthService.getCurrentUser()
+
+  const { data, error } = await supabase
+    .from('books')
+    .select('*')
+    .eq('user_id', user?.id)
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data as TBook;
+}
 
 export const createBook = async ({ title, project_id, size, status, thumbnail_url }: TBookCreate) => {
   const { user } = await AuthService.getCurrentUser()

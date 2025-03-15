@@ -39,7 +39,6 @@ type TEbookParams = {
 const EbookList = ({ books, isLoading }: EbookListProps) => {
   const router = useRouter();
   const params = useParams<TEbookParams>();
-  const [user, setUser] = useState<User>();
   const queryClient = useQueryClient();
 
   const [editingEbook, setEditingEbook] = useState<TBook | null>(null);
@@ -56,8 +55,6 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ebookToDelete, setEbookToDelete] = useState<Partial<TBook> | null>();
-
-
 
   const updateBookMutation = useMutation({
     mutationFn: async () => {
@@ -254,23 +251,23 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
         </div>
       )}
 
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Book</DialogTitle>
-          </DialogHeader>
+      <Sheet open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-xl md:max-w-2xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Edit Book</SheetTitle>
+          </SheetHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>Thumbnail</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col items-center gap-2">
                 {selectedThumbnail ? (
-                  <div className="relative rounded-md overflow-hidden">
+                  <div className="relative rounded-md w-full overflow-hidden">
                     <Image
-                      width={400}
-                      height={100}
+                      width={500}
+                      height={50}
                       src={selectedThumbnail}
                       alt="Selected thumbnail"
-                      className="object-cover w-full h-full"
+                      className="object-cover w-full h-24"
                     />
                   </div>
                 ) : (
@@ -329,8 +326,8 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
 
             <Button onClick={handleUpdate}>Update Book</Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       <Sheet open={thumbnailSheetOpen} onOpenChange={setThumbnailSheetOpen}>
         <SheetContent side="right" className="w-full sm:max-w-xl md:max-w-2xl overflow-y-auto">
@@ -348,6 +345,7 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
                 <Label className="text-sm font-medium mb-2 block">Current Selection</Label>
                 <div className="relative h-40 rounded-md overflow-hidden border-2 border-primary">
                   <Image
+                    priority
                     fill
                     src={selectedThumbnail}
                     alt="Selected thumbnail"
@@ -392,6 +390,7 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
                     >
                       <Image
                         fill
+                        priority
                         src={image.thumb}
                         alt={image.description || 'Unsplash image'}
                         className="object-cover"
