@@ -159,7 +159,7 @@ export default function EbookPage() {
                 <div className="space-y-2">
                   <p className="text-sm text-gray-500">Status</p>
                   <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${book.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                    {book.status || 'Draft'}
+                    {book.status.toUpperCase() || 'Draft'}
                   </span>
                 </div>
                 <div className="space-y-2">

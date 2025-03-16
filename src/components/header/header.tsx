@@ -61,7 +61,7 @@ export const HeaderLayout = ({ user }: THeaderLayout) => {
       </div>
 
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" className='cursor-pointer' >
+        <Button onClick={() => router.push("/projects")} variant="outline" size="sm" className='cursor-pointer' >
           Projects
         </Button>
 
@@ -109,6 +109,17 @@ export const HeaderLayout = ({ user }: THeaderLayout) => {
               <DropdownMenuItem onClick={handleNavigateToProfile} className='text-muted-foreground cursor-pointer' >
                 <UserCircle2Icon className='w-5 mr-2 text-muted-foreground' />
                 Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className='text-muted-foreground cursor-pointer'
+                onClick={() => router.push('/profile/images')}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 mr-2 text-muted-foreground">
+                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                  <circle cx="9" cy="9" r="2" />
+                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                </svg>
+                AI Generated Images
               </DropdownMenuItem>
               <DropdownMenuItem className='text-muted-foreground cursor-pointer' onClick={handleLogout}>
                 <LogOutIcon className='w-5 mr-2 text-muted-foreground' />

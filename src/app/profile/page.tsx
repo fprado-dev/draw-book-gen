@@ -189,14 +189,6 @@ export default function Profile() {
 
   return (
     <div className="container mx-auto py-10">
-      <Button
-        variant="ghost"
-        onClick={() => router.push("/projects")}
-        className="cursor-pointer w-fit hover:bg-slate-50 hover:text-primary mb-4"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Projects
-      </Button>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl ">Edit Profile</CardTitle>

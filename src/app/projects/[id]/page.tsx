@@ -9,15 +9,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { getProjectBooks } from '@/services/book.service'
 import { toast } from 'sonner'
 import { EbookList } from './components/ebook-list'
 import { formatDate } from '@/lib/date'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import * as AuthService from "@/services/auth.service"
+import { TBookSize } from '@/types/ebook'
 import * as ProjectsService from "@/services/projects.service"
 import * as BooksServices from "@/services/book.service"
-import { TBook, TBookSize } from '@/types/ebook'
 
 
 export default function ProjectDetailsPage() {
@@ -28,8 +26,7 @@ export default function ProjectDetailsPage() {
   const [newBookTitle, setNewBookTitle] = useState('')
   const [newBookSize, setNewBookSize] = useState('')
   const [newBookStatus] = useState<'draft' | 'published' | 'archived'>('draft')
-
-
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
 
   const { data: project, isLoading: isLoadingProjectInfo } = useQuery({
     queryKey: ['project'],
@@ -41,11 +38,11 @@ export default function ProjectDetailsPage() {
 
   })
 
-  const { data: books = [], isLoading: isLoadingEbooks } = useQuery({
+  const { data: books = [] } = useQuery({
     queryKey: ['books'],
     queryFn: async () => {
 
-      const books = await getProjectBooks({
+      const books = await BooksServices.getProjectBooks({
         id: params.id as string,
 
       });
@@ -72,8 +69,6 @@ export default function ProjectDetailsPage() {
       toast.error('Something went wrong while creating book')
     },
   })
-
-
 
   const handleCreateBook = async () => {
     if (!newBookTitle || !newBookSize) {
@@ -105,7 +100,6 @@ export default function ProjectDetailsPage() {
       </div>
     )
   }
-
 
   if (!project) {
     toast.error('Project not found')
@@ -180,7 +174,20 @@ export default function ProjectDetailsPage() {
         </div>
       </div>
 
-      <div className="flex justify-end items-center mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'draft' | 'published' | 'archived')}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Sheet open={showNewBookSheet} onOpenChange={setShowNewBookSheet}>
           <SheetTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -233,7 +240,10 @@ export default function ProjectDetailsPage() {
       </div>
 
       <div className="mt-8">
-        <EbookList books={books} isLoading={false} />
+        <EbookList
+          books={statusFilter === 'all' ? books : books.filter(book => book.status === statusFilter)}
+          isLoading={false}
+        />
       </div>
     </div>
   )
