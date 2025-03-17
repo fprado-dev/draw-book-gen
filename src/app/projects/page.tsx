@@ -79,6 +79,8 @@ export default function ProjectsPage() {
     }
 
   }
+
+
   const createProjectMutation = useMutation({
     mutationFn: async () => {
       if (!newProjectTitle.trim() || !user) return
@@ -251,7 +253,7 @@ export default function ProjectsPage() {
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <div className="flex items-center gap-4">
-                  <Button className="cursor-pointer bg-slate-600 hover:bg-slate-700">
+                  <Button className="cursor-pointer">
                     <PlusIcon className="w-4 h-4" />
                     Create New Project
                   </Button>

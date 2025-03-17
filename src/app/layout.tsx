@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 
+
 // Optimize font loading with display: 'swap' to prevent layout shifts
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +38,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-
           {children}
         </AuthProvider>
         <Toaster />

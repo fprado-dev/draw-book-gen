@@ -61,10 +61,9 @@ export const HeaderLayout = ({ user }: THeaderLayout) => {
       </div>
 
       <div className="flex items-center gap-4">
-        <Button onClick={() => router.push("/projects")} variant="outline" size="sm" className='cursor-pointer' >
+        <Button onClick={() => router.push("/projects")} variant="ghost" size="sm" className='cursor-pointer' >
           Projects
         </Button>
-
         <button className="relative cursor-pointer">
           <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground" />
           <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">

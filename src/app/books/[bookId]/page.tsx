@@ -4,24 +4,17 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookCheckIcon, BookTextIcon, CalendarIcon, Settings2Icon, XCircle, Download } from 'lucide-react';
+import { ArrowLeft, BookCheckIcon, Settings2Icon, XCircle, Download } from 'lucide-react';
 import GeneratePanel from '@/app/books/components/generate-panel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { GeneratedImage, useBookImages } from '@/contexts/BookImagesContext';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import jsPDF from 'jspdf';
-import { formatDate } from '@/lib/date';
 import { SupabaseImage } from '@/components/ui/supabase-image';
 import * as BooksServices from "@/services/book.service"
 import * as SupabaseStorage from "@/services/supabase-storage.service"
-import { TBook } from '@/types/ebook';
 
-interface SelectedImage {
-  id: number;
-  title: string;
-  order: number;
-}
 
 type EboookParams = {
   bookId: string;
@@ -210,75 +203,28 @@ export default function EbookPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Project
         </Button>
-
-        {/* Book Cover Thumbnail */}
-        <div className="w-full h-[100px] bg-slate-100 rounded-md overflow-hidden relative">
-          {book.thumbnail_url ? (
-            <Image
-              src={book.thumbnail_url}
-              alt={`${book.title} cover`}
-              fill
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-slate-100">
-              <BookTextIcon className="h-12 w-12 text-slate-300" />
-            </div>
-          )}
-        </div>
-
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">{book.title}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">Book Pages Size</p>
-                  <p className="font-medium">{images?.length}</p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">Status</p>
-                  <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${book.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                    {book.status.toUpperCase() || 'Draft'}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">Created At</p>
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4" />
-                    {formatDate(book.created_at)}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500">Last Updated</p>
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4" />
-                    {formatDate(book.updated_at)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
         </Card>
-
         <div className="flex justify-between items-center mb-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="sm" className="cursor-pointer">
-                Generate with AI
-                <Settings2Icon className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[600px] sm:max-w-none">
-              <SheetHeader className="py-4">
-                <SheetTitle>Configuration</SheetTitle>
-              </SheetHeader>
-              <GeneratePanel bookId={book.id} />
-            </SheetContent>
-          </Sheet>
+          <div className="flex gap-2">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="cursor-pointer">
+                  Generate with AI
+                  <Settings2Icon className="h-4 w-4 ml-2" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[600px] sm:max-w-none">
+                <SheetHeader className="py-4">
+                  <SheetTitle>Configuration</SheetTitle>
+                </SheetHeader>
+                <GeneratePanel bookId={book.id} />
+              </SheetContent>
+            </Sheet>
+          </div>
           <div className="flex gap-2">
             {selectedImages.length > 0 && (
               <Button
