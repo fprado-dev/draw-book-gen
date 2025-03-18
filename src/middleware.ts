@@ -4,11 +4,11 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const authCookie = request.cookies.get('auth-user');
   const isUserAuthenticated = authCookie?.value ? JSON.parse(authCookie.value) : null;
-  const isAuthPage = request.nextUrl.pathname === '/sign-in' || request.nextUrl.pathname === '/sign-up' || request.nextUrl.pathname === '/';
-  
+  const isAuthPage = request.nextUrl.pathname === '/sign-in' || request.nextUrl.pathname === '/sign-up';
+
   if (isUserAuthenticated) {
     if (isAuthPage) {
-      return NextResponse.redirect(new URL('/projects', request.url));
+      return NextResponse.redirect(new URL('/', request.url));
     }
   } else if (!isAuthPage) {
     return NextResponse.redirect(new URL('/sign-in', request.url));

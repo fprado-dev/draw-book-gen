@@ -35,7 +35,7 @@ export function LoginForm({
       return;
     }
 
-    router.push("/projects");
+    router.push("/");
   };
 
   return (

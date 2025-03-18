@@ -107,6 +107,12 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
 
   };
 
+  const handleViewBook = (book: TBook) => {
+    localStorage.setItem('illustra-current-book', JSON.stringify(book))
+
+    router.push(`/books/${book.id}`)
+  }
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -136,20 +142,20 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {books.map((ebook) => {
+          {books.map((book) => {
             return (
-              <Card key={ebook.id}>
+              <Card key={book.id}>
                 <CardHeader className='relative'>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
                       <span className="flex items-center gap-2 text-xs text-gray-500">
-                        {`Last time viewed ${formatDate(ebook.last_viewed)}`}
+                        {`Last time viewed ${formatDate(book.last_viewed)}`}
                       </span>
                       <CardTitle
                         className="cursor-pointer hover:underline text-2xl"
-                        onClick={() => router.push(`/books/${ebook.id}`)}
+                        onClick={() => handleViewBook(book)}
                       >
-                        {ebook.title}
+                        {book.title}
                       </CardTitle>
 
 
@@ -168,7 +174,7 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
                             variant="ghost"
                             size="sm"
                             className="justify-start"
-                            onClick={() => handleEdit(ebook)}
+                            onClick={() => handleEdit(book)}
                           >
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
@@ -178,7 +184,7 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
                             size="sm"
                             className="justify-start text-red-600 hover:text-red-600 hover:bg-red-100"
                             onClick={() => {
-                              setEbookToDelete(ebook);
+                              setEbookToDelete(book);
                               setDeleteDialogOpen(true);
                             }}
                           >
@@ -193,10 +199,10 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
 
                 <CardFooter className='gap-2' >
                   <Badge variant="outline">
-                    {ebook.status.toUpperCase() || 'Draft'}
+                    {book.status.toUpperCase() || 'Draft'}
                   </Badge>
                   <Badge variant="outline">
-                    {ebook.size}
+                    {book.size}
                   </Badge>
                 </CardFooter>
               </Card>

@@ -9,7 +9,7 @@ type ProtectedRouteProps = {
   requireAuth?: boolean;
 };
 
-const publicPaths = ['/sign-in', '/sign-up', "/", "/profile"];
+const publicPaths = ['/sign-in', '/sign-up'];
 
 export default function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteProps) {
   const { user, loading } = useAuth();

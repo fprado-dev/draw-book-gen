@@ -1,13 +1,6 @@
-'use client';
 
-
-
-export default function Home() {
-
+export default function Page() {
   return (
-    <div className="min-h-screen bg-background">
-
-      <h1>Dashboard</h1>
-    </div>
-  );
+    <h1>Dashboard</h1>
+  )
 }

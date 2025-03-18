@@ -171,9 +171,9 @@ export default function ProjectsPage() {
     }
   }
 
-  const handleViewProjectId = async (projectId: string) => {
-    console.log({ projectId })
-    router.push(`/projects/${projectId}`)
+  const handleViewProjectId = async (project: TProject) => {
+    localStorage.setItem('illustra-current-project', JSON.stringify(project))
+    router.push(`/projects/${project.id}`)
 
   }
 
@@ -189,7 +189,7 @@ export default function ProjectsPage() {
         <CardContent>
           <CardTitle
             className="cursor-pointer hover:underline text-2xl"
-            onClick={() => handleViewProjectId(project.id)}
+            onClick={() => handleViewProjectId(project)}
           >
             {project.title}
           </CardTitle>
@@ -263,8 +263,6 @@ export default function ProjectsPage() {
     <div className="container mx-auto py-6">
       <div className="flex flex-col gap-6 mb-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Projects</h1>
-
           <div className="flex gap-2">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
