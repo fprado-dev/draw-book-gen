@@ -2,8 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CalendarIcon, Clock, Palette, ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
@@ -11,7 +10,6 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { EbookList } from './components/ebook-list'
-import { formatDate } from '@/lib/date'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TBookSize } from '@/types/ebook'
 import * as ProjectsService from "@/services/projects.service"
@@ -28,26 +26,27 @@ export default function ProjectDetailsPage() {
   const [newBookStatus] = useState<'draft' | 'published' | 'archived'>('draft')
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
 
+
   const { data: project, isLoading: isLoadingProjectInfo } = useQuery({
-    queryKey: ['project'],
+    queryKey: ['project', params.id],
     queryFn: async () => {
       const project = await ProjectsService.getProjectById({ id: params.id as string })
-
       return project
     },
-
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   })
 
-  const { data: books = [] } = useQuery({
-    queryKey: ['books'],
+  const { data: books = [], isLoading: isLoadingBooks } = useQuery({
+    queryKey: ['books', params.id],
     queryFn: async () => {
-
       const books = await BooksServices.getProjectBooks({
         id: params.id as string,
-
       });
       return books;
     },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   const createBookMutation = useMutation({
@@ -78,37 +77,11 @@ export default function ProjectDetailsPage() {
     createBookMutation.mutate()
   }
 
-  if (isLoadingProjectInfo) {
-    return (
-      <div className="container mx-auto py-6">
-        <div className="flex flex-col gap-6 mb-8">
-          <div className="h-10 w-32 bg-slate-200 rounded animate-pulse" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, index) => (
-              <Card key={index} className='flex flex-row items-center justify-between animate-pulse'>
-                <CardHeader>
-                  <div className="h-6 w-24 bg-slate-200 rounded" />
-                </CardHeader>
-                <CardContent>
-                  <div className="h-4 w-20 bg-slate-200 rounded" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <div className="h-24 rounded-lg bg-slate-200 animate-pulse" />
-        </div>
-      </div>
-    )
-  }
 
-  if (!project) {
-    toast.error('Project not found')
-    router.push('/projects')
-    return null
-  }
 
   return (
     <div className="container mx-auto py-6 ">
+
       <div className="flex flex-col gap-6 mb-8">
         <Button
           variant="ghost"
@@ -118,60 +91,21 @@ export default function ProjectDetailsPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Projects
         </Button>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className='flex flex-row items-center justify-between'>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <CalendarIcon className="h-4 w-4" />
-                Created
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                {formatDate(project.created_at)}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className='flex flex-row items-center justify-between'>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4" />
-                Updated
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                {formatDate(project!.updated_at)}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className='flex flex-row items-center justify-between'>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Palette className="h-4 w-4" />
-                Theme
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center gap-2">
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: project!.color }}
-              />
-              <p className="text-sm">{project!.color.toUpperCase()}</p>
-            </CardContent>
-          </Card>
-        </div>
-        <div
-          className="h-24 rounded-lg relative"
-          style={{ backgroundColor: project!.color }}
-        >
-          <div className="absolute bottom-4 left-4">
-            <h1 className="text-4xl font-bold text-white">{project!.title}</h1>
+        {isLoadingProjectInfo ? (
+          <div className="container mx-auto">
+            <div className="h-24 rounded-lg bg-slate-200 animate-pulse" />
           </div>
-        </div>
+        ) : (
+          <div
+            className="h-24 rounded-lg relative"
+            style={{ backgroundColor: project!.color }}
+          >
+            <div className="absolute bottom-4 left-4">
+              <h1 className="text-4xl font-bold text-white">{project!.title}</h1>
+            </div>
+          </div>
+        )}
+
       </div>
 
       <div className="flex justify-between items-center mb-4">
@@ -242,7 +176,7 @@ export default function ProjectDetailsPage() {
       <div className="mt-8">
         <EbookList
           books={statusFilter === 'all' ? books : books.filter(book => book.status === statusFilter)}
-          isLoading={false}
+          isLoading={isLoadingBooks}
         />
       </div>
     </div>

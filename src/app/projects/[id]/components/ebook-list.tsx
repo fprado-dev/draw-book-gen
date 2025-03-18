@@ -1,31 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TBook, TBookStatus } from '@/types/ebook';
 import { toast } from 'sonner';
-import Image from 'next/image';
-import { Pencil, Trash, CalendarIcon, BookTextIcon, PlusIcon, ImageIcon } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetDescription, SheetClose } from '@/components/ui/sheet';
+import { Pencil, Trash, MoreVertical } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useParams, useRouter } from 'next/navigation';
 import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@/lib/date';
-import { User } from '@supabase/supabase-js';
 import * as BooksService from "@/services/book.service"
+import { Badge } from '@/components/ui/badge';
 
-type UnsplashImage = {
-  url: string;
-  thumb: string;
-  description: string | null;
-  author: string;
-};
+
 
 type EbookListProps = {
   isLoading: boolean;
@@ -47,10 +41,6 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
   const [editTitle, setEditTitle] = useState('');
   const [editSize, setEditSize] = useState<string>('');
 
-  const [thumbnailSheetOpen, setThumbnailSheetOpen] = useState(false);
-  const [unsplashImages, setUnsplashImages] = useState<UnsplashImage[]>([]);
-  const [isLoadingImages, setIsLoadingImages] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedThumbnail, setSelectedThumbnail] = useState<string>('');
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -110,35 +100,6 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
     updateBookMutation.mutate();
   };
 
-  const handleOpenThumbnailSheet = async () => {
-    if (!editingEbook) return;
-
-    setThumbnailSheetOpen(true);
-    await fetchUnsplashImages(editTitle || 'book cover');
-  };
-
-  const fetchUnsplashImages = async (query: string) => {
-    setIsLoadingImages(true);
-    try {
-      const images = await BooksService.getBookThumbnailOptions(query);
-      setUnsplashImages(images);
-    } catch (error) {
-      toast.error('Failed to fetch images from Unsplash');
-      console.error(error);
-    } finally {
-      setIsLoadingImages(false);
-    }
-  };
-
-  const handleSearchImages = async () => {
-    if (!searchQuery.trim()) return;
-    await fetchUnsplashImages(searchQuery);
-  };
-
-  const handleSelectThumbnail = (url: string) => {
-    setSelectedThumbnail(url);
-    setThumbnailSheetOpen(false);
-  };
 
   const handleDelete = async () => {
     if (!ebookToDelete) return;
@@ -165,7 +126,6 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Books</h2>
       {books.length === 0 ? (
         <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
           <h3 className="mb-2 text-lg font-medium">No books yet</h3>
@@ -179,72 +139,66 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
           {books.map((ebook) => {
             return (
               <Card key={ebook.id}>
-                <CardHeader>
+                <CardHeader className='relative'>
                   <div className="flex flex-col gap-4">
-                    <div className="w-full h-40 bg-slate-100 rounded-md overflow-hidden flex items-center justify-center">
-                      {ebook.thumbnail_url ? (
-                        <Image
-                          src={ebook.thumbnail_url}
-                          alt={ebook.title}
-                          width={400}
-                          height={400}
-                          className="object-cover"
-                        />
-                      ) : (
-                        <BookTextIcon
-                          width={100}
-                          height={100}
-                          className="object-cover text-gray-300"
-                        />
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <span className="flex items-center gap-2 text-xs text-gray-500">
+                        {`Last time viewed ${formatDate(ebook.last_viewed)}`}
+                      </span>
                       <CardTitle
-                        className="flex items-center gap-2 cursor-pointer hover:underline"
+                        className="cursor-pointer hover:underline text-2xl"
                         onClick={() => router.push(`/books/${ebook.id}`)}
                       >
                         {ebook.title}
                       </CardTitle>
-                      <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${ebook.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                          {ebook.status.toUpperCase() || 'Draft'}
-                        </span>
-                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${ebook.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                          {ebook.size}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <CalendarIcon className="h-3 w-3" />
-                        {`Last time viewed ${formatDate(ebook.last_viewed)}`}
-                      </div>
+
+
                     </div>
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer hover:bg-slate-100">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40" align="end">
+                        <div className="flex flex-col space-y-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="justify-start"
+                            onClick={() => handleEdit(ebook)}
+                          >
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="justify-start text-red-600 hover:text-red-600 hover:bg-red-100"
+                            onClick={() => {
+                              setEbookToDelete(ebook);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className='cursor-pointer hover:bg-slate-100'
-                        onClick={() => handleEdit(ebook)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="cursor-pointer text-red-600 hover:text-red-600 hover:bg-red-100"
-                        onClick={() => {
-                          setEbookToDelete(ebook);
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
+
+                <CardFooter className='gap-2' >
+                  <Badge variant="outline">
+                    {ebook.status.toUpperCase() || 'Draft'}
+                  </Badge>
+                  <Badge variant="outline">
+                    {ebook.size}
+                  </Badge>
+                </CardFooter>
               </Card>
             )
           })}
@@ -257,34 +211,6 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
             <SheetTitle>Edit Book</SheetTitle>
           </SheetHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>Thumbnail</Label>
-              <div className="flex flex-col items-center gap-2">
-                {selectedThumbnail ? (
-                  <div className="relative rounded-md w-full overflow-hidden">
-                    <Image
-                      width={500}
-                      height={50}
-                      src={selectedThumbnail}
-                      alt="Selected thumbnail"
-                      className="object-cover w-full h-24"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-20 h-20 bg-slate-100 rounded-md flex items-center justify-center">
-                    <BookTextIcon className="h-8 w-8 text-gray-400" />
-                  </div>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={handleOpenThumbnailSheet}
-                  type="button"
-                >
-                  <ImageIcon className="h-4 w-4 mr-2" />
-                  Choose Cover
-                </Button>
-              </div>
-            </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-title">Title</Label>
               <Input

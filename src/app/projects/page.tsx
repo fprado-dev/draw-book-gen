@@ -2,19 +2,20 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { PlusIcon, Pencil, Trash, Search } from 'lucide-react'
+import { PlusIcon, Pencil, Trash, Search, CalendarArrowDown } from 'lucide-react'
 import { toast } from "sonner"
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/services/supabase'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+} from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
@@ -36,6 +37,8 @@ import { useRouter } from 'next/navigation'
 import { formatDate } from '@/lib/date'
 import * as ProjectServices from '@/services/projects.service'
 import { TProject, TUpdateProject } from '@/types/TProjects'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -169,77 +172,90 @@ export default function ProjectsPage() {
   }
 
   const handleViewProjectId = async (projectId: string) => {
+    console.log({ projectId })
     router.push(`/projects/${projectId}`)
+
   }
 
   const renderListProjects = () => {
     return projectList?.map((project) => (
-      <div key={project.id} className="border rounded-lg overflow-hidden min-h-28 " >
-        <div
-          className="h-2"
-          style={{ backgroundColor: project?.color! }}
-        />
-        <div className="p-4">
-          <div className="flex justify-between items-center">
-            <h3 onClick={() => handleViewProjectId(project.id)}
-              className="cursor-pointer font-medium hover:underline">{project.title}</h3>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4" />
+      <Card key={project.id} className='relative flex flex-col gap-2'>
+        <CardHeader className='relative'>
+          <span className="flex items-center gap-2 text-xs text-gray-500">
+            {`Last time updated ${formatDate(project.updated_at)}`}
+          </span>
+
+        </CardHeader>
+        <CardContent>
+          <CardTitle
+            className="cursor-pointer hover:underline text-2xl"
+            onClick={() => handleViewProjectId(project.id)}
+          >
+            {project.title}
+          </CardTitle>
+
+        </CardContent>
+        <CardFooter className='gap-2' >
+          <Badge variant="outline">
+            <CalendarArrowDown /> {formatDate(project.created_at)}
+          </Badge>
+        </CardFooter>
+        <div className="cursor-pointer absolute top-4 right-4">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 cursor-pointer">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-40" align="end">
+              <div className="flex flex-col space-y-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="justify-start"
+                  onClick={() => handleEdit(project)}
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-40" align="end">
-                <div className="flex flex-col space-y-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="justify-start"
-                    onClick={() => handleEdit(project)}
-                  >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                  <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete your project
-                          "{projectToDelete?.title}" and all books created on this project.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setProjectToDelete(null)}>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={handleConfirmDelete}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="justify-start text-red-600 hover:text-red-600 hover:bg-red-100"
-                    onClick={() => handleDeleteClick(project)}
-                  >
-                    <Trash className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <p className="text-sm text-gray-500">
-            Last edited {formatDate(project.updated_at)}
-          </p>
+                <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your project
+                        "{projectToDelete?.title}" and all books created on this project.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setProjectToDelete(null)}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleConfirmDelete}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="justify-start text-red-600 hover:text-red-600 hover:bg-red-100"
+                  onClick={() => handleDeleteClick(project)}
+                >
+                  <Trash className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
-      </div>
+      </Card>
+
+
     ))
   }
 
@@ -250,46 +266,58 @@ export default function ProjectsPage() {
           <h1 className="text-2xl font-bold">Projects</h1>
 
           <div className="flex gap-2">
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
                 <div className="flex items-center gap-4">
                   <Button className="cursor-pointer">
-                    <PlusIcon className="w-4 h-4" />
+                    <PlusIcon className="w-4 h-4 mr-2" />
                     Create New Project
                   </Button>
                 </div>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Project</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col gap-4">
-                  <Input
-                    placeholder="Project Title"
-                    value={newProjectTitle}
-                    onChange={(e) => setNewProjectTitle(e.target.value)}
-                  />
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="color"
-                      value={newProjectColor}
-                      onChange={(e) => setNewProjectColor(e.target.value)}
-                      className="w-12 h-12 p-1 cursor-pointer"
-                    />
-                    <span className="text-sm text-gray-500">Choose project color</span>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Create New Project</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-6 mt-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Project Title</label>
+                      <Input
+                        placeholder="Enter project title"
+                        value={newProjectTitle}
+                        onChange={(e) => setNewProjectTitle(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Project Color</label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="color"
+                          value={newProjectColor}
+                          onChange={(e) => setNewProjectColor(e.target.value)}
+                          className="w-12 h-12 p-1 cursor-pointer"
+                        />
+                        <span className="text-sm text-gray-500">Choose project color</span>
+                      </div>
+                    </div>
                   </div>
-                  <Button onClick={createProject}>Create Project</Button>
                 </div>
-              </DialogContent>
-            </Dialog>
+                <SheetFooter className="absolute bottom-0 left-0 right-0 p-6 border-t bg-background">
+                  <Button onClick={createProject} className="w-full">
+                    Create Project
+                  </Button>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
-        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Project</DialogTitle>
-            </DialogHeader>
+        <Sheet open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Edit Project</SheetTitle>
+            </SheetHeader>
             <div className="flex flex-col gap-4">
               <Input
                 placeholder="Project Title"
@@ -322,8 +350,8 @@ export default function ProjectsPage() {
                 Update Project
               </Button>
             </div>
-          </DialogContent>
-        </Dialog>
+          </SheetContent>
+        </Sheet>
 
         <div className="flex gap-4 mb-6">
           <div className="flex-1">
