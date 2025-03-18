@@ -60,7 +60,6 @@ export const updateBookById = async ({ id, title, project_id, size, status, thum
 }
 
 export const deleteBookById = async ({ id }: Partial<TBook>) => {
-  console.log({ id })
   const { data, error } = await supabase
     .from('books')
     .delete()

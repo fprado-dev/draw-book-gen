@@ -59,14 +59,16 @@ export default function RootLayout({
                   <DynamicBreadCrumb />
                 </div>
               </header>
-              <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-
+              <div className="flex flex-1 flex-col p-4">
                 {children}
               </div>
             </SidebarInset>
           </SidebarProvider>
         </AuthProvider>
-        <Toaster />
+        <Toaster position="top-center" toastOptions={{
+          closeButton: true,
+
+        }} />
       </body>
     </html>
   );

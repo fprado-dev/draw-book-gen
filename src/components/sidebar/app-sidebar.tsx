@@ -2,23 +2,13 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
   BadgeCentIcon,
-  BookOpen,
-  Bot,
   BotMessageSquareIcon,
-  Command,
   FolderCheckIcon,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
+
 } from "lucide-react"
 
 import { NavMain } from "./nav-main"
-import { NavProjects } from "./nav-projects"
 import { NavUser } from "./nav-user"
 import { TeamSwitcher } from "./team-switcher"
 import {
@@ -31,7 +21,6 @@ import {
 import { User } from "@supabase/supabase-js"
 import { supabase } from "@/services/supabase"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { SideUpgradeForm } from "./upgrade-form"
 
 // This is sample data.
 const data = {
@@ -53,7 +42,7 @@ const data = {
       title: "Getting Started",
       url: "#",
       icon: FolderCheckIcon,
-      isActive: false,
+      isActive: true,
       items: [
         {
           title: "Projects",

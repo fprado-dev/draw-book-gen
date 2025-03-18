@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { PlusIcon, Pencil, Trash, Search, CalendarArrowDown } from 'lucide-react'
+import { PlusIcon, Pencil, Trash, Search } from 'lucide-react'
 import { toast } from "sonner"
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/services/supabase'
@@ -37,8 +37,7 @@ import { useRouter } from 'next/navigation'
 import { formatDate } from '@/lib/date'
 import * as ProjectServices from '@/services/projects.service'
 import { TProject, TUpdateProject } from '@/types/TProjects'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -46,7 +45,7 @@ export default function ProjectsPage() {
   const [open, setOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [newProjectTitle, setNewProjectTitle] = useState('')
-  const [newProjectColor, setNewProjectColor] = useState('#6366f1')
+  const [newProjectColor, setNewProjectColor] = useState('#8da9c4')
   const [editingProject, setEditingProject] = useState<TProject | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [projectToDelete, setProjectToDelete] = useState<TProject | null>(null)
@@ -86,9 +85,15 @@ export default function ProjectsPage() {
 
   const createProjectMutation = useMutation({
     mutationFn: async () => {
-      if (!newProjectTitle.trim() || !user) return
-      validateIfTitleProjectExists(newProjectTitle)
-      await ProjectServices.createProject({ title: newProjectTitle, color: newProjectColor })
+      if (!newProjectTitle.trim() || !user) {
+        // toast.error("Project title is required")
+        throw new Error("Project title is required")
+      }
+      if (newProjectTitle.trim()) {
+        validateIfTitleProjectExists(newProjectTitle)
+        await ProjectServices.createProject({ title: newProjectTitle, color: newProjectColor })
+
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
@@ -179,7 +184,7 @@ export default function ProjectsPage() {
 
   const renderListProjects = () => {
     return projectList?.map((project) => (
-      <Card key={project.id} className='relative flex flex-col gap-2'>
+      <Card key={project.id} className='cursor-pointer relative flex flex-col gap-2 border-t-0 border-l-0 border-r-0' style={{ borderBottomColor: project.color }}>
         <CardHeader className='relative'>
           <span className="flex items-center gap-2 text-xs text-gray-500">
             {`Last time updated ${formatDate(project.updated_at)}`}
@@ -195,11 +200,6 @@ export default function ProjectsPage() {
           </CardTitle>
 
         </CardContent>
-        <CardFooter className='gap-2' >
-          <Badge variant="outline">
-            <CalendarArrowDown /> {formatDate(project.created_at)}
-          </Badge>
-        </CardFooter>
         <div className="cursor-pointer absolute top-4 right-4">
           <Popover>
             <PopoverTrigger asChild>
@@ -260,97 +260,8 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex flex-col gap-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <div className="flex items-center gap-4">
-                  <Button className="cursor-pointer">
-                    <PlusIcon className="w-4 h-4 mr-2" />
-                    Create New Project
-                  </Button>
-                </div>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Create New Project</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-6 mt-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Project Title</label>
-                      <Input
-                        placeholder="Enter project title"
-                        value={newProjectTitle}
-                        onChange={(e) => setNewProjectTitle(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Project Color</label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={newProjectColor}
-                          onChange={(e) => setNewProjectColor(e.target.value)}
-                          className="w-12 h-12 p-1 cursor-pointer"
-                        />
-                        <span className="text-sm text-gray-500">Choose project color</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <SheetFooter className="absolute bottom-0 left-0 right-0 p-6 border-t bg-background">
-                  <Button onClick={createProject} className="w-full">
-                    Create Project
-                  </Button>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
-        <Sheet open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Edit Project</SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col gap-4">
-              <Input
-                placeholder="Project Title"
-                value={editingProject?.title || ''}
-                onChange={(e) => setEditingProject(prev =>
-                  prev ? { ...prev, title: e.target.value } : null
-                )}
-              />
-              <div className="flex items-center gap-2">
-                <Input
-                  type="color"
-                  value={editingProject?.color || '#6366f1'}
-                  onChange={(e) => setEditingProject(prev =>
-                    prev ? { ...prev, color: e.target.value } : null
-                  )}
-                  className="w-12 h-12 p-1 cursor-pointer"
-                />
-                <span className="text-sm text-gray-500">Choose project color</span>
-              </div>
-              <Button onClick={() => {
-                if (editingProject) {
-                  updateProject(
-                    editingProject.id,
-                    editingProject.title,
-                    editingProject.color
-                  )
-                  setEditDialogOpen(false)
-                }
-              }}>
-                Update Project
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-
+    <>
+      <div className="flex flex-col py-4">
         <div className="flex gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
@@ -363,6 +274,64 @@ export default function ProjectsPage() {
               />
             </div>
           </div>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <div className="flex items-center gap-4">
+                <Button className="cursor-pointer">
+                  <PlusIcon className="w-4 h-4" />
+                  New Project
+                </Button>
+              </div>
+            </SheetTrigger>
+            <SheetContent className='border-none'>
+              <SheetHeader>
+                <SheetTitle>
+                  Choose a title for your new project 😎
+                </SheetTitle>
+                <span className='text-xs text-foreground'>(eg: Mandalas, Illustrations, etc...)</span>
+              </SheetHeader>
+              <div className='flex flex-col gap-4 px-4' >
+                <div >
+                  <Input
+                    placeholder="Enter project title"
+                    value={newProjectTitle}
+                    onChange={(e) => setNewProjectTitle(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Input
+                      type="color"
+                      value={newProjectColor}
+                      onChange={(e) => setNewProjectColor(e.target.value)}
+                      className="w-12 h-12 p-1 cursor-pointer"
+                    />
+                    {[
+                      '#8da9c4', // Red
+                      '#e63946', // Orange Red
+                      '#fca311', // Dark Orange
+                      '#fb6f92', // Indigo
+                      '#d4a373', // Purple
+                      '#b8c0ff', // Dark Green
+                      '#76c893', // Dark Red
+                    ].map((color) => (
+                      <div
+                        key={color}
+                        onClick={() => setNewProjectColor(color)}
+                        className="w-8 h-8 rounded-full cursor-pointer border border-gray-200 transition-transform hover:scale-110"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <Button variant="secondary" onClick={createProject} size="sm" className='p-4 cursor-pointer hover:bg-neutral-800 hover:text-muted'>
+                  Create Project
+                </Button>
+              </div>
+            </SheetContent>
+
+          </Sheet>
         </div>
 
       </div>
@@ -404,6 +373,45 @@ export default function ProjectsPage() {
           renderListProjects()
         )}
       </div>
-    </div>
+      <Sheet open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Edit Project</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col gap-4">
+            <Input
+              placeholder="Project Title"
+              value={editingProject?.title || ''}
+              onChange={(e) => setEditingProject(prev =>
+                prev ? { ...prev, title: e.target.value } : null
+              )}
+            />
+            <div className="flex items-center gap-2">
+              <Input
+                type="color"
+                value={editingProject?.color || '#6366f1'}
+                onChange={(e) => setEditingProject(prev =>
+                  prev ? { ...prev, color: e.target.value } : null
+                )}
+                className="w-12 h-12 p-1 cursor-pointer"
+              />
+              <span className="text-sm text-gray-500">Choose project color</span>
+            </div>
+            <Button onClick={() => {
+              if (editingProject) {
+                updateProject(
+                  editingProject.id,
+                  editingProject.title,
+                  editingProject.color
+                )
+                setEditDialogOpen(false)
+              }
+            }}>
+              Update Project
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   )
 }

@@ -53,7 +53,6 @@ Base theme: ${prompt}`;
 
     // Format the outline using the OutlineFormatter service
     const formattedOutline = OutlineFormatter.format(outlineText);
-    console.log({ formattedOutline })
     return NextResponse.json({
       outline: formattedOutline,
       success: true

@@ -45,7 +45,6 @@ export default function UserImagesPage() {
     },
   });
 
-  console.log({ books })
 
 
   // Fetch all user's images
@@ -118,7 +117,6 @@ export default function UserImagesPage() {
           const { data: { publicUrl } } = supabase.storage
             .from('users-generated-images')
             .getPublicUrl(`${userId}/${bookId}/${file.name}`);
-          console.log({ file })
           return {
             id: file.id,
             name: file.name,

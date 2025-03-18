@@ -11,7 +11,6 @@ import { useIsMobile } from "@/hooks/use-mobile"
 
 export function SideUpgradeForm() {
   const isMobile = useIsMobile()
-  console.log({ isMobile })
   return (
     <SidebarMenu className={isMobile ? "opacity-0 overflow-hidden" : ""}>
       <SidebarMenuItem>
