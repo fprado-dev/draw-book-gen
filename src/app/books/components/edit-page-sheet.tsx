@@ -8,14 +8,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import PDFGuidelines from './pdf-guidelines';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { History, Settings, Sparkles, Wand2 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { SelectSeparator } from '@radix-ui/react-select';
+import { History, Settings, Sparkles, Wand2, BookOpen, BookOpenCheckIcon, Eye, EyeOff } from 'lucide-react';
+import { generateBookOutline } from '@/services/replicate.service';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { toast } from 'sonner';
+import Image from 'next/image';
 
+type Outline = {
+  prompt: string;
+  chapters: { title: string; description: string }[];
+};
 
 type EditPageSheetProps = {
   page: TPage;
@@ -63,6 +70,60 @@ export default function EditPageSheet({ page, isOpen, onOpenChange }: EditPageSh
   const [strength, setStrength] = useState([50]);
   const [guidance, setGuidance] = useState([7.5]);
   const [steps, setSteps] = useState([30]);
+  const [outlinePrompt, setOutlinePrompt] = useState('');
+  const [chapterCount, setChapterCount] = useState('5');
+  const [outlines, setOutlines] = useState<Outline[]>([]);
+  const [showGuidelines, setShowGuidelines] = useState(true);
+  const dimensions = {
+    coverWidth: 8.5,
+    coverHeight: 11,
+    spineWidth: 0.5,
+    bleed: 0.125,
+    safeZone: 0.25,
+    spineTextAllowed: true,
+    spineTextMargin: 0.0625,
+    spineVariance: 0.0625
+  };
+  const [isGeneratingOutline, setIsGeneratingOutline] = useState(false);
+
+  const handleGenerateOutline = async () => {
+    if (!outlinePrompt.trim()) {
+      toast.error('Please provide a description for your book outline');
+      return;
+    }
+
+    setIsGeneratingOutline(true);
+    try {
+      const result = await generateBookOutline({
+        prompt: outlinePrompt,
+        complexity: 'detailed',
+        chapters: parseInt(chapterCount)
+      });
+
+      if (result.success && result.outline) {
+        if (typeof result.outline === 'string') {
+          toast.error('Unexpected outline format received');
+          return;
+        }
+
+        const chapters = result.outline.chapters;
+        if (Array.isArray(chapters)) {
+          setOutlines(prev => [{ prompt: outlinePrompt, chapters }, ...prev]);
+          setOutlinePrompt('');
+          toast.success('Book outline generated successfully!');
+        } else {
+          toast.error('Invalid outline format received');
+        }
+      } else {
+        throw new Error(result.error || 'Failed to generate outline');
+      }
+    } catch (error) {
+      console.error('Error generating outline:', error);
+      toast.error('An error occurred while generating the outline');
+    } finally {
+      setIsGeneratingOutline(false);
+    }
+  };
 
   const handleGenerateImage = () => {
     // TODO: Implement image generation
@@ -97,17 +158,38 @@ export default function EditPageSheet({ page, isOpen, onOpenChange }: EditPageSh
                       />
                     ))}
                   </div>
-                  {page.type === 'illustration' && page.imageUrl ? (
-                    <img
-                      src={page.imageUrl}
-                      alt={page.title}
+                  {true ? (
+                    <Image
+                      src="/fake-image.jpg"
+                      alt="Cover Preview"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      priority
                       className="absolute inset-0 w-full h-full object-cover rounded-sm"
                     />
+                    // <img
+                    //   src={page.imageUrl}
+                    //   alt={page.title}
+                    //   className="absolute inset-0 w-full h-full object-cover rounded-sm"
+                    // />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <p className="text-sm text-slate-400">No image generated yet</p>
                     </div>
                   )}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute top-2 right-2 z-10"
+                    onClick={() => setShowGuidelines(!showGuidelines)}
+                  >
+                    {showGuidelines ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <PDFGuidelines dimensions={dimensions} visible={showGuidelines} />
                 </div>
               </CardContent>
             </Card>
@@ -116,12 +198,15 @@ export default function EditPageSheet({ page, isOpen, onOpenChange }: EditPageSh
           {/* Right side - Tabs Content */}
           <div className="col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} >
-              <TabsList className="grid w-full grid-cols-4 mb-4">
+              <TabsList className="grid w-full grid-cols-5 mb-4">
                 <TabsTrigger value="generate" className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4" /> Generate
                 </TabsTrigger>
                 <TabsTrigger value="style" className="flex items-center gap-2">
                   <Wand2 className="w-4 h-4" /> Style
+                </TabsTrigger>
+                <TabsTrigger value="outlines" className="flex items-center gap-2">
+                  <BookOpenCheckIcon className="w-4 h-4" /> Outlines
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="flex items-center gap-2">
                   <Settings className="w-4 h-4" /> Settings
@@ -129,6 +214,7 @@ export default function EditPageSheet({ page, isOpen, onOpenChange }: EditPageSh
                 <TabsTrigger value="history" className="flex items-center gap-2">
                   <History className="w-4 h-4" /> History
                 </TabsTrigger>
+
               </TabsList>
               <TabsContent value="generate" className="space-y-6 mt-0">
                 <div className="space-y-2">
@@ -255,6 +341,77 @@ export default function EditPageSheet({ page, isOpen, onOpenChange }: EditPageSh
                       max={150}
                       step={1}
                     />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="outlines" className="mt-0">
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <Label>Book Description</Label>
+                    <Textarea
+                      placeholder="Describe your book's content, themes, and structure..."
+                      value={outlinePrompt}
+                      onChange={(e) => setOutlinePrompt(e.target.value)}
+                      className="h-32"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label>Number of Chapters</Label>
+                    <Select value={chapterCount} onValueChange={setChapterCount}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select number of chapters" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num} {num === 1 ? 'Chapter' : 'Chapters'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button
+                    onClick={handleGenerateOutline}
+                    disabled={isGeneratingOutline}
+                    className="w-full"
+                  >
+                    {isGeneratingOutline ? 'Generating...' : 'Generate Outline'}
+                  </Button>
+
+                  <div className="mt-6">
+                    {outlines.length === 0 ? (
+                      <p className="text-center text-muted-foreground">No outlines generated yet.</p>
+                    ) : (
+                      <Accordion type="multiple" className="w-full">
+                        {outlines.map((outline, index) => (
+                          <AccordionItem key={index} value={index.toString()}>
+                            <AccordionTrigger className="text-left">{outline.prompt}</AccordionTrigger>
+                            <AccordionContent>
+                              <div className="grid grid-cols-1 gap-4">
+                                {outline.chapters.map((chapter, chapterIndex) => (
+                                  <Card
+                                    key={chapterIndex}
+                                    className="overflow-hidden cursor-pointer transition-all duration-200 hover:bg-slate-50 p-4"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(chapter.description);
+                                      toast.success('Copied to clipboard!');
+                                    }}
+                                  >
+                                    <CardContent className="p-2">
+                                      <h4 className="font-medium mb-2">{chapter.title}</h4>
+                                      <p className="text-sm text-muted-foreground">{chapter.description}</p>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                    )}
                   </div>
                 </div>
               </TabsContent>

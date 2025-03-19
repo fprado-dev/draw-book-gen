@@ -12,22 +12,39 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { prompt, style, complexity, chapters } = body;
 
-    // Generate 5 detailed mandala-themed space descriptions
-    let enhancedPrompt = `Generate ${chapters} detailed, atmospheric descriptions of spaces or scenes featuring ${prompt}. Each description should follow this pattern: Max 30 words, [Location] with [Key Feature] and [Atmospheric Details]. 
-    Make each description unique and vivid, incorporating elements of lighting, atmosphere, and spatial arrangement. Use this format:
-      1 - [First Description]
-      2 - [Second Description]
-      3 - [Third Description]
-      4 - [Fourth Description]
-      5 - [Fifth Description]
+    let enhancedPrompt = `**Role**: You are a *Monochrome Concept Maestro* specializing in black-and-white scenes.
+    **Task**:
+    generate ${chapters} prompts like this "A cozy yoga studio with plush mats and blankets, creating a tranquil and inviting space for physical and mental well-being. and a breathtaking view."
+    examples:
+    -Cozy Reading Nook with Soft Pillows
+    -Winter Garden with Hanging Plants
+    -Breakfast on the Flower-Filled Veranda
+    -Vintage Bedroom with Delicate Details
 
-Base theme: ${prompt}`;
+    theme context: "${prompt}}"
+    
+    **Structure**:  
+      - Title
+      - Description 
+    **Rules**:
+      - 18-30 words
+      - Zero color references - pure grayscale physics
+      - no shadows references
 
+
+    **Output Format**:  
+       1 - [Title]:  
+       2 - [Title]: 
+
+
+    **Base Theme**: ${prompt}.
+    `;
+
+    // Add style and complexity modifiers
     if (style) {
       enhancedPrompt += `\nIncorporate a ${style} aesthetic in the descriptions`;
     }
 
-    // Set complexity to influence description detail level
     if (complexity) {
       enhancedPrompt += complexity === 'detailed'
         ? '\nMake the descriptions rich in detail, focusing on textures, colors, and sensory elements'
@@ -36,15 +53,13 @@ Base theme: ${prompt}`;
 
     let outlineText = '';
 
-    // Use DeepSeek AI model with streaming
     for await (const event of replicate.stream(
-      "anthropic/claude-3.5-haiku",
+      "deepseek-ai/deepseek-r1",
       {
         input: {
           prompt: enhancedPrompt,
-          temperature: 0.7,
-          top_p: 0.9,
-          max_tokens: 1000
+          temperature: 0.7, // Balanced creativity
+          top_p: 0.9,       // Focused randomness
         }
       }
     )) {
@@ -52,6 +67,7 @@ Base theme: ${prompt}`;
     }
 
     // Format the outline using the OutlineFormatter service
+    console.log({ outlineText })
     const formattedOutline = OutlineFormatter.format(outlineText);
     return NextResponse.json({
       outline: formattedOutline,
