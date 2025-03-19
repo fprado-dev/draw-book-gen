@@ -64,7 +64,7 @@ export default function ProjectsPage() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const { data: projectList, error, isLoading: isLoadingProjects } = useQuery({
+  const { data: projectList, isLoading: isLoadingProjects } = useQuery({
     queryKey: ['projects'],
     queryFn: ProjectServices.getAllProjects,
     enabled: !!user?.id
@@ -184,7 +184,7 @@ export default function ProjectsPage() {
 
   const renderListProjects = () => {
     return projectList?.map((project) => (
-      <Card key={project.id} className='cursor-pointer relative flex flex-col gap-2 border-t-0 border-l-0 border-r-0' style={{ borderBottomColor: project.color }}>
+      <Card key={project.id} className='cursor-pointer relative flex flex-col gap-2 border-stone-100' style={{ boxShadow: `0 4px 6px -1px ${project.color}40, 0 2px 4px -2px ${project.color}40` }}>
         <CardHeader className='relative'>
           <span className="flex items-center gap-2 text-xs text-gray-500">
             {`Last time updated ${formatDate(project.updated_at)}`}
@@ -261,13 +261,13 @@ export default function ProjectsPage() {
 
   return (
     <>
-      <div className="flex flex-col py-4">
+      <div className="flex flex-col px-4">
         <div className="flex gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
               <Input
-                className="pl-10"
+                className="pl-10 border border-slate-400"
                 placeholder="Search by title..."
                 value={filters.title}
                 onChange={(e) => setFilters(prev => ({ ...prev, title: e.target.value }))}
@@ -335,7 +335,7 @@ export default function ProjectsPage() {
         </div>
 
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
         {isLoadingProjects && (
           <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((item) => (
@@ -374,30 +374,53 @@ export default function ProjectsPage() {
         )}
       </div>
       <Sheet open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <SheetContent>
+        <SheetContent className='border-none'>
           <SheetHeader>
-            <SheetTitle>Edit Project</SheetTitle>
+            <SheetTitle>
+              Edit the title for this project 😎
+            </SheetTitle>
+            <span className='text-xs text-foreground'>(you can edit title and color.)</span>
           </SheetHeader>
-          <div className="flex flex-col gap-4">
-            <Input
-              placeholder="Project Title"
-              value={editingProject?.title || ''}
-              onChange={(e) => setEditingProject(prev =>
-                prev ? { ...prev, title: e.target.value } : null
-              )}
-            />
-            <div className="flex items-center gap-2">
+          <div className='flex flex-col gap-4 px-4' >
+            <div >
               <Input
-                type="color"
-                value={editingProject?.color || '#6366f1'}
+                placeholder="Enter a project title"
+                value={editingProject?.title || ''}
                 onChange={(e) => setEditingProject(prev =>
-                  prev ? { ...prev, color: e.target.value } : null
+                  prev ? { ...prev, title: e.target.value } : null
                 )}
-                className="w-12 h-12 p-1 cursor-pointer"
               />
-              <span className="text-sm text-gray-500">Choose project color</span>
             </div>
-            <Button onClick={() => {
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  type="color"
+                  value={editingProject?.color || '#6366f1'}
+                  onChange={(e) => setEditingProject(prev =>
+                    prev ? { ...prev, color: e.target.value } : null
+                  )}
+                  className="w-12 h-12 p-1 cursor-pointer"
+                />
+                {[
+                  '#8da9c4', // Red
+                  '#e63946', // Orange Red
+                  '#fca311', // Dark Orange
+                  '#fb6f92', // Indigo
+                  '#d4a373', // Purple
+                  '#b8c0ff', // Dark Green
+                  '#76c893', // Dark Red
+                ].map((color) => (
+                  <div
+                    key={color}
+                    onClick={() => setNewProjectColor(color)}
+                    className="w-8 h-8 rounded-full cursor-pointer border border-gray-200 transition-transform hover:scale-110"
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            </div>
+            <Button variant="secondary" onClick={() => {
               if (editingProject) {
                 updateProject(
                   editingProject.id,
@@ -406,7 +429,7 @@ export default function ProjectsPage() {
                 )
                 setEditDialogOpen(false)
               }
-            }}>
+            }} size="sm" className='p-4 cursor-pointer hover:bg-neutral-800 hover:text-muted'>
               Update Project
             </Button>
           </div>

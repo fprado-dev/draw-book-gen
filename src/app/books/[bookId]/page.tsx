@@ -3,13 +3,17 @@
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Settings2Icon, SparklesIcon } from 'lucide-react';
+import { ArrowLeft, FileArchiveIcon, FileIcon, SparklesIcon } from 'lucide-react';
 import GeneratePanel from '@/app/books/components/generate-panel';
+import PageGrid from '@/app/books/components/page-grid';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import * as BooksServices from "@/services/book.service"
 import * as ReplicateServices from "@/services/replicate.service"
+import { TBook, TPage } from '@/types/ebook';
+import { Separator } from '@radix-ui/react-separator';
 
 
 type EboookParams = {
@@ -20,6 +24,8 @@ export default function EbookPage() {
   const router = useRouter();
 
 
+  const queryClient = useQueryClient();
+
   const { data: book, isLoading: isLoadingBookInfo } = useQuery({
     queryKey: ['books', params.bookId],
     queryFn: async () => {
@@ -29,69 +35,107 @@ export default function EbookPage() {
     },
   });
 
+  const createPageMutation = useMutation({
+    mutationFn: async (page: Omit<TPage, 'id' | 'order'>) => {
+      const updatedPages = [...(book?.pages || []), { ...page, id: crypto.randomUUID(), order: book?.pages?.length || 0 }];
+      await BooksServices.updateBookById({
+        id: params.bookId,
+        pages: updatedPages
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['books', params.bookId],
+      });
+      toast.success('Page created successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to create page');
+    },
+  })
+
+  const updatePageMutation = useMutation({
+    mutationFn: async (pageId: string) => {
+      const updatedPages = book?.pages.filter(page => page.id !== pageId);
+      await BooksServices.updateBookById({
+        id: params.bookId,
+        pages: updatedPages
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['books', params.bookId],
+      });
+      toast.success('Page deleted successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to delete page');
+    },
+  })
+
+  const handlePageCreate = async (page: Omit<TPage, 'id' | 'order'>) => {
+    createPageMutation.mutate(page);
+  }
+
+  const handlePageDelete = async (pageId: string) => {
+    updatePageMutation.mutate(pageId);
+
+  }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="cursor-pointer w-fit hover:bg-slate-50 hover:text-primary"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Project
-        </Button>
+    <div className="px-6">
 
-        {isLoadingBookInfo ? (
-          <Card className="animate-pulse bg-slate-200 rounded" >
-            <div className="h-6 w-24 bg-slate-200 rounded" />
-          </Card>)
-          :
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl truncate">{book?.title}</CardTitle>
-            </CardHeader>
-          </Card>
-        }
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex gap-2">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="cursor-pointer">
-                  <span className='text-xs'>GENERATE WITH AI</span>
-                  <SparklesIcon className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[600px] sm:max-w-none">
-                <SheetHeader className="py-4">
-                  <SheetTitle>Configuration</SheetTitle>
-                </SheetHeader>
-                <GeneratePanel bookId={params.bookId} />
-              </SheetContent>
-            </Sheet>
+      <div className='w-full h-fit grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <Card className='p-4'>
+          <div className='space-y-2'>
+            <h2 className='text-2xl font-bold tracking-tight'>{book?.title}</h2>
+            <p className='text-sm text-muted-foreground'>Created on {new Date(book?.created_at || '').toLocaleDateString()}</p>
+          </div>
+          <div className='grid grid-cols-2 gap-4'>
+            <div className='space-y-1'>
+              <p className='text-sm font-medium'>Status</p>
+              <p className='text-sm text-muted-foreground capitalize'>{book?.status || 'Draft'}</p>
+            </div>
+            <div className='space-y-1'>
+              <p className='text-sm font-medium'>Size</p>
+              <p className='text-sm text-muted-foreground capitalize'>{book?.size || 'Standard'}</p>
+            </div>
           </div>
 
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold py-5">AI Generated Images</h2>
-          {true ? (
-            <div className="grid md:grid-cols-4 gap-4 mb-6">
-              {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="animate-pulse">
-                  <div className="w-full h-96 bg-slate-200 rounded-lg"></div>
-                  <div className="mt-2 h-4 w-20 bg-slate-200 rounded"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-4 gap-4 mb-6">
-              <h1>Images</h1>
-            </div>
-          )}
 
+        </Card>
 
-        </div>
+        <Card className='p-6'>
+          <div className='space-y-1'>
+            <p className='text-sm font-medium'>Progress</p>
+            <div className='h-2 w-full bg-secondary rounded-full overflow-hidden'>
+              <div
+                className='h-full bg-primary transition-all duration-300 ease-in-out'
+                style={{ width: '30%' }}
+              />
+            </div>
+            <p className='text-xs text-muted-foreground mt-1'>5 Images generated</p>
+          </div>
+          <div className='space-y-1'>
+            <p className='text-sm font-medium'>Progress</p>
+            <div className='h-2 w-full bg-secondary rounded-full overflow-hidden'>
+              <div
+                className='h-full bg-primary transition-all duration-300 ease-in-out'
+                style={{ width: '10%' }}
+              />
+            </div>
+            <p className='text-xs text-muted-foreground mt-1'>{book?.pages.length} Pages Created</p>
+          </div>
+        </Card>
+
       </div>
+      <PageGrid
+        bookId={params.bookId}
+        pages={book?.pages || []}
+        onPageCreate={(page) => handlePageCreate(page)}
+        onPageDelete={(pageId) => handlePageDelete(pageId)}
+        isLoading={createPageMutation.isPending}
+      />
     </div>
   );
 }

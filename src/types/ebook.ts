@@ -3,6 +3,7 @@ export interface TBook {
   title: string;
   size: string;
   project_id: string;
+  pages: TPage[],
   user_id: string;
   thumbnail_url?: string;
   created_at: Date;
@@ -10,6 +11,15 @@ export interface TBook {
   last_viewed: Date
   status: TBookStatus;
 }
+
+export type TPage = {
+  id: string;
+  title: string;
+  type: 'blank' | 'text' | 'illustration';
+  content?: string;
+  imageUrl?: string;
+  order: number;
+};
 
 export type TBookStatus = 'draft' | 'published' | 'archived'
 export interface TBookCreate {

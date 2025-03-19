@@ -49,10 +49,10 @@ export const createBook = async ({ title, project_id, size, status, thumbnail_ur
 
 }
 
-export const updateBookById = async ({ id, title, project_id, size, status, thumbnail_url }: Partial<TBook>) => {
+export const updateBookById = async ({ id, title, project_id, size, status, thumbnail_url, pages }: Partial<TBook>) => {
   const { data, error } = await supabase
     .from('books')
-    .update({ title, project_id, size, status, thumbnail_url })
+    .update({ title, project_id, size, status, thumbnail_url, pages, })
     .eq('id', id)
     .select();
   if (error) throw error;

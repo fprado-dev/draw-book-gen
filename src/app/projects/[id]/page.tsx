@@ -27,16 +27,6 @@ export default function ProjectDetailsPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
 
 
-  const { data: project, isLoading: isLoadingProjectInfo } = useQuery({
-    queryKey: ['project', params.id],
-    queryFn: async () => {
-      const project = await ProjectsService.getProjectById({ id: params.id as string })
-      return project
-    },
-    refetchOnMount: true,
-    refetchOnWindowFocus: true
-  })
-
   const { data: books = [], isLoading: isLoadingBooks } = useQuery({
     queryKey: ['books', params.id],
     queryFn: async () => {
@@ -80,48 +70,19 @@ export default function ProjectDetailsPage() {
 
 
   return (
-    <div className="container mx-auto py-6 ">
-
-      <div className="flex flex-col gap-6 mb-8">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="cursor-pointer w-fit hover:bg-slate-50 hover:text-primary"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Projects
-        </Button>
-        {isLoadingProjectInfo ? (
-          <div className="container mx-auto">
-            <div className="h-24 rounded-lg bg-slate-200 animate-pulse" />
-          </div>
-        ) : (
-          <div
-            className="h-24 rounded-lg relative"
-            style={{ backgroundColor: project!.color }}
-          >
-            <div className="absolute bottom-4 left-4">
-              <h1 className="text-4xl font-bold text-white">{project!.title}</h1>
-            </div>
-          </div>
-        )}
-
-      </div>
-
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'draft' | 'published' | 'archived')}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="archived">Archived</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <div className='px-4 flex flex-col gap-4' >
+      <div className="flex justify-end items-center gap-2">
+        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'draft' | 'published' | 'archived')}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="archived">Archived</SelectItem>
+          </SelectContent>
+        </Select>
         <Sheet open={showNewBookSheet} onOpenChange={setShowNewBookSheet}>
           <SheetTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -173,7 +134,7 @@ export default function ProjectDetailsPage() {
         </Sheet>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-4">
         <EbookList
           books={statusFilter === 'all' ? books : books.filter(book => book.status === statusFilter)}
           isLoading={isLoadingBooks}

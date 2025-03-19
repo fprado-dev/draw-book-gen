@@ -18,6 +18,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDate } from '@/lib/date';
 import * as BooksService from "@/services/book.service"
 import { Badge } from '@/components/ui/badge';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 
 
 
@@ -109,7 +110,6 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
 
   const handleViewBook = (book: TBook) => {
     localStorage.setItem('illustra-current-book', JSON.stringify(book))
-
     router.push(`/books/${book.id}`)
   }
 
@@ -117,13 +117,17 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[...Array(3)].map((_, index) => (
-          <Card key={index} className="animate-pulse">
+          <Card key={index} className="animate-pulse flex flex-col justify-between">
             <CardHeader>
-              <div className="h-6 w-24 bg-slate-200 rounded" />
+              <div className="h-4 w-24 bg-slate-200 rounded" />
             </CardHeader>
             <CardContent>
               <div className="h-4 w-20 bg-slate-200 rounded" />
             </CardContent>
+            <CardFooter>
+              <div className="h-4 w-20 bg-slate-200 rounded" />
+              <div className="h-4 w-20 bg-slate-200 rounded" />
+            </CardFooter>
           </Card>
         ))}
       </div>
@@ -141,27 +145,43 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
 
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {books.map((book) => {
             return (
-              <Card key={book.id}>
-                <CardHeader className='relative'>
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                      <span className="flex items-center gap-2 text-xs text-gray-500">
-                        {`Last time viewed ${formatDate(book.last_viewed)}`}
-                      </span>
-                      <CardTitle
-                        className="cursor-pointer hover:underline text-2xl"
-                        onClick={() => handleViewBook(book)}
-                      >
-                        {book.title}
-                      </CardTitle>
-
-
-                    </div>
+              <Card key={book.id} className='flex flex-col justify-between'>
+                <div className='flex flex-col gap-2 '>
+                  <CardHeader className='relative'>
+                    <span className="flex items-center gap-2 text-xs text-gray-500">
+                      {`Last time viewed ${formatDate(book.last_viewed)}`}
+                    </span>
+                  </CardHeader>
+                  <CardContent>
+                    <CardTitle
+                      className="cursor-pointer hover:underline text-base"
+                      onClick={() => handleViewBook(book)}
+                    >
+                      <HoverCard>
+                        <HoverCardTrigger>
+                          {book.title.split(' ').slice(0, 3).join(' ')}
+                        </HoverCardTrigger>
+                        <HoverCardContent>
+                          {book.title}
+                        </HoverCardContent>
+                      </HoverCard>
+                    </CardTitle>
+                  </CardContent>
+                </div>
+                <CardFooter className='flex gap-2 relative justify-between items-center ' >
+                  <div className='flex flex-1 gap-2'>
+                    <Badge variant="outline">
+                      {book.status.toUpperCase() || 'Draft'}
+                    </Badge>
+                    <Badge variant="outline">
+                      {book.size}
+                    </Badge>
                   </div>
-                  <div className="absolute top-4 right-4">
+
+                  <div>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer hover:bg-slate-100">
@@ -195,15 +215,6 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
                       </PopoverContent>
                     </Popover>
                   </div>
-                </CardHeader>
-
-                <CardFooter className='gap-2' >
-                  <Badge variant="outline">
-                    {book.status.toUpperCase() || 'Draft'}
-                  </Badge>
-                  <Badge variant="outline">
-                    {book.size}
-                  </Badge>
                 </CardFooter>
               </Card>
             )
