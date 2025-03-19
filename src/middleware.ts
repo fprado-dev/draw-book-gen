@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
 
   if (isUserAuthenticated) {
     if (isAuthPage) {
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   } else if (!isAuthPage) {
     return NextResponse.redirect(new URL('/sign-in', request.url));

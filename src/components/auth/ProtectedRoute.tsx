@@ -21,7 +21,7 @@ export default function ProtectedRoute({ children, requireAuth = true }: Protect
       if (!user && requireAuth && !publicPaths.includes(pathname)) {
         router.push('/sign-in');
       } else if (user && publicPaths.includes(pathname)) {
-        router.push('/projects');
+        router.push('/dashboard');
       }
     }
   }, [user, loading, requireAuth, pathname, router]);

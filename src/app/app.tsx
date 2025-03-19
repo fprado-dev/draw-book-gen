@@ -19,7 +19,7 @@ function App({
 }) {
   const pathname = usePathname()
   const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up'
-
+  console.log({ isAuthPage })
   return (
     isAuthPage ? (
       <div className="flex flex-1 flex-col" >

@@ -39,6 +39,26 @@ const data = {
   ],
   navMain: [
     {
+      title: "Dashboard",
+      url: "/",
+      icon: BadgeCentIcon,
+      isActive: true,
+      items: [
+        {
+          title: "Overview",
+          url: "/dashboard",
+        },
+        {
+          title: "Analytics",
+          url: "/analytics",
+        },
+        {
+          title: "Settings",
+          url: "/settings",
+        }
+      ],
+    },
+    {
       title: "Getting Started",
       url: "#",
       icon: FolderCheckIcon,
