@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SupabaseImage } from '@/components/ui/supabase-image';
-import { Filter, Loader2, SparklesIcon, Download, Clipboard } from 'lucide-react';
+import { Filter, Loader2, SparklesIcon, Download, Clipboard, Zap, Calendar, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/services/supabase';
 import * as AuthService from '@/services/auth.service';
 import { TBook } from '@/types/ebook';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 type ImageFile = {
   id: string;
@@ -22,11 +24,31 @@ type ImageFile = {
   bookTitle?: string;
 };
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
 export default function UserImagesPage() {
   const router = useRouter();
   const [selectedBookId, setSelectedBookId] = useState<string>('all');
   const [userImages, setUserImages] = useState<ImageFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalImages: 0,
+    thisMonth: 0,
+    averagePerBook: 0
+  });
 
   // Fetch all user's books
   const { data: books } = useQuery({
@@ -88,6 +110,19 @@ export default function UserImagesPage() {
         });
 
         setUserImages(allImages);
+
+        // Calculate statistics
+        const now = new Date();
+        const thisMonth = allImages.filter(img => {
+          const imgDate = new Date(img.createdAt);
+          return imgDate.getMonth() === now.getMonth() && imgDate.getFullYear() === now.getFullYear();
+        }).length;
+
+        setStats({
+          totalImages: allImages.length,
+          thisMonth,
+          averagePerBook: userBooks.length ? Math.round(allImages.length / userBooks.length) : 0
+        });
       } catch (error) {
         console.error('Error fetching user images:', error);
       } finally {
@@ -174,93 +209,172 @@ export default function UserImagesPage() {
     }
   };
 
+  const StatCard = ({ icon: Icon, label, value }: { icon: any; label: string; value: number | string }) => (
+    <Card className="bg-white/50 backdrop-blur-sm border border-slate-200">
+      <CardContent className="flex items-center p-6">
+        <div className="rounded-full p-2 bg-primary/10">
+          <Icon className="h-6 w-6 text-primary" />
+        </div>
+        <div className="ml-4">
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          <h3 className="text-2xl font-bold">{value}</h3>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
-    <div className="container mx-auto py-6">
-      <div className="space-y-6">
-        <Card className='border-0 shadow-none'>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-2xl flex gap-2 justify-center items-center text-slate-600">
-              <SparklesIcon />
-              AI Generated Images</CardTitle>
-            <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select
-                value={selectedBookId}
-                onValueChange={handleBookFilterChange}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by book" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Books</SelectItem>
-                  {books?.map((book) => (
-                    <SelectItem key={book.id} value={book.id}>
-                      {book.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-2 text-muted-foreground">Loading images...</span>
-              </div>
-            ) : userImages.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No images found. Generate some images in your books!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {userImages.map((image) => (
-                  <Card key={image.id} className="overflow-hidden">
-                    <div className="aspect-square relative">
-                      <SupabaseImage
-                        src={image.url}
-                        alt={`Generated image ${image.name}`}
-                        className="object-cover"
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    </div>
-                    <CardFooter className="p-3 flex-col items-start">
+    <div className="py-6 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard
+          icon={ImageIcon}
+          label="Total Images"
+          value={stats.totalImages}
+        />
+        <StatCard
+          icon={Calendar}
+          label="Generated This Month"
+          value={stats.thisMonth}
+        />
+        <StatCard
+          icon={Zap}
+          label="Average per Book"
+          value={stats.averagePerBook}
+        />
+      </div>
+
+      <Card className='border-0 shadow-none'>
+        <CardHeader className="flex flex-row items-center justify-between p-0">
+          <div className="flex items-center">
+            <Select
+              value={selectedBookId}
+              onValueChange={handleBookFilterChange}
+            >
+              <SelectTrigger className="w-[280px]">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Filter by book" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Books</SelectItem>
+                {books?.map((book) => (
+                  <SelectItem key={book.id} value={book.id}>
+                    {book.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent className='p-0'>
+          {isLoading ? (
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              {[...Array(8)].map((_, index) => (
+                <motion.div
+                  key={index}
+                  variants={item}
+                  layout
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ type: 'spring', damping: 20 }}
+                >
+                  <Card className="group overflow-hidden bg-white/50 backdrop-blur-sm hover:bg-white/80 transition-colors duration-300">
+                    <div className="aspect-square relative overflow-hidden bg-slate-100 animate-pulse" />
+                    <CardFooter className="p-4 flex-col items-start space-y-2">
                       <div className="flex justify-between items-center w-full">
-                        {image.bookTitle && (
-                          <p className="text-sm font-medium truncate w-full">
-                            {image.bookTitle}
-                          </p>
-                        )}
+                        <div className="h-4 w-32 bg-slate-200 rounded animate-pulse" />
+                      </div>
+                      <div className="flex justify-between items-center w-full">
+                        <div className="h-3 w-24 bg-slate-200 rounded animate-pulse" />
                         <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 cursor-pointer"
-                            onClick={() => handleCopyImageId(image.id)}
-                            title="Copy image ID"
-                          >
-                            <Clipboard className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 cursor-pointer"
-                            onClick={() => handleDownloadImage(image.url, image.name)}
-                            title="Download image"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
+                          <div className="h-8 w-8 bg-slate-200 rounded animate-pulse" />
+                          <div className="h-8 w-8 bg-slate-200 rounded animate-pulse" />
                         </div>
                       </div>
                     </CardFooter>
                   </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : userImages.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No images found. Generate some images in your books!</p>
+            </div>
+          ) : (
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              <AnimatePresence>
+                {userImages.map((image) => (
+                  <motion.div
+                    key={image.id}
+                    variants={item}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ type: 'spring', damping: 20 }}
+                  >
+                    <Card className="group overflow-hidden bg-white/50 backdrop-blur-sm hover:bg-white/80 transition-colors duration-300">
+                      <div className="aspect-square relative overflow-hidden">
+                        <SupabaseImage
+                          src={image.url}
+                          alt={`Generated image ${image.name}`}
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      </div>
+                      <CardFooter className="p-4 flex-col items-start space-y-2">
+                        <div className="flex justify-between items-center w-full">
+                          {image.bookTitle && (
+                            <p className="text-sm font-medium truncate w-full text-slate-600">
+                              {image.bookTitle}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex justify-between items-center w-full">
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(image.createdAt), 'MMM d, yyyy')}
+                          </p>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 cursor-pointer hover:bg-slate-100"
+                              onClick={() => handleCopyImageId(image.id)}
+                              title="Copy image ID"
+                            >
+                              <Clipboard className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 cursor-pointer hover:bg-slate-100"
+                              onClick={() => handleDownloadImage(image.url, image.name)}
+                              title="Download image"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  </motion.div>
                 ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
