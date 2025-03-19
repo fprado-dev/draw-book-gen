@@ -40,7 +40,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/",
+      url: "/dashboard",
       icon: BadgeCentIcon,
       isActive: true,
       items: [
@@ -49,12 +49,12 @@ const data = {
           url: "/dashboard",
         },
         {
-          title: "Analytics",
-          url: "/analytics",
+          title: "Billing",
+          url: "/dashboard/billing",
         },
         {
           title: "Settings",
-          url: "/settings",
+          url: "/dashboard/settings",
         }
       ],
     },
