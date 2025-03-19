@@ -10,7 +10,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { CopyButton } from '@/components/ui/copy-button';
 
 type Outline = {
   prompt: string;

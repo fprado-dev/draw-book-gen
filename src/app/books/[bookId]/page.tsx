@@ -1,19 +1,13 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileArchiveIcon, FileIcon, SparklesIcon } from 'lucide-react';
-import GeneratePanel from '@/app/books/components/generate-panel';
+import { useParams } from 'next/navigation';
+import { Card, } from '@/components/ui/card';
 import PageGrid from '@/app/books/components/page-grid';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import * as BooksServices from "@/services/book.service"
-import * as ReplicateServices from "@/services/replicate.service"
-import { TBook, TPage } from '@/types/ebook';
-import { Separator } from '@radix-ui/react-separator';
+import { TPage } from '@/types/ebook';
 
 
 type EboookParams = {
@@ -21,12 +15,11 @@ type EboookParams = {
 };
 export default function EbookPage() {
   const params = useParams<EboookParams>();
-  const router = useRouter();
 
 
   const queryClient = useQueryClient();
 
-  const { data: book, isLoading: isLoadingBookInfo } = useQuery({
+  const { data: book } = useQuery({
     queryKey: ['books', params.bookId],
     queryFn: async () => {
       return await BooksServices.getBookById({
@@ -49,7 +42,7 @@ export default function EbookPage() {
       });
       toast.success('Page created successfully');
     },
-    onError: (error) => {
+    onError: () => {
       toast.error('Failed to create page');
     },
   })
@@ -68,7 +61,7 @@ export default function EbookPage() {
       });
       toast.success('Page deleted successfully');
     },
-    onError: (error) => {
+    onError: () => {
       toast.error('Failed to delete page');
     },
   })

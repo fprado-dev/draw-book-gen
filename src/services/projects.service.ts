@@ -5,7 +5,7 @@ import { supabase } from "./supabase"
 export const getAllProjects = async () => {
   const { user } = await Auth.getCurrentUser()
   if (!user?.id) return []
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('projects')
     .select('*')
     .eq('user_id', user.id)

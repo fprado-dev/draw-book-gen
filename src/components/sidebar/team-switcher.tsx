@@ -7,7 +7,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { CoinsIcon } from "lucide-react"
 
 export function TeamSwitcher({
   teams,
@@ -19,7 +18,7 @@ export function TeamSwitcher({
     credits: number,
   }[]
 }) {
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const [activeTeam] = React.useState(teams[0])
 
   if (!activeTeam) {
     return null

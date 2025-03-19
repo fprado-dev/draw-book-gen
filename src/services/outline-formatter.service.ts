@@ -18,7 +18,7 @@ export class OutlineFormatter {
    */
   static format(rawOutline: string): FormattedOutline {
     // Remove common AI thinking patterns and prefixes
-    let cleanedOutline = rawOutline
+    const cleanedOutline = rawOutline
       .replace(/^(Let me think about|Let me think|Let me|I'll|Here's|Sure|Okay)[^\n]*\n*/i, '')
       .replace(/Would you like me to elaborate on any of these descriptions\?/, '')
       .trim();

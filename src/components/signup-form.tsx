@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation"
 import { signUpWithEmailAndPassword } from "@/services/auth.service";
 import { useState } from "react";
 import { toast } from "sonner"
-import { supabase } from "@/services/supabase"
 import { useMutation } from "@tanstack/react-query"
 
 export function SignUpForm({
@@ -51,12 +50,12 @@ export function SignUpForm({
       const { user, error } = await signUpWithEmailAndPassword(email, password);
 
       if (error) {
-        if (error.includes("email-already-in-use")) {
+        if (error.message.includes("email-already-in-use")) {
           throw new Error("This email is already registered");
-        } else if (error.includes("invalid-email")) {
+        } else if (error.message.includes("invalid-email")) {
           throw new Error("Invalid email format");
         } else {
-          throw new Error(error);
+          throw new Error(error.message);
         }
       }
 

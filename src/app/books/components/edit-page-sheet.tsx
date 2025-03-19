@@ -1,7 +1,7 @@
 'use client';
 
 import { TPage } from '@/types/ebook';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { History, Settings, Sparkles, Wand2, BookOpen, BookOpenCheckIcon, Eye, EyeOff } from 'lucide-react';
+import { History, Settings, Sparkles, Wand2, BookOpenCheckIcon, Eye, EyeOff } from 'lucide-react';
 import { generateBookOutline } from '@/services/replicate.service';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from 'sonner';
@@ -61,7 +61,7 @@ const GENERATION_HISTORY = [
   { timestamp: new Date(), prompt: 'Sample prompt 2', style: 'Cartoon', model: 'dall-e' },
 ];
 
-export default function EditPageSheet({ page, isOpen, onOpenChange }: EditPageSheetProps) {
+export default function EditPageSheet({ isOpen, onOpenChange }: EditPageSheetProps) {
   const [selectedModel, setSelectedModel] = useState('recraft-v3');
   const [selectedStyle, setSelectedStyle] = useState('');
   const [prompt, setPrompt] = useState('');

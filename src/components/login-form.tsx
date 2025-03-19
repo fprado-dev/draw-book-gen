@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -28,9 +27,9 @@ export function LoginForm({
     e.preventDefault();
     setError(null);
 
-    const { user, error } = await loginWithEmailAndPassword(email, password);
+    const { error } = await loginWithEmailAndPassword(email, password);
     if (error) {
-      setError(error);
+      setError(error as string);
       toast.error("Could not sign in, credentials are invalid")
       return;
     }

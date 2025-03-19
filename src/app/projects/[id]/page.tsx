@@ -1,8 +1,8 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useState } from 'react'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
@@ -12,13 +12,11 @@ import { toast } from 'sonner'
 import { EbookList } from './components/ebook-list'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TBookSize } from '@/types/ebook'
-import * as ProjectsService from "@/services/projects.service"
 import * as BooksServices from "@/services/book.service"
 
 
 export default function ProjectDetailsPage() {
   const params = useParams()
-  const router = useRouter()
   const queryClient = useQueryClient()
   const [showNewBookSheet, setShowNewBookSheet] = useState(false)
   const [newBookTitle, setNewBookTitle] = useState('')
@@ -54,7 +52,7 @@ export default function ProjectDetailsPage() {
       setShowNewBookSheet(false)
       queryClient.invalidateQueries({ queryKey: ['books'] })
     },
-    onError: (error) => {
+    onError: () => {
       toast.error('Something went wrong while creating book')
     },
   })
@@ -111,13 +109,13 @@ export default function ProjectDetailsPage() {
                     <SelectValue placeholder="Select book size" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="5x8">5" x 8" (12.7 x 20.32 cm)</SelectItem>
-                    <SelectItem value="5.25x8">5.25" x 8" (13.34 x 20.32 cm)</SelectItem>
-                    <SelectItem value="5.5x8.5">5.5" x 8.5" (13.97 x 21.59 cm)</SelectItem>
-                    <SelectItem value="6x9">6" x 9" (15.24 x 22.86 cm)</SelectItem>
-                    <SelectItem value="7x10">7" x 10" (17.78 x 25.4 cm)</SelectItem>
-                    <SelectItem value="8x10">8" x 10" (20.32 x 25.4 cm)</SelectItem>
-                    <SelectItem value="8.5x11">8.5" x 11" (21.59 x 27.94 cm)</SelectItem>
+                    <SelectItem value="5x8">{`5" x 8" (12.7 x 20.32 cm)`}</SelectItem>
+                    <SelectItem value="5.25x8">{`5.25" x 8" (13.34 x 20.32 cm)`}</SelectItem>
+                    <SelectItem value="5.5x8.5">{`5.5" x 8.5" (13.97 x 21.59 cm)`}</SelectItem>
+                    <SelectItem value="6x9">{`6" x 9" (15.24 x 22.86 cm)`}</SelectItem>
+                    <SelectItem value="7x10">{`7" x 10" (17.78 x 25.4 cm)`}</SelectItem>
+                    <SelectItem value="8x10">{`8" x 10" (20.32 x 25.4 cm)`}</SelectItem>
+                    <SelectItem value="8.5x11">{`8.5" x 11" (21.59 x 27.94 cm)`}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

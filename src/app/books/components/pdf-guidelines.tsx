@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { CoverDimensions } from '@/services/pdf-rules.service';
 
 type PDFGuidelinesProps = {
@@ -36,7 +35,7 @@ export default function PDFGuidelines({ dimensions, visible }: PDFGuidelinesProp
       {/* Bleed Area */}
       <div className="absolute inset-0 border-2 border-red-400 border-dashed opacity-50">
         <div className="absolute top-1 left-2 bg-red-400 text-white text-xs px-1 rounded">
-          Bleed ({bleed}")
+          {`Bleed ${bleed}`}
         </div>
       </div>
 
@@ -51,7 +50,7 @@ export default function PDFGuidelines({ dimensions, visible }: PDFGuidelinesProp
         }}
       >
         <div className="absolute -top-3 left-2 bg-blue-400 text-white text-xs px-1 rounded">
-          Safe Zone ({safeZone}")
+          {`Safe Zone ${safeZone}`}
         </div>
       </div>
 
@@ -65,7 +64,7 @@ export default function PDFGuidelines({ dimensions, visible }: PDFGuidelinesProp
           }}
         >
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-400 text-white text-xs px-1 rounded whitespace-nowrap">
-            Spine ({spineWidth.toFixed(3)}")
+            {`Spine ${spineWidth.toFixed(3)}`}
           </div>
           {spineTextAllowed && (
             <div

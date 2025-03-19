@@ -7,37 +7,35 @@ export const loginWithEmailAndPassword = async (email: string, password: string)
       password,
     });
     return { user, error: error?.message };
-  } catch (error: any) {
-    return { user: null, error: error.message };
+  } catch (error: unknown) {
+    return { user: null, error };
   }
 };
 
 export const signUpWithEmailAndPassword = async (email: string, password: string) => {
-  try {
-    const { data: { user }, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    return { user, error: error?.message };
-  } catch (error: any) {
-    return { user: null, error: error.message };
+
+  const { data: { user }, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+  if (error) {
+    return { user: null, error };
   }
+  return { user, error: null };
+
 };
 
 export const logoutUser = async () => {
-  try {
-    const { error } = await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+  if (error) {
     return { error: error?.message };
-  } catch (error: any) {
-    return { error: error.message };
   }
 };
 
 export const getCurrentUser = async () => {
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    return { user, error: error?.message };
-  } catch (error: any) {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error) {
     return { user: null, error: error.message };
   }
+  return { user }
 };

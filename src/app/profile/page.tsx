@@ -50,7 +50,7 @@ export default function Profile() {
     },
   });
 
-  const { data: profile, isLoading } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["user-profile", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) return null;
@@ -149,9 +149,9 @@ export default function Profile() {
       }
 
       toast.success('Avatar uploaded successfully');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error uploading avatar:', error);
-      toast.error(error.message || 'Failed to upload avatar');
+      toast.error('Failed to upload avatar',);
     }
   };
   const handleSubmit = (e: React.FormEvent) => {

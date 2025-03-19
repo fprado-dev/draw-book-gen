@@ -256,13 +256,13 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
                   <SelectValue placeholder="Select book size" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5x8">5" x 8" (12.7 x 20.32 cm)</SelectItem>
-                  <SelectItem value="5.25x8">5.25" x 8" (13.34 x 20.32 cm)</SelectItem>
-                  <SelectItem value="5.5x8.5">5.5" x 8.5" (13.97 x 21.59 cm)</SelectItem>
-                  <SelectItem value="6x9">6" x 9" (15.24 x 22.86 cm)</SelectItem>
-                  <SelectItem value="7x10">7" x 10" (17.78 x 25.4 cm)</SelectItem>
-                  <SelectItem value="8x10">8" x 10" (20.32 x 25.4 cm)</SelectItem>
-                  <SelectItem value="8.5x11">8.5" x 11" (21.59 x 27.94 cm)</SelectItem>
+                  <SelectItem value="5x8">{`5" x 8" (12.7 x 20.32 cm)`}</SelectItem>
+                  <SelectItem value="5.25x8">{`5.25" x 8" (13.34 x 20.32 cm)`}</SelectItem>
+                  <SelectItem value="5.5x8.5">{`5.5" x 8.5" (13.97 x 21.59 cm)`}</SelectItem>
+                  <SelectItem value="6x9">{`6" x 9" (15.24 x 22.86 cm)`}</SelectItem>
+                  <SelectItem value="7x10">{`7" x 10" (17.78 x 25.4 cm)`}</SelectItem>
+                  <SelectItem value="8x10">{`8" x 10" (20.32 x 25.4 cm)`}</SelectItem>
+                  <SelectItem value="8.5x11">{`8.5" x 11" (21.59 x 27.94 cm)`}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -280,7 +280,7 @@ const EbookList = ({ books, isLoading }: EbookListProps) => {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete your book
-              "{ebookToDelete?.title}".
+              {`"${ebookToDelete?.title}"`}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

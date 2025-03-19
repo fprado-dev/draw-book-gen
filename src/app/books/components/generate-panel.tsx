@@ -22,7 +22,7 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
   const [aspectRatio, setAspectRatio] = useState('portrait');
   const [difficultyLevel, setDifficultyLevel] = useState('');
   const [loading, setLoading] = useState(false);
-  const { selectedImages, toggleImageSelection: handleImageSelect, addImage } = useBookImages();
+  const { addImage } = useBookImages();
 
   const handleGenerate = async () => {
     if (!introduction.trim()) {

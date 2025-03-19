@@ -30,7 +30,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { User } from "@supabase/supabase-js"
-import { useEffect, useState } from "react"
 import { supabase } from "@/services/supabase"
 import { useQuery } from "@tanstack/react-query"
 
@@ -47,7 +46,7 @@ type TUserProfile = {
 
 export function NavUser({ user }: TNavUser) {
   const { isMobile } = useSidebar()
-  const { data: userProfile, isLoading } = useQuery({
+  const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: async () => {
       if (!user?.id) return null;

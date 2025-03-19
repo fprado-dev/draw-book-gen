@@ -4,15 +4,11 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { FileArchiveIcon, FileSlidersIcon, Plus, SparklesIcon, Trash2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { FileSlidersIcon, Plus, Trash2 } from 'lucide-react';
 import { TPage } from '@/types/ebook';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
-import GeneratePanel from './generate-panel';
 import EditPageSheet from './edit-page-sheet';
+import Image from 'next/image';
 
 
 
@@ -24,7 +20,7 @@ type PageGridProps = {
   isLoading?: boolean;
 };
 
-export default function PageGrid({ bookId, pages, onPageCreate, onPageDelete, isLoading }: PageGridProps) {
+export default function PageGrid({ pages, onPageCreate, onPageDelete }: PageGridProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pageToDelete, setPageToDelete] = useState<string | null>(null);
   const [editingPage, setEditingPage] = useState<TPage | null>(null);
@@ -99,7 +95,7 @@ export default function PageGrid({ bookId, pages, onPageCreate, onPageDelete, is
                         ))}
                       </div>
                       {page.type === 'illustration' && page.imageUrl ? (
-                        <img src={page.imageUrl} alt={page.title} className="absolute inset-0 w-full h-full object-cover" />
+                        <Image src={page.imageUrl} alt={page.title} className="absolute inset-0 w-full h-full object-cover" />
                       ) : page.type === 'text' ? (
                         <p className="absolute inset-0 p-4 text-sm text-red-600 line-clamp-3">{page.content || 'No content yet'}</p>
                       ) : (

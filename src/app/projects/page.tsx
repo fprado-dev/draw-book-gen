@@ -14,7 +14,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
 } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import {
@@ -224,7 +223,7 @@ export default function ProjectsPage() {
                       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                       <AlertDialogDescription>
                         This action cannot be undone. This will permanently delete your project
-                        "{projectToDelete?.title}" and all books created on this project.
+                        {`"${projectToDelete?.title}"`} and all books created on this project.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

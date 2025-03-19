@@ -1,6 +1,5 @@
 
 
-import { OutlineFormatter } from './outline-formatter.service';
 
 export type TOutline = {
   title: string;

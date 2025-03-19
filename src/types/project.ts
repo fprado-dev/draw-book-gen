@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 export function useProjectFiltering(projects: Project[], filters: ProjectFilterOptions) {
   return useMemo(() => {
-    let filteredProjects = projects.filter(project => {
+    const filteredProjects = projects.filter(project => {
       // Title filter
       if (filters.title && !project.title.toLowerCase().includes(filters.title.toLowerCase())) {
         return false;

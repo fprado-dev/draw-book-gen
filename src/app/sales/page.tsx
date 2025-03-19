@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
 import { BotMessageSquare } from "lucide-react";
 
 export default function Home() {
@@ -11,7 +10,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -28,7 +26,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="bg-slate-300 px-4 py-12 md:py-24 lg:py-32 xl:py-48 mt-14">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
