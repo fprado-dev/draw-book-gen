@@ -44,7 +44,9 @@ type TUserProfile = {
   email: string;
 }
 
+import { useRouter } from "next/navigation"
 export function NavUser({ user }: TNavUser) {
+  const Router = useRouter()
   const { isMobile } = useSidebar()
   const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
@@ -127,7 +129,12 @@ export function NavUser({ user }: TNavUser) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={
+              async () => {
+                await supabase.auth.signOut();
+                Router.push("/sign-in")
+              }
+            }>
               <LogOut className="w-4 h-4 text-slate-500 mr-2" />
               Log out
             </DropdownMenuItem>

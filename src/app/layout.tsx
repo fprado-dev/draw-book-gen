@@ -3,15 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { AppSidebar } from "@/components/sidebar/app-sidebar"
-
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
-import DynamicBreadCrumb from "@/components/DynamicBreadCrumb";
+import App from "./app";
 
 // Optimize font loading with display: 'swap' to prevent layout shifts
 const geistSans = Geist({
@@ -41,29 +33,15 @@ export default function RootLayout({
 }>) {
 
 
-
-
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-              <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-                <div className="flex items-center gap-2 px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <Separator orientation="vertical" className="mr-2 h-4" />
-                  <DynamicBreadCrumb />
-                </div>
-              </header>
-              <div className="flex flex-1 flex-col">
-                {children}
-              </div>
-            </SidebarInset>
-          </SidebarProvider>
+          <App>
+            {children}
+          </App>
         </AuthProvider>
         <Toaster position="top-center" toastOptions={{
           closeButton: true,
