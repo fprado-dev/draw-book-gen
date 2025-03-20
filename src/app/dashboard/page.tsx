@@ -1,12 +1,21 @@
 'use client';
 
+import { useQuery } from "@tanstack/react-query";
 import { ChartAreaInteractive } from "./components/ChartArea";
 import { DataTable } from "./components/DataTable";
-import { SectionCards } from "./components/SectionCards";
+import { StatsCards } from "./components/StatsCards";
 import data from "./components/data.json"
+import { getUserStats } from "@/services/dashboard.service";
+
 
 export default function Dashboard() {
-
+  const { data: statsInfos, isLoading: isLoadingStatsInfos } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: async () => {
+      const { totalBooks, totalImages, totalPages, totalProjects } = await getUserStats();
+      return { totalBooks, totalImages, totalPages, totalProjects };
+    },
+  })
 
   return (
     <div className="flex flex-1 flex-col">
@@ -17,7 +26,7 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
             <p className="text-muted-foreground mt-2">Manage your data and credit usage</p>
           </div>
-          <SectionCards />
+          <StatsCards userStats={statsInfos} isLoading={isLoadingStatsInfos} />
           <div className="px-4 lg:px-6">
             <ChartAreaInteractive />
           </div>
