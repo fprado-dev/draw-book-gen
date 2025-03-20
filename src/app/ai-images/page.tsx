@@ -225,7 +225,11 @@ export default function UserImagesPage() {
 
   return (
     <div className="py-6 px-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+      >
         <StatCard
           icon={ImageIcon}
           label="Total Images"
@@ -241,7 +245,7 @@ export default function UserImagesPage() {
           label="Average per Book"
           value={stats.averagePerBook}
         />
-      </div>
+      </motion.div>
 
       <Card className='border-0 shadow-none'>
         <CardHeader className="flex flex-row items-center justify-between p-0">

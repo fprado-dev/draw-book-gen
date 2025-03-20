@@ -136,7 +136,7 @@ export default function EditPageSheet({ isOpen, onOpenChange }: EditPageSheetPro
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-full p-4 h-screen">
+      <SheetContent className="w-full sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full p-6 h-screen overflow-y-auto">
 
 
 
