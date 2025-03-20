@@ -180,7 +180,7 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center">
                 <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium">Created new project "Children's Book"</p>
+                  <p className="text-sm font-medium">Created new project Childrens Book</p>
                   <p className="text-sm text-muted-foreground">5 hours ago</p>
                 </div>
               </div>

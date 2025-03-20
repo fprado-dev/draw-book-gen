@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, ForwardRefExoticComponent, RefAttributes } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { generateBookOutline } from '@/services/replicate.service';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Sparkles, BookOpen, Copy, Trash, Filter, Download } from 'lucide-react';
+import { Plus, Sparkles, BookOpen, Copy, Trash, Filter, Download, LucideProps } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -68,20 +68,25 @@ export default function OutlinesPage() {
   });
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    updateStats();
-  }, [outlines]);
 
-  const updateStats = () => {
+
+  const updateStats = useCallback(() => {
     const totalChapters = outlines.reduce((sum, outline) => sum + outline.chapters.length, 0);
     const avgComplexity = outlines.reduce((sum, outline) => sum + outline.complexity, 0) / (outlines.length || 1);
-
     setStats({
       totalOutlines: outlines.length,
       totalChapters,
       averageComplexity: Math.round(avgComplexity * 10) / 10
     });
-  };
+  }, [outlines])
+
+
+
+  useEffect(() => {
+    updateStats();
+  }, [outlines, updateStats]);
+
+
 
   const handleGenerateOutline = async () => {
     if (!outlinePrompt.trim()) {
@@ -153,7 +158,7 @@ export default function OutlinesPage() {
     return outline.complexity < 4;
   });
 
-  const StatCard = ({ icon: Icon, label, value }: { icon: any; label: string; value: number | string }) => (
+  const StatCard = ({ icon: Icon, label, value }: { icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; value: number | string }) => (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}

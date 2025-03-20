@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ForwardRefExoticComponent, RefAttributes } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SupabaseImage } from '@/components/ui/supabase-image';
-import { Filter, Loader2, SparklesIcon, Download, Clipboard, Zap, Calendar, Image as ImageIcon } from 'lucide-react';
+import { Filter, Download, Clipboard, Zap, Calendar, Image as ImageIcon, LucideProps } from 'lucide-react';
 import { supabase } from '@/services/supabase';
 import * as AuthService from '@/services/auth.service';
 import { TBook } from '@/types/ebook';
@@ -209,7 +209,7 @@ export default function UserImagesPage() {
     }
   };
 
-  const StatCard = ({ icon: Icon, label, value }: { icon: any; label: string; value: number | string }) => (
+  const StatCard = ({ icon: Icon, label, value }: { icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; value: number | string }) => (
     <Card className="bg-white/50 backdrop-blur-sm border border-slate-200">
       <CardContent className="flex items-center p-6">
         <div className="rounded-full p-2 bg-primary/10">

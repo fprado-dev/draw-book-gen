@@ -59,7 +59,7 @@ const usageStats = {
 }
 
 export default function BillingPage() {
-  const [selectedPackage, setSelectedPackage] = React.useState(creditPackages[1])
+  const [, setSelectedPackage] = React.useState(creditPackages[1])
 
   return (
     <div className="container mx-auto p-6 space-y-8">

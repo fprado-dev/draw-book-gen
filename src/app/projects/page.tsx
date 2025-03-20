@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { ForwardRefExoticComponent, RefAttributes, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { PlusIcon, Pencil, Trash, Search, FolderOpen, FolderDotIcon, BookCheck } from 'lucide-react'
+import { PlusIcon, Pencil, Trash, Search, FolderOpen, FolderDotIcon, BookCheck, LucideProps } from 'lucide-react'
 import { toast } from "sonner"
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/services/supabase'
@@ -53,11 +53,7 @@ export default function ProjectsPage() {
     title: '',
     sortOrder: 'newest' as 'newest' | 'oldest'
   })
-  const [stats, setStats] = useState({
-    totalProjects: 0,
-    thisMonth: 0,
-    averageBook: 0
-  });
+
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
@@ -195,7 +191,7 @@ export default function ProjectsPage() {
 
 
 
-  const StatCard = ({ icon: Icon, label, value }: { icon: any; label: string; value: number | string }) => (
+  const StatCard = ({ icon: Icon, label, value }: { icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; value: number | string }) => (
 
     <Card className="bg-white/50 backdrop-blur-sm border border-slate-200 flex flex-1 w-full">
       <CardContent className="flex items-center p-6">
