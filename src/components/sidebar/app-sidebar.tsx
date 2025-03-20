@@ -5,7 +5,7 @@ import {
   BadgeCentIcon,
   BotMessageSquareIcon,
   FolderCheckIcon,
-
+  LayoutDashboardIcon,
 } from "lucide-react"
 
 import { NavMain } from "./nav-main"
@@ -38,26 +38,7 @@ const data = {
     },
   ],
   navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: BadgeCentIcon,
-      isActive: true,
-      items: [
-        {
-          title: "Overview",
-          url: "/dashboard",
-        },
-        {
-          title: "Billing",
-          url: "/dashboard/billing",
-        },
-        {
-          title: "Settings",
-          url: "/dashboard/settings",
-        }
-      ],
-    },
+
     {
       title: "Getting Started",
       url: "#",
@@ -76,6 +57,26 @@ const data = {
           title: "AI Images",
           url: "/ai-images",
         },
+      ],
+    },
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboardIcon,
+      isActive: true,
+      items: [
+        {
+          title: "Overview",
+          url: "/dashboard",
+        },
+        {
+          title: "Billing",
+          url: "/dashboard/billing",
+        },
+        {
+          title: "Settings",
+          url: "/dashboard/settings",
+        }
       ],
     },
   ],
@@ -108,7 +109,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Sidebar collapsible="icon" {...props}>
+      <Sidebar collapsible="offcanvas"  {...props}>
         <SidebarHeader>
           <TeamSwitcher teams={data.teams} />
         </SidebarHeader>

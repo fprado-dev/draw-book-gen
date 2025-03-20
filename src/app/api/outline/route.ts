@@ -67,7 +67,6 @@ export async function POST(request: Request) {
     }
 
     // Format the outline using the OutlineFormatter service
-    console.log({ outlineText })
     const formattedOutline = OutlineFormatter.format(outlineText);
     return NextResponse.json({
       outline: formattedOutline,

@@ -127,7 +127,6 @@ export default function EditPageSheet({ isOpen, onOpenChange }: EditPageSheetPro
 
   const handleGenerateImage = () => {
     // TODO: Implement image generation
-    console.log('Generating image...');
   };
 
   const addKeywordToPrompt = (keyword: string) => {

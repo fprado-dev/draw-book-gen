@@ -13,6 +13,7 @@ import { signUpWithEmailAndPassword } from "@/services/auth.service";
 import { useState } from "react";
 import { toast } from "sonner"
 import { useMutation } from "@tanstack/react-query"
+import Logo from "@/app/Logo";
 
 export function SignUpForm({
   className,
@@ -84,8 +85,10 @@ export function SignUpForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome!</CardTitle>
+        <CardHeader className="text-center items-center pt-5">
+          <CardTitle>
+            <Logo />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form>

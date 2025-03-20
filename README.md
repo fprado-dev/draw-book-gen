@@ -85,3 +85,18 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+
+#### TODO
+
+TODO: INFOS
+
+- [ ] Get count of Pages generated
+- [ ] Get count of Images generated
+- [ ] Get count of Books generated
+- [ ] Get count of Projects generated
+
+TODO: Chart 
+
+- [ ] Get Count of Images generated per range
+- [ ] Get Current Credits per range

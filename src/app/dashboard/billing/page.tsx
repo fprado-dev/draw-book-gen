@@ -63,12 +63,12 @@ export default function BillingPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Billing & Credits</h1>
+          <h1 className="text-3xl font-bold text-primary">Billing & Credits</h1>
           <p className="text-muted-foreground mt-2">Manage your subscription and credit usage</p>
         </div>
-        <Button variant="secondary" className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+        <Button variant="secondary" className="bg-gradient-to-r from-primary  to-primary/80 text-white">
           <Sparkles className="mr-2 h-4 w-4" />
           Upgrade Now
         </Button>
@@ -83,26 +83,26 @@ export default function BillingPage() {
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Credits Used: {usageStats.creditsUsed}</span>
-                <span>Total Credits: {usageStats.totalCredits}</span>
+                <CardDescription>Credits Used: {usageStats.creditsUsed}</CardDescription>
+                <CardDescription>Total Credits: {usageStats.totalCredits}</CardDescription>
               </div>
               <Progress value={(usageStats.creditsUsed / usageStats.totalCredits) * 100} />
             </div>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div className="space-y-1">
-                <LineChart className="h-4 w-4 mx-auto text-blue-500" />
-                <p className="text-2xl font-bold">{usageStats.imagesGenerated}</p>
-                <p className="text-xs text-muted-foreground">Images Generated</p>
+                <LineChart className="h-4 w-4 mx-auto text-primary" />
+                <CardDescription className="text-2xl font-bold">{usageStats.imagesGenerated}</CardDescription>
+                <CardDescription className="text-xs text-muted-foreground">Images Generated</CardDescription>
               </div>
               <div className="space-y-1">
-                <Star className="h-4 w-4 mx-auto text-yellow-500" />
-                <p className="text-2xl font-bold">{usageStats.averageQuality}</p>
-                <p className="text-xs text-muted-foreground">Avg. Quality</p>
+                <Star className="h-4 w-4 mx-auto text-primary" />
+                <CardDescription className="text-2xl font-bold">{usageStats.averageQuality}</CardDescription>
+                <CardDescription className="text-xs text-muted-foreground">Avg. Quality</CardDescription>
               </div>
               <div className="space-y-1">
-                <TrendingUp className="h-4 w-4 mx-auto text-green-500" />
-                <p className="text-2xl font-bold">{usageStats.savedTime}h</p>
-                <p className="text-xs text-muted-foreground">Time Saved</p>
+                <TrendingUp className="h-4 w-4 mx-auto text-primary" />
+                <CardDescription className="text-2xl font-bold">{usageStats.savedTime}h</CardDescription>
+                <CardDescription className="text-xs text-muted-foreground">Time Saved</CardDescription>
               </div>
             </div>
           </CardContent>
@@ -117,22 +117,22 @@ export default function BillingPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Zap className="h-4 w-4 text-yellow-500" />
-                  <span>Traditional Design Cost</span>
+                  <Zap className="h-4 w-4 text-primary" />
+                  <CardDescription>Traditional Design Cost</CardDescription>
                 </div>
-                <span className="font-bold">$50/image</span>
+                <CardDescription className="font-bold">$50/image</CardDescription>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <CreditCard className="h-4 w-4 text-blue-500" />
-                  <span>Illustra AI Cost</span>
+                  <CreditCard className="h-4 w-4 text-primary" />
+                  <CardDescription>Illustra AI Cost</CardDescription>
                 </div>
-                <span className="font-bold">$0.08/image</span>
+                <CardDescription className="font-bold">$0.08/image</CardDescription>
               </div>
               <div className="pt-4 border-t">
-                <div className="flex items-center justify-between text-green-600">
-                  <span className="font-semibold">Your Savings</span>
-                  <span className="font-bold">99.84%</span>
+                <div className="flex items-center justify-between text-primary">
+                  <CardDescription className="font-semibold">Your Savings</CardDescription>
+                  <CardDescription className="font-bold">99.84%</CardDescription>
                 </div>
               </div>
             </div>
@@ -151,10 +151,12 @@ export default function BillingPage() {
               <motion.div
                 key={pkg.name}
                 whileHover={{ scale: 1.02 }}
-                className={`relative ${pkg.popular ? 'ring-2 ring-purple-500 rounded-lg' : ''}`}
+                className={`relative ${pkg.popular ? 'ring-2 ring-primary rounded-lg' : ''}`}
               >
                 {pkg.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-500 text-white px-3 py-1 rounded-full text-sm">
+
+                  <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary/100 border border-primary text-white px-3 py-1 rounded-full text-sm">
+
                     Most Popular
                   </span>
                 )}
@@ -169,7 +171,7 @@ export default function BillingPage() {
                     <ul className="space-y-2">
                       {pkg.features.map((feature, i) => (
                         <li key={i} className="flex items-center">
-                          <BadgeCheck className="h-4 w-4 text-green-500 mr-2" />
+                          <BadgeCheck className="h-4 w-4 text-primary mr-2" />
                           {feature}
                         </li>
                       ))}
@@ -178,7 +180,7 @@ export default function BillingPage() {
                   <CardFooter>
                     <Button
                       className="w-full"
-                      variant={pkg.popular ? "secondary" : "outline"}
+                      variant={pkg.popular ? "default" : "outline"}
                       onClick={() => setSelectedPackage(pkg)}
                     >
                       {pkg.popular ? "Upgrade Now" : "Get Started"}
@@ -197,10 +199,11 @@ export default function BillingPage() {
                 <motion.div
                   key={pkg.name}
                   whileHover={{ scale: 1.02 }}
-                  className={`relative ${pkg.popular ? 'ring-2 ring-purple-500 rounded-lg' : ''}`}
+                  className={`relative ${pkg.popular ? 'ring-2 ring-primary rounded-lg' : ''}`}
                 >
                   {pkg.popular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-500 text-white px-3 py-1 rounded-full text-sm">
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary/100 border border-primary text-white px-3 py-1 rounded-full text-sm">
+
                       Most Popular
                     </span>
                   )}
@@ -215,7 +218,7 @@ export default function BillingPage() {
                       <ul className="space-y-2">
                         {pkg.features.map((feature, i) => (
                           <li key={i} className="flex items-center">
-                            <BadgeCheck className="h-4 w-4 text-green-500 mr-2" />
+                            <BadgeCheck className="h-4 w-4 text-primary mr-2" />
                             {feature}
                           </li>
                         ))}
@@ -224,7 +227,7 @@ export default function BillingPage() {
                     <CardFooter>
                       <Button
                         className="w-full"
-                        variant={pkg.popular ? "secondary" : "outline"}
+                        variant={pkg.popular ? "default" : "outline"}
                         onClick={() => setSelectedPackage(pkg)}
                       >
                         {pkg.popular ? "Upgrade Now" : "Get Started"}
