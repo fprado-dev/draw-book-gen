@@ -26,7 +26,7 @@ export function TeamSwitcher({
   return (
     <SidebarMenu>
       <SidebarMenuItem className="flex items-center justify-center pt-4" >
-        <Logo className="w-40" />
+        <Logo className="w-32" />
       </SidebarMenuItem>
     </SidebarMenu>
   )

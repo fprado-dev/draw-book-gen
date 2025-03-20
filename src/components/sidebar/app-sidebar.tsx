@@ -4,7 +4,7 @@ import * as React from "react"
 import {
   BadgeCentIcon,
   BotMessageSquareIcon,
-  FolderCheckIcon,
+  FolderIcon,
   LayoutDashboardIcon,
 } from "lucide-react"
 
@@ -42,7 +42,7 @@ const data = {
     {
       title: "Getting Started",
       url: "#",
-      icon: FolderCheckIcon,
+      icon: FolderIcon,
       isActive: true,
       items: [
         {

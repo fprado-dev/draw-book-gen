@@ -100,3 +100,8 @@ TODO: Chart
 
 - [ ] Get Count of Images generated per range
 - [ ] Get Current Credits per range
+
+
+- Billing Page
+
+- [ ] ROI Calculator
