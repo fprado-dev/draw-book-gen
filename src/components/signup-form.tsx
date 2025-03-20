@@ -85,7 +85,7 @@ export function SignUpForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader className="text-center items-center pt-5">
+        <CardHeader className="text-center flex items-center justify-center pt-5">
           <CardTitle>
             <Logo />
           </CardTitle>
