@@ -14,6 +14,8 @@ import {
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
@@ -29,7 +31,7 @@ import {
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
 import { useQuery } from "@tanstack/react-query"
-import { getDailyImageStats } from "@/services/dashboard.service"
+import { DailyImageStats, DailyOutlinesStats, getDailyImageStats, getDailyOutlineStats } from "@/services/dashboard.service"
 
 
 const chartConfig = {
@@ -38,7 +40,11 @@ const chartConfig = {
   },
   images: {
     label: "AI Images",
-    color: "hsl(var(--primary))",
+    color: "hsl(var(--chart-1))",
+  },
+  outlines: {
+    label: "AI Outlines",
+    color: "hsl(var(--chart-4))",
   },
 } satisfies ChartConfig
 
@@ -55,24 +61,57 @@ export function ChartAreaInteractive() {
   const { data: chartData } = useQuery({
     queryKey: ["chart-data"],
     queryFn: async () => {
-      const data = await getDailyImageStats();
-      return data
+      const [imageStats, outlineStats] = await Promise.all([
+        getDailyImageStats(),
+        getDailyOutlineStats(),
+      ])
+      const mergedData = mergeData({ imageStats, outlineStats });
+
+      return mergedData
     },
   })
+
+
+  const mergeData = ({ imageStats, outlineStats }: { outlineStats: DailyOutlinesStats[], imageStats: DailyImageStats[] }) => {
+    if (!imageStats || !outlineStats) return [];
+
+    const dateMap = new Map();
+
+    // Initialize with image data
+    imageStats.forEach(item => {
+      dateMap.set(item.date, { date: item.date, images: item.images, outlines: 0 });
+    });
+
+    // Merge outline data
+    outlineStats.forEach(item => {
+      if (dateMap.has(item.date)) {
+        const existing = dateMap.get(item.date);
+        existing.outlines = item.outlines;
+      } else {
+        dateMap.set(item.date, { date: item.date, images: 0, outlines: item.outlines });
+      }
+    });
+
+    return Array.from(dateMap.values())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
 
   const filteredData = chartData?.filter((item) => {
     const date = new Date(item.date)
     const referenceDate = new Date()
     let daysToSubtract = 90
-    if (timeRange === "30d") {
-      daysToSubtract = 30
-    } else if (timeRange === "15d") {
+    if (timeRange === "15d") {
       daysToSubtract = 15
+    } else if (timeRange === "7d") {
+      daysToSubtract = 7
     }
     const startDate = new Date(referenceDate)
     startDate.setDate(startDate.getDate() - daysToSubtract)
     return date >= startDate
   })
+
+
+
   return (
     <Card className="@container/card">
       <CardHeader className="relative">
@@ -94,11 +133,11 @@ export function ChartAreaInteractive() {
             <ToggleGroupItem value="90d" className="h-8 px-2.5">
               Last 3 months
             </ToggleGroupItem>
-            <ToggleGroupItem value="30d" className="h-8 px-2.5">
-              Last 30 days
-            </ToggleGroupItem>
             <ToggleGroupItem value="15d" className="h-8 px-2.5">
               Last 15 days
+            </ToggleGroupItem>
+            <ToggleGroupItem value="7d" className="h-8 px-2.5">
+              Last 7 days
             </ToggleGroupItem>
           </ToggleGroup>
           <Select value={timeRange} onValueChange={setTimeRange}>
@@ -112,11 +151,11 @@ export function ChartAreaInteractive() {
               <SelectItem value="90d" className="rounded-lg">
                 Last 3 months
               </SelectItem>
-              <SelectItem value="30d" className="rounded-lg">
-                Last 30 days
-              </SelectItem>
               <SelectItem value="15d" className="rounded-lg">
                 Last 15 days
+              </SelectItem>
+              <SelectItem value="7d" className="rounded-lg">
+                Last 7 days
               </SelectItem>
             </SelectContent>
           </Select>
@@ -132,16 +171,27 @@ export function ChartAreaInteractive() {
               <linearGradient id="fillImages" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--primary)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--primary)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
-
+              <linearGradient id="fillOutlines" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--chart-4)"
+                  stopOpacity={1.0}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--chart-4)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
             </defs>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -153,7 +203,7 @@ export function ChartAreaInteractive() {
               tickFormatter={(value) => {
                 const date = new Date(value)
                 return date.toLocaleDateString("en-US", {
-                  month: "short",
+                  month: "2-digit",
                   day: "numeric",
                 })
               }}
@@ -174,11 +224,23 @@ export function ChartAreaInteractive() {
             />
             <Area
               dataKey="images"
-              type="natural"
+              type="bump"
+              animateNewValues
+              animationDuration={2000}
               fill="url(#fillImages)"
-              stroke="var(--primary)"
+              stroke="var(--chart-1)"
               stackId="a"
             />
+            <Area
+              dataKey="outlines"
+              type="bump"
+              animationDuration={2000}
+              animateNewValues
+              fill="url(#fillOutlines)"
+              stroke="var(--chart-4)"
+              stackId="b"
+            />
+            <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
       </CardContent>

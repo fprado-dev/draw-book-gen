@@ -8,6 +8,16 @@ export interface UserStats {
   totalImages: number;
 }
 
+export interface DailyImageStats {
+  date: string;
+  images: number;
+}
+
+export interface DailyOutlinesStats {
+  date: string;
+  outlines: number;
+}
+
 export async function getUserStats(): Promise<UserStats> {
   try {
     const { user } = await AuthService.getCurrentUser();
@@ -76,11 +86,6 @@ export async function getUserStats(): Promise<UserStats> {
   }
 }
 
-export interface DailyImageStats {
-  date: string;
-  images: number;
-}
-
 export async function getDailyImageStats(): Promise<DailyImageStats[]> {
   try {
     const { user } = await AuthService.getCurrentUser();
@@ -125,6 +130,39 @@ export async function getDailyImageStats(): Promise<DailyImageStats[]> {
     return stats;
   } catch (error) {
     console.error("Error fetching daily image stats:", error);
+    throw error;
+  }
+}
+
+export async function getDailyOutlineStats(): Promise<DailyOutlinesStats[]> {
+  try {
+    const { user } = await AuthService.getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const { data: outlines, error } = await supabase
+      .from("outlines")
+      .select("created_at")
+      .eq("user_id", user.id);
+
+    if (error) throw error;
+
+    // Store outline counts by date
+    const outlinesByDate = new Map<string, number>();
+
+    // Group outlines by date
+    outlines?.forEach(outline => {
+      const date = new Date(outline.created_at).toISOString().split('T')[0];
+      outlinesByDate.set(date, (outlinesByDate.get(date) || 0) + 1);
+    });
+
+    // Convert map to array and sort by date
+    const stats = Array.from(outlinesByDate.entries())
+      .map(([date, outlines]) => ({ date, outlines }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return stats;
+  } catch (error) {
+    console.error("Error fetching daily outline stats:", error);
     throw error;
   }
 }

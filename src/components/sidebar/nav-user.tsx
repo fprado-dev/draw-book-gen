@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/sidebar"
 import { User } from "@supabase/supabase-js"
 import { supabase } from "@/services/supabase"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 type TNavUser = {
   user: User | undefined,
@@ -46,6 +46,7 @@ type TUserProfile = {
 
 import { useRouter } from "next/navigation"
 export function NavUser({ user }: TNavUser) {
+  const queryClient = useQueryClient()
   const Router = useRouter()
   const { isMobile } = useSidebar()
   const { data: userProfile } = useQuery({
@@ -132,6 +133,7 @@ export function NavUser({ user }: TNavUser) {
             <DropdownMenuItem onClick={
               async () => {
                 await supabase.auth.signOut();
+                queryClient.clear();
                 Router.push("/sign-in")
               }
             }>
