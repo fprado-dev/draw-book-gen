@@ -1,83 +1,25 @@
 'use client'
 
-// import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { PlusCircleIcon } from 'lucide-react'
-// import { toast } from "sonner"
-// import { User } from '@supabase/supabase-js'
-// import { supabase } from '@/services/supabase'
-// import { useQueryClient } from '@tanstack/react-query'
-// import { motion, AnimatePresence } from 'framer-motion';
+import { FolderOpenDotIcon, PlusCircleIcon } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-// import {
-//   Sheet,
-//   SheetContent,
-//   SheetHeader,
-//   SheetTitle,
-//   SheetTrigger,
-// } from "@/components/ui/sheet"
-// import { Input } from "@/components/ui/input"
-// import {
-//   Popover,
-//   PopoverContent,
-//   PopoverTrigger,
-// } from "@/components/ui/popover"
-// import { MoreVertical } from 'lucide-react'
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-// } from "@/components/ui/alert-dialog"
-// import { useRouter } from 'next/navigation'
-// import { formatDate } from '@/lib/date'
-// import * as ProjectServices from '@/services/projects.service'
-// import { TProject } from '@/types/TProjects'
-// import { Card, CardContent } from '@/components/ui/card'
-import { BentoGrid } from './components/card'
+import * as ProjectsServices from '@/services/projects.service'
+import { TProject } from '@/types/TProjects'
+import { BentoItem, BentoCard } from '@/components/ui/bento-card'
+import { useState } from 'react'
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 
 export default function ProjectsPage() {
-  // const router = useRouter()
-  // const queryClient = useQueryClient()
-  // const [, setOpen] = useState(false)
-  // const [, setEditDialogOpen] = useState(false)
-  // const [newProjectTitle, setNewProjectTitle] = useState('')
-  // const [newProjectColor, setNewProjectColor] = useState('#8da9c4')
-  // const [, setEditingProject] = useState<TProject | null>(null)
-  // const [, setDeleteDialogOpen] = useState(false)
-  // const [, setProjectToDelete] = useState<TProject | null>(null)
-  // const [, setFilters] = useState({
-  //   title: '',
-  //   sortOrder: 'newest' as 'newest' | 'oldest'
-  // })
 
-  // const [user, setUser] = useState<User | null>(null)
 
-  // useEffect(() => {
-  //   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 9
 
-  //     setUser(session?.user || null)
-  //   })
-
-  //   return () => subscription.unsubscribe()
-  // }, [])
-
-  // const { data: projectList, } = useQuery({
-  //   queryKey: ['projects'],
-  //   queryFn: ProjectServices.getAllProjects,
-  //   enabled: !!user?.id,
-
-  // })
-
-  // const now = new Date();
-  // const thisMonth = projectList?.filter(img => {
-  //   const imgDate = new Date(img.created_at);
-  //   return imgDate.getMonth() === now.getMonth() && imgDate.getFullYear() === now.getFullYear();
-  // }).length;
+  const { data: projectsData, isLoading } = useQuery({
+    queryKey: ['projects', currentPage],
+    queryFn: () => ProjectsServices.getAllProjects(currentPage, itemsPerPage)
+  })
 
 
   // const validateIfTitleProjectExists = (title: string) => {
@@ -191,36 +133,23 @@ export default function ProjectsPage() {
   // }
 
 
+  const formatCardProjects = (projects: TProject[]): BentoItem<TProject>[] => {
 
-  // const StatCard = ({ icon: Icon, label, value }: { icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; label: string; value: number | string }) => (
+    const formattedOutlines = projects?.map((project): BentoItem<TProject> => {
+      return {
+        title: project.title,
+        description: project.description || '',
+        tags: project.keywords || [],
+        cta: 'Explore →',
+        status: project.ebooks_count ? `${project.ebooks_count.toString()} Books` : "0 Books",
+        icon: <FolderOpenDotIcon className="w-4 h-4 text-purple-500" />,
+        meta: project,
+      }
+    })
+    return formattedOutlines
+  }
 
-  //   <Card className="bg-white/50 backdrop-blur-sm border border-slate-200 flex flex-1 w-full">
-  //     <CardContent className="flex items-center p-6">
-  //       <div className="rounded-full p-2 bg-primary/10">
-  //         <Icon className="h-6 w-6 text-primary" />
-  //       </div>
-  //       <div className="ml-4">
-  //         <p className="text-sm font-medium text-muted-foreground">{label}</p>
-  //         <h3 className="text-2xl font-bold">{value}</h3>
-  //       </div>
-  //     </CardContent>
-  //   </Card>
-  // );
-
-  // const container = {
-  //   hidden: { opacity: 0 },
-  //   show: {
-  //     opacity: 1,
-  //     transition: {
-  //       staggerChildren: 0.1
-  //     }
-  //   }
-  // };
-
-  // const item = {
-  //   hidden: { opacity: 0, y: 20 },
-  //   show: { opacity: 1, y: 0 }
-  // };
+  console.log({ projectsData })
   return (
     <div className="container flex flex-1 flex-col gap-4 px-6 py-6">
       <div className="flex justify-between items-start">
@@ -233,297 +162,72 @@ export default function ProjectsPage() {
           Create Project
         </Button>
       </div>
-      <BentoGrid />
-
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[...Array(6)].map((_, index) => (
+            <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
+              <div className="space-y-3">
+                <div className="h-4 w-3/4 bg-muted rounded"></div>
+                <div className="h-3 w-full bg-muted rounded"></div>
+                <div className="h-3 w-2/3 bg-muted rounded"></div>
+                <div className="flex gap-2 pt-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-6 w-16 bg-muted rounded-full"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          <BentoCard items={formatCardProjects(projectsData?.data || [])} />
+          {projectsData?.total && projectsData.total > itemsPerPage && (
+            <div className="flex justify-center mt-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (currentPage > 1) setCurrentPage(currentPage - 1)
+                      }}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: Math.ceil(projectsData.total / itemsPerPage) }).map((_, index) => (
+                    <PaginationItem key={index}>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setCurrentPage(index + 1)
+                        }}
+                        isActive={currentPage === index + 1}
+                      >
+                        {index + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (currentPage < Math.ceil(projectsData?.total! / itemsPerPage)) {
+                          setCurrentPage(currentPage + 1)
+                        }
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
 
 
-
-// <motion.div
-//         initial={{ opacity: 0, y: -20 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         className="grid grid-cols-1 md:grid-cols-3 gap-4"
-//       >
-//         <StatCard
-//           icon={FolderOpen}
-//           label="Total Projects"
-//           value={projectList?.length || 0}
-//         />
-//         <StatCard
-//           icon={FolderDotIcon}
-//           label="Created this month"
-//           value={thisMonth || 0}
-//         />
-//         <StatCard
-//           icon={BookCheck}
-//           label="Avg. Books per project"
-//           value={10}
-//         />
-//       </motion.div>
-//       <div className="flex gap-4 mb-6 mt-6 w-full">
-//         <div className="flex-1 w-full">
-//           <div className="relative w-full">
-//             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-//             <Input
-//               className="pl-10 border border-slate-200"
-//               placeholder="Search by title..."
-//               value={filters.title}
-//               onChange={(e) => setFilters(prev => ({ ...prev, title: e.target.value }))}
-//             />
-//           </div>
-//         </div>
-//         <Sheet open={open} onOpenChange={setOpen}>
-//           <SheetTrigger asChild>
-//             <div className="flex items-center gap-4">
-//               <Button className="cursor-pointer">
-//                 <PlusIcon className="w-4 h-4" />
-//                 New Project
-//               </Button>
-//             </div>
-//           </SheetTrigger>
-//           <SheetContent className='border-none'>
-//             <SheetHeader>
-//               <SheetTitle>
-//                 Choose a title for your new project 😎
-//               </SheetTitle>
-//               <span className='text-xs text-foreground'>(eg: Mandalas, Illustrations, etc...)</span>
-//             </SheetHeader>
-//             <div className='flex flex-col gap-4 px-4' >
-//               <div >
-//                 <Input
-//                   placeholder="Enter project title"
-//                   value={newProjectTitle}
-//                   onChange={(e) => setNewProjectTitle(e.target.value)}
-//                 />
-//               </div>
-//               <div className="flex flex-col gap-4">
-//                 <div className="flex flex-wrap items-center gap-2">
-//                   <Input
-//                     type="color"
-//                     value={newProjectColor}
-//                     onChange={(e) => setNewProjectColor(e.target.value)}
-//                     className="w-12 h-12 p-1 cursor-pointer"
-//                   />
-//                   {[
-//                     '#8da9c4', // Red
-//                     '#e63946', // Orange Red
-//                     '#fca311', // Dark Orange
-//                     '#fb6f92', // Indigo
-//                     '#d4a373', // Purple
-//                     '#b8c0ff', // Dark Green
-//                     '#76c893', // Dark Red
-//                   ].map((color) => (
-//                     <div
-//                       key={color}
-//                       onClick={() => setNewProjectColor(color)}
-//                       className="w-8 h-8 rounded-full cursor-pointer border border-gray-200 transition-transform hover:scale-110"
-//                       style={{ backgroundColor: color }}
-//                       title={color}
-//                     />
-//                   ))}
-//                 </div>
-//               </div>
-//               <Button variant="secondary" onClick={createProject} size="sm" className='p-4 cursor-pointer hover:bg-neutral-800 hover:text-muted'>
-//                 Create Project
-//               </Button>
-//             </div>
-//           </SheetContent>
-
-//         </Sheet>
-//       </div>
-
-// {
-//   isLoadingProjects ? (
-//     <motion.div
-//       variants={container}
-//       initial="hidden"
-//       animate="show"
-//       className="grid grid-cols-3 px-4 gap-4"
-//     >
-//       {[...Array(8)].map((_, index) => (
-//         <motion.div
-//           key={index}
-//           variants={item}
-//           layout
-//           initial={{ opacity: 0, x: -0.8 }}
-//           animate={{ opacity: 1, x: 0 }}
-//           exit={{ opacity: 0, x: -0.8 }}
-//           transition={{ type: 'spring', damping: 20 }}
-//         >
-//           <div className="border rounded-lg overflow-hidden min-h-28 animate-pulse">
-//             <div className="h-2 bg-slate-200" />
-//             <div className="p-4">
-//               <div className="flex justify-between items-center">
-//                 <div className="h-4 w-48 bg-slate-200 rounded" />
-//                 <div className="h-8 w-8 bg-slate-200 rounded" />
-//               </div>
-//               <div className="mt-2 h-4 w-32 bg-slate-200 rounded" />
-//             </div>
-//           </div>
-//         </motion.div>
-//       ))}
-//     </motion.div>
-//   ) : projectList?.length === 0 ? (
-//     <div className="text-center py-12">
-//       <p className="text-muted-foreground">No images found. Generate some images in your books!</p>
-//     </div>
-//   )
-//     : (
-//       <motion.div
-//         variants={container}
-//         initial="hidden"
-//         animate="show"
-//         className="grid grid-cols-3 gap-4"
-//       >
-//         <AnimatePresence>
-//           {projectList?.map((project) => (
-//             <motion.div
-//               key={project.id}
-//               variants={item}
-//               layout
-//               initial={{ opacity: 0, scale: 0.8 }}
-//               animate={{ opacity: 1, scale: 1 }}
-//               exit={{ opacity: 0, scale: 0.8 }}
-//               transition={{ type: 'spring', damping: 20 }}
-//               className='w-full '
-//             >
-//               <Card key={project.id} className='cursor-pointer relative flex flex-col gap-2 border-stone-100 w-full' style={{ boxShadow: `0 4px 6px -1px ${project.color}40, 0 2px 4px -2px ${project.color}40` }}>
-//                 <CardHeader className='relative'>
-//                   <span className="flex items-center gap-2 text-xs text-gray-500">
-//                     {`Last time updated ${formatDate(project.updated_at)}`}
-//                   </span>
-
-//                 </CardHeader>
-//                 <CardContent>
-//                   <CardTitle
-//                     className="cursor-pointer hover:underline text-2xl"
-//                     onClick={() => handleViewProjectId(project)}
-//                   >
-//                     {project.title}
-//                   </CardTitle>
-
-//                 </CardContent>
-//                 <div className="cursor-pointer absolute top-4 right-4">
-//                   <Popover>
-//                     <PopoverTrigger asChild>
-//                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 cursor-pointer">
-//                         <MoreVertical className="h-4 w-4" />
-//                       </Button>
-//                     </PopoverTrigger>
-//                     <PopoverContent className="w-40" align="end">
-//                       <div className="flex flex-col space-y-1">
-//                         <Button
-//                           variant="ghost"
-//                           size="sm"
-//                           className="justify-start"
-//                           onClick={() => handleEdit(project)}
-//                         >
-//                           <Pencil className="h-4 w-4 mr-2" />
-//                           Edit
-//                         </Button>
-//                         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-//                           <AlertDialogContent>
-//                             <AlertDialogHeader>
-//                               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-//                               <AlertDialogDescription>
-//                                 This action cannot be undone. This will permanently delete your project
-//                                 {`"${projectToDelete?.title}"`} and all books created on this project.
-//                               </AlertDialogDescription>
-//                             </AlertDialogHeader>
-//                             <AlertDialogFooter>
-//                               <AlertDialogCancel onClick={() => setProjectToDelete(null)}>
-//                                 Cancel
-//                               </AlertDialogCancel>
-//                               <AlertDialogAction
-//                                 onClick={handleConfirmDelete}
-//                                 className="bg-red-600 hover:bg-red-700"
-//                               >
-//                                 Delete
-//                               </AlertDialogAction>
-//                             </AlertDialogFooter>
-//                           </AlertDialogContent>
-//                         </AlertDialog>
-//                         <Button
-//                           variant="ghost"
-//                           size="sm"
-//                           className="justify-start text-red-600 hover:text-red-600 hover:bg-red-100"
-//                           onClick={() => handleDeleteClick(project)}
-//                         >
-//                           <Trash className="h-4 w-4 mr-2" />
-//                           Delete
-//                         </Button>
-//                       </div>
-//                     </PopoverContent>
-//                   </Popover>
-//                 </div>
-//               </Card>
-//             </motion.div>
-//           ))}
-//         </AnimatePresence>
-//       </motion.div>
-//     )
-// }
-// <Sheet open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-//   <SheetContent className='border-none'>
-//     <SheetHeader>
-//       <SheetTitle>
-//         Edit the title for this project 😎
-//       </SheetTitle>
-//       <span className='text-xs text-foreground'>(you can edit title and color.)</span>
-//     </SheetHeader>
-//     <div className='flex flex-col gap-4 px-4' >
-//       <div >
-//         <Input
-//           placeholder="Enter a project title"
-//           value={editingProject?.title || ''}
-//           onChange={(e) => setEditingProject(prev =>
-//             prev ? { ...prev, title: e.target.value } : null
-//           )}
-//         />
-//       </div>
-//       <div className="flex flex-col gap-4">
-//         <div className="flex flex-wrap items-center gap-2">
-//           <Input
-//             type="color"
-//             value={editingProject?.color || '#6366f1'}
-//             onChange={(e) => setEditingProject(prev =>
-//               prev ? { ...prev, color: e.target.value } : null
-//             )}
-//             className="w-12 h-12 p-1 cursor-pointer"
-//           />
-//           {[
-//             '#8da9c4', // Red
-//             '#e63946', // Orange Red
-//             '#fca311', // Dark Orange
-//             '#fb6f92', // Indigo
-//             '#d4a373', // Purple
-//             '#b8c0ff', // Dark Green
-//             '#76c893', // Dark Red
-//           ].map((color) => (
-//             <div
-//               key={color}
-//               onClick={() => setNewProjectColor(color)}
-//               className="w-8 h-8 rounded-full cursor-pointer border border-gray-200 transition-transform hover:scale-110"
-//               style={{ backgroundColor: color }}
-//               title={color}
-//             />
-//           ))}
-//         </div>
-//       </div>
-//       <Button variant="secondary" onClick={() => {
-//         if (editingProject) {
-//           updateProject(
-//             editingProject.id,
-//             editingProject.title,
-//             editingProject.color
-//           )
-//           setEditDialogOpen(false)
-//         }
-//       }} size="sm" className='p-4 cursor-pointer hover:bg-neutral-800 hover:text-muted'>
-//         Update Project
-//       </Button>
-//     </div>
-//   </SheetContent>
-// </Sheet> *

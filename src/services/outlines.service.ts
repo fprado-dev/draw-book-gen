@@ -74,22 +74,32 @@ export class OutlinesService {
    * @param userId The ID of the user
    * @returns Array of outlines or error
    */
-  async getOutlinesByUserId(userId: string): Promise<{ success: boolean; error?: string; data?: Outline[] }> {
+  async getOutlinesByUserId(userId: string, page: number = 1, limit: number = 6): Promise<{ success: boolean; error?: string; data?: Outline[]; total?: number }> {
     try {
       if (!userId) {
         throw new Error('User ID is required');
       }
 
-      const { data, error } = await this.supabase
-        .from('outlines')
-        .select('*')
-        .eq('user_id', userId).order('created_at', { ascending: false });
+      const offset = (page - 1) * limit;
 
-      if (error) throw error;
+      const [{ count }, { data }] = await Promise.all([
+        this.supabase
+          .from('outlines')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        this.supabase
+          .from('outlines')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1)
+      ]);
+
 
       return {
         success: true,
-        data: data as Outline[]
+        data: data as Outline[],
+        total: count!
       };
     } catch (error) {
       console.error('Error retrieving outlines:', error);

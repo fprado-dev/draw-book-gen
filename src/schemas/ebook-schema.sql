@@ -80,3 +80,39 @@ create trigger handle_project_deletion
   on public.projects
   for each row
   execute function public.handle_project_deletion();
+
+-- Function to update project's ebooks_count
+create or replace function public.update_project_ebooks_count()
+returns trigger
+language plpgsql
+as $$
+begin
+  if (TG_OP = 'DELETE') then
+    update public.projects
+    set ebooks_count = (select count(*) from public.books where project_id = old.project_id)
+    where id = old.project_id;
+    return old;
+  elsif (TG_OP = 'INSERT') then
+    update public.projects
+    set ebooks_count = (select count(*) from public.books where project_id = new.project_id)
+    where id = new.project_id;
+    return new;
+  elsif (TG_OP = 'UPDATE') and (old.project_id != new.project_id) then
+    update public.projects
+    set ebooks_count = (select count(*) from public.books where project_id = old.project_id)
+    where id = old.project_id;
+    update public.projects
+    set ebooks_count = (select count(*) from public.books where project_id = new.project_id)
+    where id = new.project_id;
+    return new;
+  end if;
+  return null;
+end;
+$$;
+
+-- Trigger to update project's ebooks_count on book changes
+create trigger update_project_ebooks_count
+  after insert or update or delete
+  on public.books
+  for each row
+  execute function public.update_project_ebooks_count();

@@ -2,16 +2,20 @@ import { TNewProject, TProject, TUpdateProject } from "@/types/TProjects"
 import * as Auth from "./auth.service"
 import { supabase } from "./supabase"
 
-export const getAllProjects = async () => {
+export const getAllProjects = async (page = 1, limit = 9) => {
   const { user } = await Auth.getCurrentUser()
-  if (!user?.id) return []
+  if (!user?.id) return { data: [], total: 0 }
 
-  const { data } = await supabase
+  const start = (page - 1) * limit
+  const end = start + limit - 1
+
+  const { data, count } = await supabase
     .from('projects')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('user_id', user.id)
-  return data as TProject[]
+    .range(start, end)
 
+  return { data: data as TProject[], total: count }
 }
 
 export const createProject = async ({ title, color }: TNewProject) => {

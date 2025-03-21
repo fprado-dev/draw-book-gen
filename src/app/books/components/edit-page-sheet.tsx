@@ -166,11 +166,6 @@ export default function EditPageSheet({ isOpen, onOpenChange }: EditPageSheetPro
                       priority
                       className="absolute inset-0 w-full h-full object-cover rounded-sm"
                     />
-                    // <img
-                    //   src={page.imageUrl}
-                    //   alt={page.title}
-                    //   className="absolute inset-0 w-full h-full object-cover rounded-sm"
-                    // />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <p className="text-sm text-slate-400">No image generated yet</p>
