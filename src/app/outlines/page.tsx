@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+
 'use client';
 
 import { useState } from 'react';
@@ -14,6 +16,7 @@ import * as ReplicateServices from "@/services/replicate.service";
 import { BentoCard, BentoItem } from '@/components/ui/bento-card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 
 export default function OutlinesPage() {
@@ -23,8 +26,11 @@ export default function OutlinesPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [chapterCount, setChapterCount] = useState('5');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
+
   const { data: outlines, isLoading: isLoadingOutlines } = useQuery({
-    queryKey: ['generate-outlines'],
+    queryKey: ['generate-outlines', currentPage],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -32,8 +38,7 @@ export default function OutlinesPage() {
         return;
       }
       const outlinesService = new OutlinesService();
-      return await outlinesService.getOutlinesByUserId(user.id);
-
+      return await outlinesService.getOutlinesByUserId(user.id, currentPage, itemsPerPage);
     }
   })
 
@@ -113,12 +118,12 @@ export default function OutlinesPage() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
 
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+        <div className="flex flex-col gap-8 py-4 md:gap-6 md:py-6">
           <div className="mx-6">
             <h1 className="text-3xl font-bold text-primary">Outlines</h1>
             <p className="text-muted-foreground mt-2">Harness our AI to create detailed book outlines and chapter structures tailored to your story!</p>
           </div>
-          <div className="px-4 lg:px-6 flex flex-col gap-4">
+          <div className="px-4 lg:px-6 flex flex-col gap-8">
             <div className='flex items-center justify-between gap-2'>
               <Input
                 placeholder="Describe a little about what you want. (e.g. Cute and Cozy Gardens)"
@@ -155,7 +160,7 @@ export default function OutlinesPage() {
             </div>
 
             {isLoadingOutlines ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[...Array(6)].map((_, index) => (
                   <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
                     <div className="space-y-3">
@@ -182,6 +187,48 @@ export default function OutlinesPage() {
                   isOpen={isSheetOpen}
                   onOpenChange={setIsSheetOpen}
                 />
+                {outlines.total && outlines.total > itemsPerPage && (
+                  <div className="flex justify-center mt-6">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (currentPage > 1) setCurrentPage(currentPage - 1);
+                            }}
+                          />
+                        </PaginationItem>
+                        {Array.from({ length: Math.ceil(outlines.total / itemsPerPage) }).map((_, i) => (
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === i + 1}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(i + 1);
+                              }}
+                            >
+                              {i + 1}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ))}
+                        <PaginationItem>
+                          <PaginationNext
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (currentPage < Math.ceil(outlines?.total! / itemsPerPage)) {
+                                setCurrentPage(currentPage + 1);
+                              }
+                            }}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
               </>
             ) : (
               <EmptyState

@@ -1,0 +1,14 @@
+-- Insert mock project data
+insert into public.projects (id, title, description, ebooks_count, keywords, color, created_at, user_id)
+values
+ ('9ba7b810-9dad-11d1-80b4-00c04fd430c1', 'Art Portfolio', 'Digital art collection showcasing various styles and techniques', 1, array['art', 'digital', 'portfolio'], '#7F4A88', '2024-02-15 11:20:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', 'Science for Kids', 'Educational content about basic scientific concepts with interactive illustrations', 2, array['science', 'education', 'kids'], '#4A90E2', '2024-02-20 13:00:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', 'Fantasy World', 'Epic fantasy novel with detailed character illustrations and world maps', 1, array['fantasy', 'fiction', 'adventure'], '#8E44AD', '2024-02-25 16:45:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f', 'Mindful Living', 'Guide to meditation and mindfulness practices with calming visuals', 0, array['meditation', 'mindfulness', 'wellness'], '#2ECC71', '2024-03-01 09:30:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8g', 'Urban Sketches', 'Collection of city landscapes and architectural drawings', 3, array['urban', 'sketching', 'architecture'], '#E67E22', '2024-03-05 14:15:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8f9a', 'Music Theory', 'Comprehensive guide to understanding music with visual aids', 1, array['music', 'theory', 'education'], '#3498DB', '2024-03-10 11:00:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8f9a0b', 'Nature Journal', 'Botanical illustrations and wildlife observations', 2, array['nature', 'botany', 'wildlife'], '#27AE60', '2024-03-15 10:20:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('a7b8c9d0-e1f2-4a3b-4c5d-6e7f8f9a0b1c', 'DIY Crafts', 'Step-by-step guides for various craft projects', 1, array['crafts', 'DIY', 'creative'], '#D35400', '2024-03-20 15:40:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('b8c9d0e1-f2a3-4b4c-5d6e-7f8f9a0b1c2d', 'Space Explorer', 'Educational content about astronomy and space exploration', 0, array['space', 'astronomy', 'science'], '#2C3E50', '2024-03-25 12:10:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('c9d0e1f2-a3b4-4c5d-6e7f-8f9a0b1c2d3e', 'Healthy Living', 'Guide to nutrition and wellness with healthy recipes', 2, array['health', 'nutrition', 'wellness'], '#16A085', '2024-03-30 09:50:00+00', '417899c9-71a3-4d69-845f-671d17079513'),
+  ('d0e1f2a3-b4c5-4d6e-7f8f-9a0b1c2d3e4f', 'Digital Photography', 'Tips and techniques for improving photography skills', 1, array['photography', 'digital', 'tutorial'], '#C0392B', '2024-04-05 13:25:00+00', '417899c9-71a3-4d69-845f-671d17079513');

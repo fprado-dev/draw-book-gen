@@ -2,10 +2,13 @@
 create table if not exists public.projects (
   id uuid primary key,
   title text not null,
-  color text not null default '#6366f1',
+  description text,
+  ebooks_count integer not null default 0,
+  keywords text[] default array[]::text[],
+  color text not null default '#7F4A88',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  user_id uuid references auth.users(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null
 );
 
 -- Enable RLS (Row Level Security)

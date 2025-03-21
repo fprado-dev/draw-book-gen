@@ -40,11 +40,11 @@ const chartConfig = {
   },
   images: {
     label: "AI Images",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--primary))",
   },
   outlines: {
     label: "AI Outlines",
-    color: "hsl(var(--chart-4))",
+    color: "hsl(var(--primary))",
   },
 } satisfies ChartConfig
 
@@ -171,24 +171,24 @@ export function ChartAreaInteractive() {
               <linearGradient id="fillImages" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--chart-1)"
+                  stopColor="var(--primary)"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--chart-1)"
+                  stopColor="var(--primary)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
               <linearGradient id="fillOutlines" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--chart-4)"
+                  stopColor="var(--primary-secondary)"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--chart-4)"
+                  stopColor="var(--primary-secondary)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -228,7 +228,7 @@ export function ChartAreaInteractive() {
               animateNewValues
               animationDuration={2000}
               fill="url(#fillImages)"
-              stroke="var(--chart-1)"
+              stroke="var(--primary)"
               stackId="a"
             />
             <Area
@@ -237,7 +237,7 @@ export function ChartAreaInteractive() {
               animationDuration={2000}
               animateNewValues
               fill="url(#fillOutlines)"
-              stroke="var(--chart-4)"
+              stroke="var(--primary-secondary)"
               stackId="b"
             />
             <ChartLegend content={<ChartLegendContent />} />

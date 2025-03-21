@@ -1,9 +1,8 @@
 
 "use client";
 
+import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
-import { Outline } from "@/services/outlines.service";
-
 
 export interface BentoItem<T> {
   title: string;
@@ -17,20 +16,20 @@ export interface BentoItem<T> {
   hasPersistentHover?: boolean;
 }
 
-interface BentoGridProps {
-  items?: BentoItem<Outline>[];
-  onClick: (outline: Outline) => void;
+interface BentoGridProps<T> {
+  items?: BentoItem<T>[];
+  onClick?: (item: T) => void;
 }
 
 
 
-function BentoCard({ items, onClick }: BentoGridProps) {
+function BentoCard<T>({ items, onClick }: BentoGridProps<T>) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {items?.map((item, index) => (
         <div
           key={index}
-          onClick={() => onClick(item.meta!)}
+          onClick={() => onClick?.(item.meta!)}
           className={cn(
             "group relative p-4 rounded-xl overflow-hidden transition-all duration-300",
             "border border-gray-100 dark:border-white/10 bg-white dark:bg-black",
@@ -67,25 +66,25 @@ function BentoCard({ items, onClick }: BentoGridProps) {
                   "transition-colors duration-300 group-hover:bg-black/10 dark:group-hover:bg-white/20"
                 )}
               >
-                {item.status || "Active"}
+                {item.status && item.status || "Active"}
               </span>
             </div>
 
             <div className="space-y-2">
               <h3 className="font-medium text-gray-900 dark:text-gray-100 tracking-tight text-[15px]">
                 {item.title}
-                {/* <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">
-                  {item.meta}
-                </span> */}
+                {item.meta && <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">
+                  {formatDate((item?.meta as unknown as { created_at: string })?.created_at)}
+                </span>}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-snug font-[425]">
-                {item.description}
+              <p className="text-sm text-slate-400 dark:text-gray-300 leading-snug font-[425]">
+                {item.description && item.description}
               </p>
             </div>
 
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
-                {item.tags?.map((tag, i) => (
+                {item.tags && item.tags?.map((tag, i) => (
                   <span
                     key={i}
                     className="px-2 py-1 rounded-md bg-black/5 dark:bg-white/10 backdrop-blur-sm transition-all duration-200 hover:bg-black/10 dark:hover:bg-white/20"

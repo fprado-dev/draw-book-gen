@@ -58,7 +58,6 @@ export async function getUserStats(): Promise<UserStats> {
       });
 
     if (userFoldersError) throw userFoldersError;
-    console.log({ userFolders })
     // Count all images across all book folders
     let totalImagesCount = 0;
     if (userFolders) {
@@ -126,7 +125,6 @@ export async function getDailyImageStats(): Promise<DailyImageStats[]> {
     const stats = Array.from(imagesByDate.entries())
       .map(([date, images]) => ({ date, images }))
       .sort((a, b) => a.date.localeCompare(b.date));
-    console.log({ stats })
     return stats;
   } catch (error) {
     console.error("Error fetching daily image stats:", error);
