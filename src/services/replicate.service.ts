@@ -1,6 +1,3 @@
-
-
-
 export type TOutline = {
   title: string;
   chapters: Array<{
@@ -16,9 +13,7 @@ type TGenerateBookOutline = {
   chapters: number;
 }
 
-
-
-export const generateBookOutline = async ({ prompt, style, complexity, chapters }: TGenerateBookOutline): Promise<{ success: boolean; outline?: TOutline; error?: string }> => {
+export const generateBookOutline = async ({ prompt, chapters }: TGenerateBookOutline): Promise<{ success: boolean; outline?: TOutline; error?: string }> => {
   try {
     // Validate input parameters
     if (!prompt?.trim()) {
@@ -37,8 +32,6 @@ export const generateBookOutline = async ({ prompt, style, complexity, chapters 
       },
       body: JSON.stringify({
         prompt,
-        style,
-        complexity,
         chapters
       })
     });
@@ -63,3 +56,4 @@ export const generateBookOutline = async ({ prompt, style, complexity, chapters 
     };
   }
 };
+

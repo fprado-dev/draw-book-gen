@@ -91,10 +91,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 TODO: INFOS
 
-- [ ] Get count of Pages generated
-- [ ] Get count of Images generated
-- [ ] Get count of Books generated
-- [ ] Get count of Projects generated
+- [x] Get count of Pages generated
+- [x] Get count of Images generated
+- [x] Get count of Books generated
+- [x] Get count of Projects generated
 
 TODO: Chart 
 
@@ -105,3 +105,7 @@ TODO: Chart
 - Billing Page
 
 - [ ] ROI Calculator
+
+- AI Images Page
+
+- [ ] Nova Tela
