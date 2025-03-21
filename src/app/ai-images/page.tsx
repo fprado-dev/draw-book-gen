@@ -93,7 +93,6 @@ export default function UserImagesPage() {
 
         // If a specific book is selected, only fetch images for that book
         if (selectedBookId !== 'all') {
-          console.log({ selectedBookId })
           const bookImages = await fetchImagesForBook(selectedBookId, user.id, bookTitleMap[selectedBookId]);
           allImages.push(...bookImages);
         } else {

@@ -74,7 +74,7 @@ function BentoCard<T>({ items, onClick }: BentoGridProps<T>) {
               <h3 className="font-medium text-gray-900 dark:text-gray-100 tracking-tight text-[15px]">
                 {item.title}
                 {item.meta && <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">
-                  {formatDate((item?.meta as any as { created_at: string })?.created_at)}
+                  {formatDate((item?.meta as unknown as { created_at: string })?.created_at)}
                 </span>}
               </h3>
               <p className="text-sm text-slate-400 dark:text-gray-300 leading-snug font-[425]">

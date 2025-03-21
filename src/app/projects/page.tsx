@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+
 'use client'
 
 import { Button } from '@/components/ui/button'
 import { FolderOpenDotIcon, PlusCircleIcon } from 'lucide-react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import * as ProjectsServices from '@/services/projects.service'
 import { TProject } from '@/types/TProjects'
@@ -149,7 +151,6 @@ export default function ProjectsPage() {
     return formattedOutlines
   }
 
-  console.log({ projectsData })
   return (
     <div className="container flex flex-1 flex-col gap-4 px-6 py-6">
       <div className="flex justify-between items-start">
