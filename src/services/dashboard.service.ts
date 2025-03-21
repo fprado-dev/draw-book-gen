@@ -63,7 +63,6 @@ export async function getUserStats(): Promise<UserStats> {
         }
       }
     }
-    console.log({ totalImagesCount })
 
     return {
       totalProjects: projectsCount || 0,
@@ -76,3 +75,57 @@ export async function getUserStats(): Promise<UserStats> {
     throw error;
   }
 }
+
+export interface DailyImageStats {
+  date: string;
+  images: number;
+}
+
+export async function getDailyImageStats(): Promise<DailyImageStats[]> {
+  try {
+    const { user } = await AuthService.getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const { data: userFolders, error: userFoldersError } = await supabase.storage
+      .from("users-generated-images")
+      .list(`${user.id}`, {
+        limit: 100000,
+        offset: 0,
+        sortBy: { column: "name", order: "asc" },
+      });
+
+    if (userFoldersError) throw userFoldersError;
+
+    // Store image counts by date
+    const imagesByDate = new Map<string, number>();
+
+    if (userFolders) {
+      for (const folder of userFolders) {
+        if (folder.name) {
+          const { data: bookImages, error: bookImagesError } = await supabase.storage
+            .from("users-generated-images")
+            .list(`${user.id}/${folder.name}`);
+
+          if (bookImagesError) throw bookImagesError;
+
+          // Group images by date
+          bookImages?.forEach(image => {
+            const date = new Date(image.created_at).toISOString().split('T')[0];
+            imagesByDate.set(date, (imagesByDate.get(date) || 0) + 1);
+          });
+        }
+      }
+    }
+
+    // Convert map to array and sort by date
+    const stats = Array.from(imagesByDate.entries())
+      .map(([date, images]) => ({ date, images }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    console.log({ stats })
+    return stats;
+  } catch (error) {
+    console.error("Error fetching daily image stats:", error);
+    throw error;
+  }
+}
+
