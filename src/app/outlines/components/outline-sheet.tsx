@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { Outline } from '@/services/outlines.service';
+import { Outline } from '@/types/outlines';
 
 type OutlineSheetProps = {
   outline: Outline | null;

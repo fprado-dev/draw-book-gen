@@ -136,7 +136,6 @@ export default function ProjectsPage() {
 
 
   const formatCardProjects = (projects: TProject[]): BentoItem<TProject>[] => {
-
     const formattedOutlines = projects?.map((project): BentoItem<TProject> => {
       return {
         title: project.title,
@@ -152,81 +151,85 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="container flex flex-1 flex-col gap-4 px-6 py-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-primary">Projects</h1>
-          <p className="text-muted-foreground mt-2">Manage your projects and create new ones </p>
+    <div className="flex flex-1 flex-col">
+      <div className="@container/main flex flex-1 flex-col gap-2">
+        <div className="mx-6 flex items-center justify-between gap-8 py-4 md:gap-6">
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Projects</h1>
+            <p className="text-muted-foreground mt-2">Organize existing projects and start new ventures effortlessly. </p>
+          </div>
+          <Button variant="secondary" className="bg-gradient-to-r from-primary  to-primary/80 text-white">
+            <PlusCircleIcon className="mr-2 h-4 w-4" />
+            Create Project
+          </Button>
         </div>
-        <Button variant="secondary" className="bg-gradient-to-r from-primary  to-primary/80 text-white">
-          <PlusCircleIcon className="mr-2 h-4 w-4" />
-          Create Project
-        </Button>
-      </div>
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[...Array(6)].map((_, index) => (
-            <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
-              <div className="space-y-3">
-                <div className="h-4 w-3/4 bg-muted rounded"></div>
-                <div className="h-3 w-full bg-muted rounded"></div>
-                <div className="h-3 w-2/3 bg-muted rounded"></div>
-                <div className="flex gap-2 pt-2">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-6 w-16 bg-muted rounded-full"></div>
-                  ))}
+        <div className="px-4 lg:px-6 flex flex-col gap-8">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
+                  <div className="space-y-3">
+                    <div className="h-4 w-3/4 bg-muted rounded"></div>
+                    <div className="h-3 w-full bg-muted rounded"></div>
+                    <div className="h-3 w-2/3 bg-muted rounded"></div>
+                    <div className="flex gap-2 pt-2">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-6 w-16 bg-muted rounded-full"></div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : (
-        <>
-          <BentoCard items={formatCardProjects(projectsData?.data || [])} />
-          {projectsData?.total && projectsData.total > itemsPerPage && (
-            <div className="flex justify-center mt-6">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        if (currentPage > 1) setCurrentPage(currentPage - 1)
-                      }}
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: Math.ceil(projectsData.total / itemsPerPage) }).map((_, index) => (
-                    <PaginationItem key={index}>
-                      <PaginationLink
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setCurrentPage(index + 1)
-                        }}
-                        isActive={currentPage === index + 1}
-                      >
-                        {index + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        if (currentPage < Math.ceil(projectsData?.total! / itemsPerPage)) {
-                          setCurrentPage(currentPage + 1)
-                        }
-                      }}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
+          ) : (
+            <>
+              <BentoCard items={formatCardProjects(projectsData?.data || [])} />
+              {projectsData?.total && projectsData.total > itemsPerPage && (
+                <div className="flex justify-center mt-6">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage > 1) setCurrentPage(currentPage - 1)
+                          }}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: Math.ceil(projectsData.total / itemsPerPage) }).map((_, index) => (
+                        <PaginationItem key={index}>
+                          <PaginationLink
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              setCurrentPage(index + 1)
+                            }}
+                            isActive={currentPage === index + 1}
+                          >
+                            {index + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (currentPage < Math.ceil(projectsData?.total! / itemsPerPage)) {
+                              setCurrentPage(currentPage + 1)
+                            }
+                          }}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </div>
   )
 }
