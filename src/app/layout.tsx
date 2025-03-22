@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react"
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -21,9 +22,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AIlustra",
-  description: "A AI Powered Drawing Book Generator",
+  title: "AIlustra - No Skills, No Problem",
+  description: "No Skills, No Problem",
+  appleWebApp: {
+    title: "AIlustra",
+    statusBarStyle: "black-translucent",
+
+  }
 };
+
 
 
 export default function RootLayout({
@@ -47,6 +54,7 @@ export default function RootLayout({
           closeButton: true,
 
         }} />
+        <Analytics />
       </body>
     </html>
   );
