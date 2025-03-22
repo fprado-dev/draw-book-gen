@@ -11,21 +11,25 @@ import { Input } from '@/components/ui/input';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/services/supabase';
 import { toast } from 'sonner';
-import { Outline, OutlinesService } from '@/services/outlines.service';
-import * as ReplicateServices from "@/services/replicate.service";
 import { BentoCard, BentoItem } from '@/components/ui/bento-card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
+import * as OutlinesService from '@/services/outlines.service';
+import * as ReplicateServices from "@/services/replicate.service";
+import { Outline } from '@/types/outlines';
 
 export default function OutlinesPage() {
   const queryClient = useQueryClient();
   const [outlinePrompt, setOutlinePrompt] = useState('');
   const [selectedOutline, setSelectedOutline] = useState<Outline | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isCreateSheetOpen, setCreateSheetOpen] = useState(false);
   const [chapterCount, setChapterCount] = useState('5');
-
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [currentKeyword, setCurrentKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
 
@@ -37,7 +41,7 @@ export default function OutlinesPage() {
         toast.error('You must be logged in to generate outlines');
         return;
       }
-      const outlinesService = new OutlinesService();
+      const outlinesService = new OutlinesService.Outlines();
       return await outlinesService.getOutlinesByUserId(user.id, currentPage, itemsPerPage);
     }
   })
@@ -58,7 +62,7 @@ export default function OutlinesPage() {
             return;
           }
 
-          const outlinesService = new OutlinesService();
+          const outlinesService = new OutlinesService.Outlines();
           const result = await outlinesService.createOutline({
             title: outlinePrompt,
             user_id: user.id,
@@ -68,9 +72,11 @@ export default function OutlinesPage() {
           if (result.success) {
             toast.success('Outline generated and saved successfully!');
             setOutlinePrompt('');
+
             queryClient.invalidateQueries({
               queryKey: ['generate-outlines'],
             });
+            setCreateSheetOpen(false);
           } else {
             toast.error(result.error || 'Failed to save outline');
           }
@@ -114,134 +120,183 @@ export default function OutlinesPage() {
     setSelectedOutline(outline);
     setIsSheetOpen(true);
   }
+
+
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
-
-        <div className="flex flex-col gap-8 py-4 md:gap-6 md:py-6">
-          <div className="mx-6">
+        <div className="mx-6 flex items-center justify-between gap-8 py-4 md:gap-6">
+          <div>
             <h1 className="text-3xl font-bold text-primary">Outlines</h1>
             <p className="text-muted-foreground mt-2">Harness our AI to create detailed book outlines and chapter structures tailored to your story!</p>
           </div>
-          <div className="px-4 lg:px-6 flex flex-col gap-8">
-            <div className='flex items-center justify-between gap-2'>
-              <Input
-                placeholder="Describe a little about what you want. (e.g. Cute and Cozy Gardens)"
-                value={outlinePrompt}
-                className="w-full py-3 px-4 text-sm text-muted-foreground placeholder:text-muted-foreground bg-transparent rounded-md border border-muted-foreground/10 focus:border-primary focus-visible:ring-0 focus:ring-0 focus:outline-none "
-                onChange={(e) => setOutlinePrompt(e.target.value)} />
-
-              <Select value={chapterCount} onValueChange={setChapterCount}>
-                <SelectTrigger className='w-2xs focus-visible:ring-0 cursor-pointer'>
-                  <SelectValue placeholder="Select number of chapters" />
-                </SelectTrigger>
-                <SelectContent className='w-fit'>
-                  {[5, 10, 20].map((num) => (
-                    <SelectItem
-                      key={num}
-                      value={num.toString()}
-                      disabled={num !== 5}
-                      className='w-full flex items-center justify-between cursor-pointer'
-                    >
-                      <span>{num} Chapters</span>
-                      {num !== 5 && (
-                        <Badge variant="default">
-                          Pro
-                        </Badge>
-                      )}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button disabled={onGenerateAIOutline.isPending} onClick={handleGenerateOutline} variant="secondary" className="cursor-pointer hover:opacity-90 bg-gradient-to-r from-primary  to-primary/80 text-white">
-                <SparklesIcon className="mr-2 h-4 w-4" />
+          <Sheet open={isCreateSheetOpen} onOpenChange={setCreateSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="secondary" className="cursor-pointer hover:opacity-90 bg-gradient-to-r from-primary  to-primary/80 text-white">
+                <SparklesIcon className="h-4 w-4" />
                 {onGenerateAIOutline.isPending ? "Generating..." : "Generate Now"}
               </Button>
-            </div>
+            </SheetTrigger>
+            <SheetContent className='p-4'>
+              <SheetTitle>Generate Outline</SheetTitle>
+              <SheetDescription>
+                Generate detailed book outlines and chapter structures with AI assistance.
+              </SheetDescription>
+              <div className="flex flex-col gap-4">
+                <Input
+                  placeholder="Be Simple. (e.g. Cute and Cozy Gardens)"
+                  value={outlinePrompt}
+                  className="w-full py-3 text-sm text-muted-foreground placeholder:text-muted-foreground bg-transparent rounded-md border border-muted-foreground/10 focus:border-primary focus-visible:ring-0 focus:ring-0 focus:outline-none "
+                  onChange={(e) => setOutlinePrompt(e.target.value)} />
 
-            {isLoadingOutlines ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[...Array(6)].map((_, index) => (
-                  <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
-                    <div className="space-y-3">
-                      <div className="h-4 w-3/4 bg-muted rounded"></div>
-                      <div className="h-3 w-full bg-muted rounded"></div>
-                      <div className="h-3 w-2/3 bg-muted rounded"></div>
-                      <div className="flex gap-2 pt-2">
-                        {[...Array(3)].map((_, i) => (
-                          <div key={i} className="h-6 w-16 bg-muted rounded-full"></div>
-                        ))}
-                      </div>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add some keywords. (trees, flowers, nature)"
+                      value={currentKeyword}
+                      className="flex-1"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && currentKeyword.trim()) {
+                          e.preventDefault();
+                          setKeywords([...keywords, currentKeyword.trim()]);
+                          setCurrentKeyword('');
+                        }
+                      }}
+                      onChange={(e) => setCurrentKeyword(e.target.value)}
+                    />
+                  </div>
+                  {keywords.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {keywords.map((keyword, index) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="cursor-pointer hover:bg-destructive/20"
+                          onClick={() => setKeywords(keywords.filter((_, i) => i !== index))}
+                        >
+                          {keyword}
+                          <span className="ml-1">×</span>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <Select value={chapterCount} onValueChange={setChapterCount}>
+                  <SelectTrigger className='w-full focus-visible:ring-0 cursor-pointer'>
+                    <SelectValue placeholder="Select number of chapters" />
+                  </SelectTrigger>
+                  <SelectContent className='w-fit'>
+                    {[5, 10, 20].map((num) => (
+                      <SelectItem
+                        key={num}
+                        value={num.toString()}
+                        disabled={num !== 5}
+                        className='w-full flex items-center justify-between cursor-pointer'
+                      >
+                        <span>{num} Chapters</span>
+                        {num !== 5 && (
+                          <Badge variant="default">
+                            Pro
+                          </Badge>
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button disabled={onGenerateAIOutline.isPending} onClick={handleGenerateOutline} variant="secondary" className="cursor-pointer hover:opacity-90 bg-gradient-to-r from-primary  to-primary/80 text-white">
+                  <SparklesIcon className="mr-2 h-4 w-4" />
+                  {onGenerateAIOutline.isPending ? "Generating..." : "Generate Now"}
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+
+        <div className="px-4 lg:px-6 flex flex-col gap-8">
+          {isLoadingOutlines ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
+                  <div className="space-y-3">
+                    <div className="h-4 w-3/4 bg-muted rounded"></div>
+                    <div className="h-3 w-full bg-muted rounded"></div>
+                    <div className="h-3 w-2/3 bg-muted rounded"></div>
+                    <div className="flex gap-2 pt-2">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-6 w-16 bg-muted rounded-full"></div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : outlines?.data && outlines.data.length > 0 ? (
-              <>
-                <BentoCard
-                  items={formatCardOutlines(outlines.data)}
-                  onClick={handleClickCard}
-                />
-                <OutlineSheet
-                  outline={selectedOutline}
-                  isOpen={isSheetOpen}
-                  onOpenChange={setIsSheetOpen}
-                />
-                {outlines.total && outlines.total > itemsPerPage && (
-                  <div className="flex justify-center mt-6">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (currentPage > 1) setCurrentPage(currentPage - 1);
-                            }}
-                          />
-                        </PaginationItem>
-                        {Array.from({ length: Math.ceil(outlines.total / itemsPerPage) }).map((_, i) => (
-                          <PaginationItem key={i}>
-                            <PaginationLink
-                              href="#"
-                              isActive={currentPage === i + 1}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setCurrentPage(i + 1);
-                              }}
-                            >
-                              {i + 1}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        <PaginationItem>
-                          <PaginationNext
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (currentPage < Math.ceil(outlines?.total! / itemsPerPage)) {
-                                setCurrentPage(currentPage + 1);
-                              }
-                            }}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            ) : (
-              <EmptyState
-                title="No Outlines Yet"
-                description="Start creating detailed book outlines with AI assistance. Generate chapter structures tailored to your story!"
-                actionLabel="Generate Your First Outline"
-                onAction={handleGenerateOutline}
+                </div>
+              ))}
+            </div>
+          ) : outlines?.data && outlines.data.length > 0 ? (
+            <>
+              <BentoCard
+                items={formatCardOutlines(outlines.data)}
+                onClick={handleClickCard}
               />
+              <OutlineSheet
+                outline={selectedOutline}
+                isOpen={isSheetOpen}
+                onOpenChange={setIsSheetOpen}
+              />
+              {outlines.total && outlines.total > itemsPerPage && (
+                <div className="flex justify-center mt-6">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage > 1) setCurrentPage(currentPage - 1);
+                          }}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: Math.ceil(outlines.total / itemsPerPage) }).map((_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            href="#"
+                            isActive={currentPage === i + 1}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(i + 1);
+                            }}
+                          >
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage < Math.ceil(outlines?.total! / itemsPerPage)) {
+                              setCurrentPage(currentPage + 1);
+                            }
+                          }}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyState
+              title="No Outlines Yet"
+              description="Start creating detailed book outlines with AI assistance. Generate chapter structures tailored to your story!"
+              actionLabel="Generate Your First Outline"
+              onAction={handleGenerateOutline}
+            />
 
-            )}
-          </div>
+          )}
         </div>
       </div>
-    </div>
+    </div >
   );
 }

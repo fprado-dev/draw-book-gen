@@ -1,17 +1,9 @@
+import { Outline } from '@/types/outlines';
 import { supabase } from './supabase';
 
-interface Chapter {
-  title: string;
-  description: string;
-}
 
-export interface Outline {
-  title: string;
-  user_id: string;
-  chapters: Chapter[];
-}
 
-export class OutlinesService {
+export class Outlines {
   private supabase;
 
   constructor() {
