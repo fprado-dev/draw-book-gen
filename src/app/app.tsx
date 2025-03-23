@@ -18,7 +18,7 @@ function App({
   children: React.ReactNode;
 }) {
   const pathname = usePathname()
-  const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up'
+  const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up' || pathname === '/forgot-password' || pathname === '/reset-password' || pathname === '/sales'
   return (
     isAuthPage ? (
       <div className="flex flex-1 flex-col" >
