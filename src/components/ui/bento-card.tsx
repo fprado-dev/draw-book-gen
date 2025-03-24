@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import { Button } from './button';
-import { EllipsisVerticalIcon, EyeIcon, Trash2Icon } from 'lucide-react';
+import { EllipsisVerticalIcon, EyeIcon, Trash2Icon, EditIcon } from 'lucide-react';
 
 export interface BentoItem<T> {
   id: string;
@@ -16,6 +16,7 @@ export interface BentoItem<T> {
   tags?: string[];
   meta?: T;
   cta?: string;
+  color?: string;
   colSpan?: number;
   hasPersistentHover?: boolean;
 }
@@ -24,10 +25,11 @@ interface BentoGridProps<T> {
   item: BentoItem<T>;
   onView?: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 
-function BentoCard<T>({ item, onDelete, onView }: BentoGridProps<T>) {
+function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
   return (
     <div
       className={cn(
@@ -56,7 +58,7 @@ function BentoCard<T>({ item, onDelete, onView }: BentoGridProps<T>) {
 
       <div className="relative flex flex-col space-y-3">
         <div className="flex items-center justify-between">
-          {item.icon && <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/10 group-hover:bg-gradient-to-br transition-all duration-300">
+          {item.icon && <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/10 group-hover:bg-gradient-to-br transition-all duration-300`}>
             {item.icon}
           </div>}
           <span
@@ -104,6 +106,12 @@ function BentoCard<T>({ item, onDelete, onView }: BentoGridProps<T>) {
                   <EyeIcon className='w-4 h-4' />
                   View
                 </DropdownMenuItem>
+                {onEdit && (
+                  <DropdownMenuItem onClick={onEdit} className='flex items-center gap-4 justify-start cursor-pointer'>
+                    <EditIcon className='w-4 h-4' />
+                    Edit
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={onDelete} className='flex items-center gap-4 justify-start text-destructive cursor-pointer'>
                   <Trash2Icon className='w-4 h-4' />
                   Delete

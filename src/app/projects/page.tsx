@@ -40,6 +40,8 @@ export default function ProjectsPage() {
   const [keywords, setKeywords] = useState<string[]>([])
   const [currentKeyword, setCurrentKeyword] = useState('')
   const [currentColor, setSelectedColor] = useState('#E5E5FF')
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [projectToEdit, setProjectToEdit] = useState<TProject | null>(null)
 
   const createProjectMutation = useMutation({
     mutationFn: async () => {
@@ -71,9 +73,44 @@ export default function ProjectsPage() {
     }
   })
 
-  const handleCreateProject = () => {
-    console.log({ titleName, keywords, currentColor })
-    createProjectMutation.mutate()
+  const updateProjectMutation = useMutation({
+    mutationFn: async () => {
+      if (!titleName.trim() || !projectToEdit?.id) {
+        throw new Error("Project title is required")
+      }
+
+      return await ProjectsServices.updateProject({
+        id: projectToEdit.id,
+        title: titleName.trim(),
+        color: currentColor,
+        keywords: keywords
+      })
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setTitleName('')
+      setKeywords([])
+      setCurrentKeyword('')
+      setSelectedColor('#E5E5FF')
+      setOpenCreateSheet(false)
+      setIsEditMode(false)
+      setProjectToEdit(null)
+      toast("Project updated", {
+        description: `Successfully updated project "${data?.title}!"`
+      })
+    },
+    onError: (error) => {
+      console.error('Error updating project:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update project')
+    }
+  })
+
+  const handleCreateOrUpdateProject = () => {
+    if (isEditMode && projectToEdit) {
+      updateProjectMutation.mutate()
+    } else {
+      createProjectMutation.mutate()
+    }
   }
 
   const { data: projectsData, isLoading: isLoadingProject } = useQuery({
@@ -123,6 +160,18 @@ export default function ProjectsPage() {
     setDeleteDialogOpen(true)
   }
 
+  const handleEditProject = (project: BentoItem<TProject>) => {
+    const projectData = project.meta
+    if (projectData) {
+      setProjectToEdit(projectData)
+      setTitleName(projectData.title)
+      setKeywords(projectData.keywords || [])
+      setSelectedColor(projectData.color)
+      setIsEditMode(true)
+      setOpenCreateSheet(true)
+    }
+  }
+
   const formatCardProjects = (projects: TProject[]): BentoItem<TProject>[] => {
     const formattedOutlines = projects?.map((project): BentoItem<TProject> => {
       return {
@@ -133,6 +182,7 @@ export default function ProjectsPage() {
         cta: 'Explore →',
         icon: <FolderOpenDotIcon className="w-4 h-4 text-purple-500" />,
         meta: project,
+        color: project.color,
       }
     })
     return formattedOutlines
@@ -148,18 +198,29 @@ export default function ProjectsPage() {
           </div>
           <ProjectSheet
             isOpen={isOpenCreateSheet}
-            onOpenChange={setOpenCreateSheet}
+            onOpenChange={(open) => {
+              setOpenCreateSheet(open)
+              if (!open) {
+                // Reset form when closing
+                setIsEditMode(false)
+                setProjectToEdit(null)
+                setTitleName('')
+                setKeywords([])
+                setCurrentKeyword('')
+                setSelectedColor('#E5E5FF')
+              }
+            }}
             titleName={titleName}
             setTitleName={setTitleName}
             setKeywords={setKeywords}
             keywords={keywords}
             setCurrentKeyword={setCurrentKeyword}
             currentKeyword={currentKeyword}
-            onClick={handleCreateProject}
-            isLoading={createProjectMutation.isPending}
+            onClick={handleCreateOrUpdateProject}
+            isLoading={createProjectMutation.isPending || updateProjectMutation.isPending}
             setSelectedColor={setSelectedColor}
             selectedColor={currentColor}
-
+            isEditMode={isEditMode}
           >
             <Button variant="secondary" className="cursor-pointer bg-gradient-to-r from-primary  to-primary/80 text-white">
               <PlusCircleIcon className="mr-2 h-4 w-4" />
@@ -196,6 +257,7 @@ export default function ProjectsPage() {
                       item={project}
                       onView={() => handleViewProjectId(project)}
                       onDelete={() => handleDeleteOutline(project)}
+                      onEdit={() => handleEditProject(project)}
                     />
 
                   )

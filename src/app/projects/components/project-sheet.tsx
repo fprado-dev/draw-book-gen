@@ -20,9 +20,10 @@ type ProjectSheetProps = {
   titleName: string;
   selectedColor?: string;
   setSelectedColor: (color: string) => void;
+  isEditMode?: boolean;
 };
 
-export function ProjectSheet({ children, isLoading, isOpen, onOpenChange, titleName, setTitleName, setKeywords, keywords, setCurrentKeyword, currentKeyword, onClick, selectedColor = '#FFE5E5', setSelectedColor }: ProjectSheetProps) {
+export function ProjectSheet({ children, isLoading, isOpen, onOpenChange, titleName, setTitleName, setKeywords, keywords, setCurrentKeyword, currentKeyword, onClick, selectedColor = '#FFE5E5', setSelectedColor, isEditMode = false }: ProjectSheetProps) {
   const colors = [
     { name: 'Soft Pink', value: '#FFE5E5' },
     { name: 'Mint Green', value: '#E5FFE5' },
@@ -43,9 +44,9 @@ export function ProjectSheet({ children, isLoading, isOpen, onOpenChange, titleN
         {children}
       </SheetTrigger>
       <SheetContent className='p-4'>
-        <SheetTitle>Create Project</SheetTitle>
+        <SheetTitle>{isEditMode ? 'Edit Project' : 'Create Project'}</SheetTitle>
         <SheetDescription>
-          Create a new project and start generating your book.
+          {isEditMode ? 'Edit your project details.' : 'Create a new project and start generating your book.'}
         </SheetDescription>
         <div className="flex flex-col gap-4">
           <div className="relative">
@@ -119,7 +120,9 @@ export function ProjectSheet({ children, isLoading, isOpen, onOpenChange, titleN
             variant="secondary"
             className="cursor-pointer hover:opacity-90 bg-gradient-to-r from-primary  to-primary/80 text-white">
             <FolderIcon className="mr-2 h-4 w-4" />
-            {isLoading ? "Creating..." : "Create Now"}
+            {isLoading
+              ? (isEditMode ? "Updating..." : "Creating...")
+              : (isEditMode ? "Update Project" : "Create Now")}
           </Button>
         </div>
       </SheetContent>
