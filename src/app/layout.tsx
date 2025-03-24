@@ -22,10 +22,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AIlustra - No Skills, No Problem",
+  title: "AIllustra - No Skills, No Problem",
   description: "No Skills, No Problem",
   appleWebApp: {
-    title: "AIlustra",
+    title: "AIllustra",
     statusBarStyle: "black-translucent",
 
   }
