@@ -6,7 +6,6 @@ interface EmptyStateProps {
   title: string;
   description: string;
   actionLabel: string;
-  onAction: () => void;
 }
 
 export function EmptyState({
@@ -21,7 +20,6 @@ export function EmptyState({
       </div>
       <h3 className="mb-2 text-xl font-semibold text-primary">{title}</h3>
       <p className="mb-6 max-w-sm text-muted-foreground">{description}</p>
-
     </div>
   );
 }

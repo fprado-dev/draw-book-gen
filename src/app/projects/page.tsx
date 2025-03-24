@@ -3,22 +3,37 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { FolderOpenDotIcon, PlusCircleIcon } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-
-import * as ProjectsServices from '@/services/projects.service'
-import { TProject } from '@/types/TProjects'
-import { BentoItem, BentoCard } from '@/components/ui/bento-card'
-import { useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { EmptyState } from '@/components/ui/empty-state'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { FolderOpenDotIcon, PlusCircleIcon } from 'lucide-react'
+import { BentoItem, BentoCard } from '@/components/ui/bento-card'
+
+import { TProject } from '@/types/TProjects'
+
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
+import * as ProjectsServices from '@/services/projects.service'
+import { toast } from 'sonner'
 
 export default function ProjectsPage() {
-
+  const router = useRouter()
+  const queryClient = useQueryClient();
 
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 9
+  const [projectToDelete, setProjectToDelete] = useState<BentoItem<TProject> | null>(null)
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-  const { data: projectsData, isLoading } = useQuery({
+  const { data: projectsData, isLoading: isLoadingProject } = useQuery({
     queryKey: ['projects', currentPage],
     queryFn: () => ProjectsServices.getAllProjects(currentPage, itemsPerPage)
   })
@@ -81,24 +96,7 @@ export default function ProjectsPage() {
   //   }
   // })
 
-  // const deleteProjectMutation = useMutation({
-  //   mutationFn: async (id: string) => {
-  //     if (!user) return
-  //     return await ProjectServices.deleteProject({ id: id })
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['projects'] })
-  //     setDeleteDialogOpen(false)
-  //     setProjectToDelete(null)
-  //     toast("Project Deleted", {
-  //       description: `Successfully deleted project!`,
-  //     })
-  //   },
-  //   onError: (error) => {
-  //     console.error('Error deleting project:', error)
-  //     toast.error('Failed to delete project')
-  //   }
-  // })
+
 
   // const createProject = () => {
   //   createProjectMutation.mutate()
@@ -108,9 +106,7 @@ export default function ProjectsPage() {
   //   updateProjectMutation.mutate({ id, title: newTitle, color })
   // }
 
-  // const deleteProject = (id: string) => {
-  //   deleteProjectMutation.mutate(id)
-  // }
+
 
   // const handleEdit = (project: TProject) => {
   //   setEditingProject(project)
@@ -118,26 +114,55 @@ export default function ProjectsPage() {
   // }
 
   // const handleDeleteClick = (project: TProject) => {
-  //   setProjectToDelete(project)
-  //   setDeleteDialogOpen(true)
-  // }
-
-  // const handleConfirmDelete = () => {
-  //   if (projectToDelete) {
-  //     deleteProject(projectToDelete.id)
-  //   }
-  // }
-
-  // const handleViewProjectId = async (project: TProject) => {
-  //   localStorage.setItem('illustra-current-project', JSON.stringify(project))
-  //   router.push(`/projects/${project.id}`)
 
   // }
 
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await ProjectsServices.deleteProject({ id: id })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setDeleteDialogOpen(false)
+      setProjectToDelete(null)
+      toast("Project Deleted", {
+        description: `Successfully deleted project!`,
+      })
+    },
+    onError: (error) => {
+      console.error('Error deleting project:', error)
+      toast.error('Failed to delete project')
+    }
+  })
+
+  const deleteProject = (id: string) => {
+    deleteProjectMutation.mutate(id)
+  }
+
+  const handleConfirmDelete = () => {
+    if (projectToDelete) {
+      deleteProject(projectToDelete.id);
+    }
+  }
+
+  const handleViewProjectId = (project: BentoItem<TProject>) => {
+    const projectInfos = {
+      id: project.id,
+      title: project.title,
+    }
+    localStorage.setItem('aillustra-current-project', JSON.stringify(projectInfos))
+    router.push(`/projects/${project.id}`)
+  }
+
+  const handleDeleteOutline = (project: BentoItem<TProject>) => {
+    setProjectToDelete(project)
+    setDeleteDialogOpen(true)
+  }
 
   const formatCardProjects = (projects: TProject[]): BentoItem<TProject>[] => {
     const formattedOutlines = projects?.map((project): BentoItem<TProject> => {
       return {
+        id: project.id,
         title: project.title,
         description: project.description || '',
         tags: project.keywords || [],
@@ -164,7 +189,7 @@ export default function ProjectsPage() {
           </Button>
         </div>
         <div className="px-4 lg:px-6 flex flex-col gap-8">
-          {isLoading ? (
+          {isLoadingProject ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[...Array(6)].map((_, index) => (
                 <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
@@ -181,10 +206,48 @@ export default function ProjectsPage() {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : projectsData?.data && projectsData.data.length > 0 ? (
             <>
-              <BentoCard items={formatCardProjects(projectsData?.data || [])} />
-              {projectsData?.total && projectsData.total > itemsPerPage && (
+              {/* Formatting Project Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {formatCardProjects(projectsData.data).map(project => {
+                  return (
+                    <BentoCard
+                      key={project.id}
+                      item={project}
+                      onView={() => handleViewProjectId(project)}
+                      onDelete={() => handleDeleteOutline(project)}
+                    />
+
+                  )
+                })}
+
+                {/* Delete Dialog */}
+                <Dialog open={isDeleteDialogOpen} >
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Are you absolutely sure?</DialogTitle>
+                      <DialogDescription>
+                        This action cannot be undone.<br />
+                        This will permanently delete your project <span className='font-bold'>{projectToDelete?.title + " "}</span>
+                        and remove your data from our servers.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button className='cursor-pointer hover:opacity-95' variant="secondary" onClick={() => setDeleteDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button className='cursor-pointer hover:opacity-95' variant="destructive" onClick={() => handleConfirmDelete()}>
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+
+              {/* Pagination */}
+              {projectsData.total && projectsData.total > itemsPerPage && (
                 <div className="flex justify-center mt-6">
                   <Pagination>
                     <PaginationContent>
@@ -192,22 +255,22 @@ export default function ProjectsPage() {
                         <PaginationPrevious
                           href="#"
                           onClick={(e) => {
-                            e.preventDefault()
-                            if (currentPage > 1) setCurrentPage(currentPage - 1)
+                            e.preventDefault();
+                            if (currentPage > 1) setCurrentPage(currentPage - 1);
                           }}
                         />
                       </PaginationItem>
-                      {Array.from({ length: Math.ceil(projectsData.total / itemsPerPage) }).map((_, index) => (
-                        <PaginationItem key={index}>
+                      {Array.from({ length: Math.ceil(projectsData.total / itemsPerPage) }).map((_, i) => (
+                        <PaginationItem key={i}>
                           <PaginationLink
                             href="#"
+                            isActive={currentPage === i + 1}
                             onClick={(e) => {
-                              e.preventDefault()
-                              setCurrentPage(index + 1)
+                              e.preventDefault();
+                              setCurrentPage(i + 1);
                             }}
-                            isActive={currentPage === index + 1}
                           >
-                            {index + 1}
+                            {i + 1}
                           </PaginationLink>
                         </PaginationItem>
                       ))}
@@ -215,9 +278,9 @@ export default function ProjectsPage() {
                         <PaginationNext
                           href="#"
                           onClick={(e) => {
-                            e.preventDefault()
+                            e.preventDefault();
                             if (currentPage < Math.ceil(projectsData?.total! / itemsPerPage)) {
-                              setCurrentPage(currentPage + 1)
+                              setCurrentPage(currentPage + 1);
                             }
                           }}
                         />
@@ -226,7 +289,15 @@ export default function ProjectsPage() {
                   </Pagination>
                 </div>
               )}
+
             </>
+          ) : (
+            <EmptyState
+              title="No Projects Yet"
+              description="Start creating a new project. To help you manage all your books!"
+              actionLabel="Create Your First Project"
+            />
+
           )}
         </div>
       </div>
