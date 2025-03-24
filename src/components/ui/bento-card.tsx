@@ -10,7 +10,7 @@ import { EllipsisVerticalIcon, EyeIcon, Trash2Icon } from 'lucide-react';
 export interface BentoItem<T> {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   icon?: React.ReactNode;
   status?: string;
   tags?: string[];
@@ -25,7 +25,6 @@ interface BentoGridProps<T> {
   onView?: () => void;
   onDelete?: () => void;
 }
-
 
 
 function BentoCard<T>({ item, onDelete, onView }: BentoGridProps<T>) {

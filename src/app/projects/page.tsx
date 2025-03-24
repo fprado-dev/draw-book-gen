@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { EmptyState } from '@/components/ui/empty-state'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
-import { FolderOpenDotIcon, PlusCircleIcon } from 'lucide-react'
+import { FolderCheckIcon, FolderOpenDotIcon, PlusCircleIcon } from 'lucide-react'
 import { BentoItem, BentoCard } from '@/components/ui/bento-card'
 
 import { TProject } from '@/types/TProjects'
@@ -23,6 +23,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import * as ProjectsServices from '@/services/projects.service'
 import { toast } from 'sonner'
+import { ProjectSheet } from './components/project-sheet'
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -33,89 +34,52 @@ export default function ProjectsPage() {
   const [projectToDelete, setProjectToDelete] = useState<BentoItem<TProject> | null>(null)
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
+
+  const [isOpenCreateSheet, setOpenCreateSheet] = useState(false);
+  const [titleName, setTitleName] = useState('')
+  const [keywords, setKeywords] = useState<string[]>([])
+  const [currentKeyword, setCurrentKeyword] = useState('')
+  const [currentColor, setSelectedColor] = useState('#E5E5FF')
+
+  const createProjectMutation = useMutation({
+    mutationFn: async () => {
+      if (!titleName.trim()) {
+        throw new Error("Project title is required")
+      }
+
+      return await ProjectsServices.createProject({
+        title: titleName.trim(),
+        color: currentColor,
+        keywords: keywords,
+        books_count: 0
+      })
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setTitleName('')
+      setKeywords([])
+      setCurrentKeyword('')
+      setSelectedColor('#E5E5FF')
+      setOpenCreateSheet(false)
+      toast("Project created", {
+        description: `Successfully created project "${data?.title}!"`
+      })
+    },
+    onError: (error) => {
+      console.error('Error creating project:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to create project')
+    }
+  })
+
+  const handleCreateProject = () => {
+    console.log({ titleName, keywords, currentColor })
+    createProjectMutation.mutate()
+  }
+
   const { data: projectsData, isLoading: isLoadingProject } = useQuery({
     queryKey: ['projects', currentPage],
     queryFn: () => ProjectsServices.getAllProjects(currentPage, itemsPerPage)
   })
-
-
-  // const validateIfTitleProjectExists = (title: string) => {
-  //   const projectExists = projectList?.some(project => {
-  //     return project.title.toLowerCase() === title.toLowerCase()
-  //   })
-  //   if (projectExists) {
-  //     throw new Error("Project already exists");
-  //   }
-
-  // }
-
-
-  // const createProjectMutation = useMutation({
-  //   mutationFn: async () => {
-  //     if (!newProjectTitle.trim() || !user) {
-  //       // toast.error("Project title is required")
-  //       throw new Error("Project title is required")
-  //     }
-  //     if (newProjectTitle.trim()) {
-  //       validateIfTitleProjectExists(newProjectTitle)
-  //       await ProjectServices.createProject({ title: newProjectTitle, color: newProjectColor })
-
-  //     }
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['projects'] })
-  //     setNewProjectTitle('')
-  //     setNewProjectColor('#6366f1')
-  //     setOpen(false)
-  //     toast("Project created", {
-  //       description: `Successfully created project "${newProjectTitle}!"`
-  //     })
-  //   },
-  //   onError: (error) => {
-  //     console.error('Error creating project:', error)
-  //     toast.error(error instanceof Error ? error.message : 'Failed to create project')
-  //   }
-  // })
-
-  // const updateProjectMutation = useMutation({
-  //   mutationFn: async ({ id, title, color }: TUpdateProject) => {
-  //     if (!user) return
-
-  //     return await ProjectServices.updateProject({ id, title, color })
-  //   },
-  //   onSuccess: (data) => {
-  //     queryClient.invalidateQueries({ queryKey: ['projects'] })
-  //     setEditingProject(null)
-  //     toast("Project updated", {
-  //       description: `Successfully updated project "${data?.title}!"`
-  //     })
-  //   },
-  //   onError: (error) => {
-  //     console.error('Error updating project:', error)
-  //     toast.error('Failed to update project')
-  //   }
-  // })
-
-
-
-  // const createProject = () => {
-  //   createProjectMutation.mutate()
-  // }
-
-  // const updateProject = (id: string, newTitle: string, color: string) => {
-  //   updateProjectMutation.mutate({ id, title: newTitle, color })
-  // }
-
-
-
-  // const handleEdit = (project: TProject) => {
-  //   setEditingProject(project)
-  //   setEditDialogOpen(true)
-  // }
-
-  // const handleDeleteClick = (project: TProject) => {
-
-  // }
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -164,10 +128,9 @@ export default function ProjectsPage() {
       return {
         id: project.id,
         title: project.title,
-        description: project.description || '',
+        status: `${project.books_count} ${project.books_count === 1 ? 'book' : 'books'}`,
         tags: project.keywords || [],
         cta: 'Explore →',
-        status: project.ebooks_count ? `${project.ebooks_count.toString()} Books` : "0 Books",
         icon: <FolderOpenDotIcon className="w-4 h-4 text-purple-500" />,
         meta: project,
       }
@@ -183,10 +146,26 @@ export default function ProjectsPage() {
             <h1 className="text-3xl font-bold text-primary">Projects</h1>
             <p className="text-muted-foreground mt-2">Organize existing projects and start new ventures effortlessly. </p>
           </div>
-          <Button variant="secondary" className="bg-gradient-to-r from-primary  to-primary/80 text-white">
-            <PlusCircleIcon className="mr-2 h-4 w-4" />
-            Create Project
-          </Button>
+          <ProjectSheet
+            isOpen={isOpenCreateSheet}
+            onOpenChange={setOpenCreateSheet}
+            titleName={titleName}
+            setTitleName={setTitleName}
+            setKeywords={setKeywords}
+            keywords={keywords}
+            setCurrentKeyword={setCurrentKeyword}
+            currentKeyword={currentKeyword}
+            onClick={handleCreateProject}
+            isLoading={createProjectMutation.isPending}
+            setSelectedColor={setSelectedColor}
+            selectedColor={currentColor}
+
+          >
+            <Button variant="secondary" className="cursor-pointer bg-gradient-to-r from-primary  to-primary/80 text-white">
+              <PlusCircleIcon className="mr-2 h-4 w-4" />
+              Create Project
+            </Button>
+          </ProjectSheet>
         </div>
         <div className="px-4 lg:px-6 flex flex-col gap-8">
           {isLoadingProject ? (
@@ -220,7 +199,9 @@ export default function ProjectsPage() {
                     />
 
                   )
-                })}
+                })
+
+                }
 
                 {/* Delete Dialog */}
                 <Dialog open={isDeleteDialogOpen} >
@@ -295,7 +276,7 @@ export default function ProjectsPage() {
             <EmptyState
               title="No Projects Yet"
               description="Start creating a new project. To help you manage all your books!"
-              actionLabel="Create Your First Project"
+              renderIcon={() => <FolderCheckIcon className="h-8 w-8 text-primary" />}
             />
 
           )}
