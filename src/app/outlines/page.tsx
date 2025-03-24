@@ -33,6 +33,7 @@ export default function OutlinesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
 
+  // Fetch outlines
   const { data: outlines, isLoading: isLoadingOutlines } = useQuery({
     queryKey: ['generate-outlines', currentPage],
     queryFn: async () => {
@@ -94,15 +95,46 @@ export default function OutlinesPage() {
     }
   })
 
-
   const handleGenerateOutline = () => {
     onGenerateAIOutline.mutate()
+  }
+
+
+  const onDeleteOutline = useMutation({
+    mutationFn: async (id: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const outlinesService = new OutlinesService.Outlines();
+      return await outlinesService.deleteOutline({
+        outline_id: id,
+        user_id: user?.id!
+      });
+    },
+    onSuccess: async (data) => {
+      if (data.success) {
+        toast.success(`Outline deleted successfully!`);
+        queryClient.invalidateQueries({
+          queryKey: ['generate-outlines'],
+        });
+      } else {
+        toast.error(data.error || 'Failed to delete outline');
+      }
+    },
+    onError: (error: unknown) => {
+      console.error('Error deleting outline:', error);
+      toast.error('An error occurred while deleting the outline');
+    }
+  })
+
+  const handleDeleteOutline = (outline: BentoItem<Outline>) => {
+    onDeleteOutline.mutate(outline.id);
   }
 
   const formatCardOutlines = (outlines: Outline[]): BentoItem<Outline>[] => {
 
     const formattedOutlines = outlines.map((outline): BentoItem<Outline> => {
       return {
+        id: outline.id,
         title: outline.title,
         description: outline.chapters[3]?.description?.slice(0, 80).replace(/[\*]/g, '') + '...',
         tags: outline.chapters[3]?.description?.split(' ').slice(0, 3).map(word => word.replace(/[^a-zA-Z]/g, '')) || [],
@@ -116,8 +148,9 @@ export default function OutlinesPage() {
     return formattedOutlines
   }
 
-  const handleClickCard = (outline: Outline) => {
-    setSelectedOutline(outline);
+  const handleViewOutline = (selectedOutline: BentoItem<Outline>) => {
+    const filteredOutline = outlines?.data?.find((outline) => outline.id === selectedOutline.id);
+    setSelectedOutline(filteredOutline!);
     setIsSheetOpen(true);
   }
 
@@ -234,15 +267,24 @@ export default function OutlinesPage() {
             </div>
           ) : outlines?.data && outlines.data.length > 0 ? (
             <>
-              <BentoCard
-                items={formatCardOutlines(outlines.data)}
-                onClick={handleClickCard}
-              />
-              <OutlineSheet
-                outline={selectedOutline}
-                isOpen={isSheetOpen}
-                onOpenChange={setIsSheetOpen}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {formatCardOutlines(outlines.data).map(outline => {
+                  return (
+                    <BentoCard
+                      key={outline.id}
+                      item={outline}
+                      onView={() => handleViewOutline(outline)}
+                      onDelete={() => handleDeleteOutline(outline)}
+                    />
+                  )
+                })}
+                <OutlineSheet
+                  outline={selectedOutline}
+                  isOpen={isSheetOpen}
+                  onOpenChange={setIsSheetOpen}
+                />
+              </div>
+
               {outlines.total && outlines.total > itemsPerPage && (
                 <div className="flex justify-center mt-6">
                   <Pagination>
@@ -285,6 +327,7 @@ export default function OutlinesPage() {
                   </Pagination>
                 </div>
               )}
+
             </>
           ) : (
             <EmptyState

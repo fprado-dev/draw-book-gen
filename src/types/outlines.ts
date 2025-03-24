@@ -4,6 +4,7 @@ interface Chapter {
 }
 
 export interface Outline {
+  id: string;
   title: string;
   user_id: string;
   chapters: Chapter[];

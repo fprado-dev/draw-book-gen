@@ -15,7 +15,7 @@ export class Outlines {
    * @param outline The outline data to create
    * @returns The created outline or error
    */
-  async createOutline(outline: Outline): Promise<{ success: boolean; error?: string; data?: Outline }> {
+  async createOutline(outline: Omit<Outline, "id">): Promise<{ success: boolean; error?: string; data?: Outline }> {
     try {
       // Validate input
       if (!outline.title || !outline.user_id || !Array.isArray(outline.chapters)) {
@@ -99,6 +99,21 @@ export class Outlines {
         success: false,
         error: error instanceof Error ? error.message : 'An unknown error occurred'
       };
+    }
+  }
+
+  async deleteOutline({ outline_id, user_id }: { outline_id: string, user_id: string }): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { error } = await this.supabase
+        .from('outlines')
+        .delete()
+        .eq('id', outline_id)
+        .eq('user_id', user_id);
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting outline:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
     }
   }
 
