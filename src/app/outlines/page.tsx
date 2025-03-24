@@ -333,7 +333,6 @@ export default function OutlinesPage() {
             <EmptyState
               title="No Outlines Yet"
               description="Start creating detailed book outlines with AI assistance. Generate chapter structures tailored to your story!"
-              actionLabel="Generate Your First Outline"
             />
 
           )}
