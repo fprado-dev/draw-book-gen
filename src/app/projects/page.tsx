@@ -222,8 +222,8 @@ export default function ProjectsPage() {
             selectedColor={currentColor}
             isEditMode={isEditMode}
           >
-            <Button variant="secondary" className="cursor-pointer bg-gradient-to-r from-primary  to-primary/80 text-white">
-              <PlusCircleIcon className="mr-2 h-4 w-4" />
+            <Button variant="secondary" className="cursor-pointer hover:-translate-y-0.5 bg-gradient-to-r from-primary  to-primary/80 text-white">
+              <PlusCircleIcon className="h-4 w-4" />
               Create Project
             </Button>
           </ProjectSheet>

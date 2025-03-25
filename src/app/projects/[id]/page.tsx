@@ -1,28 +1,33 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { BookCheck, BookImage, FolderClosedIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Sheet, SheetTrigger } from '@/components/ui/sheet'
 import { toast } from 'sonner'
-import { EbookList } from './components/ebook-list'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { TBookSize } from '@/types/ebook'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { TBook, TBookSize, TBookStatus } from '@/types/ebook'
 import * as BooksServices from "@/services/book.service"
+import { EmptyState } from '@/components/ui/empty-state'
+import { BentoCard, BentoItem } from '@/components/ui/bento-card'
+import { CreateBookSheet } from './components/create-book-sheet'
+import { EditBookSheet } from './components/edit-book-sheet'
 
 
 export default function ProjectDetailsPage() {
   const params = useParams()
   const queryClient = useQueryClient()
+  const router = useRouter();
+  const [editingBook, setEditingBook] = useState<TBook | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editBookStatus, setEditStatus] = useState<TBookStatus>('draft');
+  const [editTitle, setEditTitle] = useState('');
+  const [editSize, setEditSize] = useState<string>('');
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<TBook | null>(null);
   const [showNewBookSheet, setShowNewBookSheet] = useState(false)
-  const [newBookTitle, setNewBookTitle] = useState('')
-  const [newBookSize, setNewBookSize] = useState('')
-  const [newBookStatus] = useState<'draft' | 'published' | 'archived'>('draft')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
 
 
   const { data: books = [], isLoading: isLoadingBooks } = useQuery({
@@ -38,11 +43,11 @@ export default function ProjectDetailsPage() {
   });
 
   const createBookMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (data: Partial<TBook>) => {
       const newBook = await BooksServices.createBook({
-        title: newBookTitle,
-        size: newBookSize as TBookSize,
-        status: newBookStatus as 'draft' | 'published' | 'archived',
+        title: data.title as string,
+        size: data.size as TBookSize,
+        status: data.status as TBookStatus,
         project_id: params.id as string,
       })
       return newBook
@@ -57,86 +62,168 @@ export default function ProjectDetailsPage() {
     },
   })
 
-  const handleCreateBook = async () => {
-    if (!newBookTitle || !newBookSize) {
-      toast.error('Please fill in all fields')
-      return
-    }
-    createBookMutation.mutate()
+  const handleCreateBook = async (data: Partial<TBook>) => {
+    createBookMutation.mutate(data)
   }
 
+  const updateBookMutation = useMutation({
+    mutationFn: async () => {
+      return await BooksServices.updateBookById({
+        id: editingBook?.id,
+        title: editTitle,
+        size: editSize,
+        status: editBookStatus,
+        project_id: params.id as string,
+        thumbnail_url: editingBook?.thumbnail_url,
+      })
+    },
+    onSuccess(book) {
+      toast.success(`Book ${book.title} updated successfully`);
+      setEditDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+    onError() {
+      toast.error('Something went wrong while updating book');
+    }
+  });
 
+  const deleteBookMutation = useMutation({
+    mutationFn: async () => {
+      return await BooksServices.deleteBookById({
+        id: bookToDelete?.id as string
+      })
+    },
+    onSuccess() {
+      toast.success(`Book ${bookToDelete?.title} deleted successfully`);
+      setDeleteDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+    onError() {
+      toast.error('Something went wrong while deleting book');
+    }
+  });
+
+  const handleEditStatus = (status: TBookStatus) => {
+    setEditStatus(status);
+  };
+
+  const handleEdit = (book: TBook) => {
+    setEditingBook(book);
+    setEditTitle(book.title);
+    setEditSize(book.size);
+    setEditStatus(book.status);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdate = async () => {
+    updateBookMutation.mutate();
+  };
+
+  const handleDelete = async () => {
+    if (!bookToDelete) return;
+    deleteBookMutation.mutate();
+  };
+
+  const handleViewBook = (book: TBook) => {
+    localStorage.setItem('aillustra-current-book', JSON.stringify(book));
+    router.push(`/books/${book.id}`);
+  };
+
+  const formatCardProjects = (books: TBook[]): BentoItem<TBook>[] => {
+    const formattedOutlines = books?.map((book): BentoItem<TBook> => {
+      return {
+        id: book.id,
+        title: book.title,
+        status: `${book.pages.length} ${book.pages.length === 1 ? 'Page' : 'Pages'}`,
+        tags: [`${book.size}`, `${book.status}`],
+        cta: 'Explore →',
+        icon: <FolderClosedIcon className="w-4 h-4 text-purple-500" />,
+        meta: book,
+      }
+    })
+    return formattedOutlines
+  }
 
   return (
-    <div className='px-4 flex flex-col gap-4' >
-      <div className="flex justify-end items-center gap-2">
-        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'draft' | 'published' | 'archived')}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="archived">Archived</SelectItem>
-          </SelectContent>
-        </Select>
-        <Sheet open={showNewBookSheet} onOpenChange={setShowNewBookSheet}>
-          <SheetTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Create New Book
-            </Button>
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Create New Book</SheetTitle>
-            </SheetHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={newBookTitle}
-                  onChange={(e) => setNewBookTitle(e.target.value)}
-                  placeholder="Enter book title"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="size">Book Size</Label>
-                <Select value={newBookSize} onValueChange={setNewBookSize}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select book size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="5x8">{`5" x 8" (12.7 x 20.32 cm)`}</SelectItem>
-                    <SelectItem value="5.25x8">{`5.25" x 8" (13.34 x 20.32 cm)`}</SelectItem>
-                    <SelectItem value="5.5x8.5">{`5.5" x 8.5" (13.97 x 21.59 cm)`}</SelectItem>
-                    <SelectItem value="6x9">{`6" x 9" (15.24 x 22.86 cm)`}</SelectItem>
-                    <SelectItem value="7x10">{`7" x 10" (17.78 x 25.4 cm)`}</SelectItem>
-                    <SelectItem value="8x10">{`8" x 10" (20.32 x 25.4 cm)`}</SelectItem>
-                    <SelectItem value="8.5x11">{`8.5" x 11" (21.59 x 27.94 cm)`}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
+    <div className="flex flex-1 flex-col">
+      <div className="px-4 lg:px-6 flex flex-col gap-2">
+        <div className="flex items-start justify-between gap-8 py-4 md:gap-6">
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Books</h1>
+            <p className="text-muted-foreground mt-2">
+              Manage your books here, you can create, edit, and delete your books.
+            </p>
+          </div>
+          <Sheet
+            open={showNewBookSheet}
+            onOpenChange={setShowNewBookSheet}>
+            <SheetTrigger asChild>
               <Button
-                onClick={handleCreateBook}
-                disabled={createBookMutation.isPending}
-                className="mt-4"
+                variant="secondary"
+                className="cursor-pointer hover:-translate-y-0.5 bg-gradient-to-r from-primary  to-primary/80 text-white"
               >
-                {createBookMutation.isPending ? 'Creating...' : 'Create Book'}
+                <BookImage className="h-4 w-4" />
+                Create Book
               </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+            </SheetTrigger>
+            <CreateBookSheet
+              onSubmit={handleCreateBook}
+              isLoading={createBookMutation.isPending}
 
-      <div className="mt-4">
-        <EbookList
-          books={statusFilter === 'all' ? books : books.filter(book => book.status === statusFilter)}
-          isLoading={isLoadingBooks}
-        />
+            />
+          </Sheet>
+
+          <Sheet open={editDialogOpen}
+            onOpenChange={(open) => setEditDialogOpen(open)}>
+            <EditBookSheet
+              isLoading={updateBookMutation.isPending}
+              book={editingBook}
+              onUpdate={handleUpdate}
+              onStatusChange={handleEditStatus}
+            />
+          </Sheet>
+
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {
+            formatCardProjects(books).map((book) => {
+              return (
+                <BentoCard
+                  onDelete={() => handleDelete()}
+                  onView={() => handleViewBook(book.meta!)}
+                  key={book.id}
+                  onEdit={() => handleEdit(book.meta!)}
+                  item={book}
+                />
+              )
+            })
+          }
+        </div>
+        {isLoadingBooks && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
+                <div className="space-y-3">
+                  <div className="h-4 w-3/4 bg-muted rounded"></div>
+                  <div className="h-3 w-full bg-muted rounded"></div>
+                  <div className="h-3 w-2/3 bg-muted rounded"></div>
+                  <div className="flex gap-2 pt-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="h-6 w-16 bg-muted rounded-full"></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className='flex items-center justify-center'>
+          {books.length === 0 && !isLoadingBooks && <EmptyState
+            description='Create your first book and start profit!'
+            title='No Books yet!'
+            renderIcon={() => <BookCheck className='h-8 w-8 text-primary' />}
+          />}
+        </div>
       </div>
     </div>
   )

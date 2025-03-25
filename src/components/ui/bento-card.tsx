@@ -73,7 +73,7 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
         </div>
 
         <div className="space-y-2">
-          <h3 className="font-medium text-gray-900 dark:text-gray-100 tracking-tight text-[15px]">
+          <h3 onClick={onView} className="cursor-pointer hover:-translate-0.5 transition-all font-medium text-gray-900 dark:text-gray-100 tracking-tight text-[15px]">
             {item.title}
             {item.meta && <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">
               {formatDate((item?.meta as unknown as { created_at: string })?.created_at)}

@@ -36,12 +36,12 @@ export const getBookById = async ({ id }: Partial<TBook>) => {
   return data as TBook;
 }
 
-export const createBook = async ({ title, project_id, size, status, thumbnail_url }: TBookCreate) => {
+export const createBook = async ({ title, project_id, size, status }: TBookCreate) => {
   const { user } = await AuthService.getCurrentUser()
   const { data, error } = await supabase
     .from('books')
     .insert([
-      { title, project_id, size, status, thumbnail_url, user_id: user?.id },
+      { title, project_id, size, status, user_id: user?.id },
     ])
     .select();
   if (error) throw error;
