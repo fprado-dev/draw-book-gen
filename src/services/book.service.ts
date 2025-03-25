@@ -49,13 +49,18 @@ export const createBook = async ({ title, project_id, size, status }: TBookCreat
 
 }
 
-export const updateBookById = async ({ id, title, project_id, size, status, thumbnail_url, pages }: Partial<TBook>) => {
+export const updateBookById = async ({ id, title, project_id, size, status, pages }: Partial<TBook>) => {
+  const { user } = await AuthService.getCurrentUser()
+
   const { data, error } = await supabase
     .from('books')
-    .update({ title, project_id, size, status, thumbnail_url, pages, })
+    .update({ title, project_id, size, status, pages })
     .eq('id', id)
+    .eq("project_id", project_id)
+    .eq('user_id', user?.id)
     .select();
   if (error) throw error;
+  console.log({ data, title, project_id, size, status, pages })
   return data[0] as TBook;
 }
 

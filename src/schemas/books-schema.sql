@@ -76,7 +76,7 @@ end;
 $$;
 
 create trigger handle_project_deletion
-  before delete
+  after delete
   on public.projects
   for each row
   execute function public.handle_project_deletion();

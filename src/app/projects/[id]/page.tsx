@@ -13,6 +13,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { BentoCard, BentoItem } from '@/components/ui/bento-card'
 import { CreateBookSheet } from './components/create-book-sheet'
 import { EditBookSheet } from './components/edit-book-sheet'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 
 export default function ProjectDetailsPage() {
@@ -74,7 +75,6 @@ export default function ProjectDetailsPage() {
         size: editSize,
         status: editBookStatus,
         project_id: params.id as string,
-        thumbnail_url: editingBook?.thumbnail_url,
       })
     },
     onSuccess(book) {
@@ -119,7 +119,12 @@ export default function ProjectDetailsPage() {
     updateBookMutation.mutate();
   };
 
-  const handleDelete = async () => {
+  const handleDelete = (book: TBook) => {
+    setBookToDelete(book);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
     if (!bookToDelete) return;
     deleteBookMutation.mutate();
   };
@@ -178,8 +183,14 @@ export default function ProjectDetailsPage() {
             <EditBookSheet
               isLoading={updateBookMutation.isPending}
               book={editingBook}
-              onUpdate={handleUpdate}
               onStatusChange={handleEditStatus}
+              onTitleChange={setEditTitle}
+              onSizeChange={setEditSize}
+              onUpdate={handleUpdate}
+              title={editTitle}
+              size={editSize}
+              status={editBookStatus}
+
             />
           </Sheet>
 
@@ -189,7 +200,7 @@ export default function ProjectDetailsPage() {
             formatCardProjects(books).map((book) => {
               return (
                 <BentoCard
-                  onDelete={() => handleDelete()}
+                  onDelete={() => handleDelete(book.meta!)}
                   onView={() => handleViewBook(book.meta!)}
                   key={book.id}
                   onEdit={() => handleEdit(book.meta!)}
@@ -225,6 +236,29 @@ export default function ProjectDetailsPage() {
           />}
         </div>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your book
+              {bookToDelete && ` "${bookToDelete.title}"`}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setBookToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

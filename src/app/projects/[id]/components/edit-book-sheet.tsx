@@ -13,25 +13,24 @@ interface EditBookSheetProps {
   book: TBook | null;
   onUpdate: () => void;
   onStatusChange: (status: TBookStatus) => void;
+  onTitleChange: (title: string) => void;
+  onSizeChange: (size: string) => void;
+  title: string;
+  size: string;
+  status: TBookStatus;
 }
 
-export function EditBookSheet({ isLoading, book, onUpdate, onStatusChange }: EditBookSheetProps) {
-  const [title, setTitle] = useState('');
-  const [size, setSize] = useState<string>('');
-  const [status, setStatus] = useState<TBookStatus>('draft');
+export function EditBookSheet({ isLoading, book, title, size, status, onUpdate, onStatusChange, onSizeChange, onTitleChange }: EditBookSheetProps) {
 
   useEffect(() => {
     if (book) {
-      setTitle(book.title);
-      setSize(book.size);
-      setStatus(book.status);
+      onTitleChange(book.title);
+      onSizeChange(book.size);
+      onStatusChange(book.status);
     }
   }, [book]);
 
-  const handleStatusChange = (value: TBookStatus) => {
-    setStatus(value);
-    onStatusChange(value);
-  };
+
 
   return (
     <SheetContent className='p-4'>
@@ -45,12 +44,12 @@ export function EditBookSheet({ isLoading, book, onUpdate, onStatusChange }: Edi
             id="title"
             placeholder="Enter book title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => onTitleChange(e.target.value)}
           />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="size">Book Size</Label>
-          <Select value={size} onValueChange={setSize}>
+          <Select value={size} onValueChange={onSizeChange}>
             <SelectTrigger id="size">
               <SelectValue placeholder="Select book size" />
             </SelectTrigger>
@@ -67,7 +66,7 @@ export function EditBookSheet({ isLoading, book, onUpdate, onStatusChange }: Edi
         </div>
         <div className="grid gap-2">
           <Label htmlFor="status">Status</Label>
-          <Select value={status} onValueChange={handleStatusChange}>
+          <Select value={status} onValueChange={onStatusChange}>
             <SelectTrigger id="status">
               <SelectValue placeholder="Select book status" />
             </SelectTrigger>

@@ -5,7 +5,6 @@ export interface TBook {
   project_id: string;
   pages: TPage[],
   user_id: string;
-  thumbnail_url?: string;
   created_at: Date;
   updated_at: Date;
   last_viewed: Date
