@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,7 +28,7 @@ export function EditBookSheet({ isLoading, book, title, size, status, onUpdate, 
       onSizeChange(book.size);
       onStatusChange(book.status);
     }
-  }, [book]);
+  }, [book, onSizeChange, onStatusChange, onTitleChange]);
 
 
 
