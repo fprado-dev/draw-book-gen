@@ -12,8 +12,8 @@ export default function Dashboard() {
   const { data: statsInfos, isLoading: isLoadingStatsInfos } = useQuery({
     queryKey: ["dashboard"],
     queryFn: async () => {
-      const { totalBooks, totalImages, totalPages, totalProjects } = await getUserStats();
-      return { totalBooks, totalImages, totalPages, totalProjects };
+      const { totalBooks, totalImages, totalProjects } = await getUserStats();
+      return { totalBooks, totalImages, totalProjects };
     },
   })
 

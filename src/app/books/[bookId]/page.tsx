@@ -117,7 +117,7 @@ export default function EbookPage() {
                 style={{ width: '10%' }}
               />
             </div>
-            <p className='text-xs text-muted-foreground mt-1'>{book?.pages.length} Pages Created</p>
+            <p className='text-xs text-muted-foreground mt-1'>{book?.pages ? book?.pages.length : 0} Pages Created</p>
           </div>
         </Card>
 

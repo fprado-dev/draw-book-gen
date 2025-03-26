@@ -134,12 +134,12 @@ export default function ProjectDetailsPage() {
     router.push(`/books/${book.id}`);
   };
 
-  const formatCardProjects = (books: TBook[]): BentoItem<TBook>[] => {
+  const formatCardBook = (books: TBook[]): BentoItem<TBook>[] => {
     const formattedOutlines = books?.map((book): BentoItem<TBook> => {
       return {
         id: book.id,
         title: book.title,
-        status: `${book.pages.length} ${book.pages.length === 1 ? 'Page' : 'Pages'}`,
+        status: "0",
         tags: [`${book.size}`, `${book.status}`],
         cta: 'Explore →',
         icon: <FolderClosedIcon className="w-4 h-4 text-purple-500" />,
@@ -197,7 +197,7 @@ export default function ProjectDetailsPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {
-            formatCardProjects(books).map((book) => {
+            formatCardBook(books).map((book) => {
               return (
                 <BentoCard
                   onDelete={() => handleDelete(book.meta!)}

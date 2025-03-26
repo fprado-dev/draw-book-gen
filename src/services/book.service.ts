@@ -38,6 +38,7 @@ export const getBookById = async ({ id }: Partial<TBook>) => {
 
 export const createBook = async ({ title, project_id, size, status }: TBookCreate) => {
   const { user } = await AuthService.getCurrentUser()
+  console.log({ title, project_id, size, status, user_id: user?.id })
   const { data, error } = await supabase
     .from('books')
     .insert([
