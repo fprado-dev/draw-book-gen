@@ -3,148 +3,186 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { FolderOpenDotIcon, PlusCircleIcon } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-
-import * as ProjectsServices from '@/services/projects.service'
-import { TProject } from '@/types/TProjects'
-import { BentoItem, BentoCard } from '@/components/ui/bento-card'
-import { useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { EmptyState } from '@/components/ui/empty-state'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import { FolderCheckIcon, FolderOpenDotIcon, PlusCircleIcon } from 'lucide-react'
+import { BentoItem, BentoCard } from '@/components/ui/bento-card'
+
+import { TProject } from '@/types/TProjects'
+
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
+import * as ProjectsServices from '@/services/projects.service'
+import { toast } from 'sonner'
+import { ProjectSheet } from './components/project-sheet'
 
 export default function ProjectsPage() {
-
+  const router = useRouter()
+  const queryClient = useQueryClient();
 
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 9
+  const [projectToDelete, setProjectToDelete] = useState<BentoItem<TProject> | null>(null)
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-  const { data: projectsData, isLoading } = useQuery({
+
+  const [isOpenCreateSheet, setOpenCreateSheet] = useState(false);
+  const [titleName, setTitleName] = useState('')
+  const [keywords, setKeywords] = useState<string[]>([])
+  const [currentKeyword, setCurrentKeyword] = useState('')
+  const [currentColor, setSelectedColor] = useState('#E5E5FF')
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [projectToEdit, setProjectToEdit] = useState<TProject | null>(null)
+
+  const createProjectMutation = useMutation({
+    mutationFn: async () => {
+      if (!titleName.trim()) {
+        throw new Error("Project title is required")
+      }
+
+      return await ProjectsServices.createProject({
+        title: titleName.trim(),
+        color: currentColor,
+        keywords: keywords,
+        books_count: 0
+      })
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setTitleName('')
+      setKeywords([])
+      setCurrentKeyword('')
+      setSelectedColor('#E5E5FF')
+      setOpenCreateSheet(false)
+      toast("Project created", {
+        description: `Successfully created project "${data?.title}!"`
+      })
+    },
+    onError: (error) => {
+      console.error('Error creating project:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to create project')
+    }
+  })
+
+  const updateProjectMutation = useMutation({
+    mutationFn: async () => {
+      if (!titleName.trim() || !projectToEdit?.id) {
+        throw new Error("Project title is required")
+      }
+
+      return await ProjectsServices.updateProject({
+        id: projectToEdit.id,
+        title: titleName.trim(),
+        color: currentColor,
+        keywords: keywords
+      })
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setTitleName('')
+      setKeywords([])
+      setCurrentKeyword('')
+      setSelectedColor('#E5E5FF')
+      setOpenCreateSheet(false)
+      setIsEditMode(false)
+      setProjectToEdit(null)
+      toast("Project updated", {
+        description: `Successfully updated project "${data?.title}!"`
+      })
+    },
+    onError: (error) => {
+      console.error('Error updating project:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update project')
+    }
+  })
+
+  const handleCreateOrUpdateProject = () => {
+    if (isEditMode && projectToEdit) {
+      updateProjectMutation.mutate()
+    } else {
+      createProjectMutation.mutate()
+    }
+  }
+
+  const { data: projectsData, isLoading: isLoadingProject } = useQuery({
     queryKey: ['projects', currentPage],
     queryFn: () => ProjectsServices.getAllProjects(currentPage, itemsPerPage)
   })
 
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await ProjectsServices.deleteProject({ id: id })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setDeleteDialogOpen(false)
+      setProjectToDelete(null)
+      toast("Project Deleted", {
+        description: `Successfully deleted project!`,
+      })
+    },
+    onError: (error) => {
+      console.error('Error deleting project:', error)
+      toast.error('Failed to delete project')
+    }
+  })
 
-  // const validateIfTitleProjectExists = (title: string) => {
-  //   const projectExists = projectList?.some(project => {
-  //     return project.title.toLowerCase() === title.toLowerCase()
-  //   })
-  //   if (projectExists) {
-  //     throw new Error("Project already exists");
-  //   }
+  const deleteProject = (id: string) => {
+    deleteProjectMutation.mutate(id)
+  }
 
-  // }
+  const handleConfirmDelete = () => {
+    if (projectToDelete) {
+      deleteProject(projectToDelete.id);
+    }
+  }
 
+  const handleViewProjectId = (project: BentoItem<TProject>) => {
+    const projectInfos = {
+      id: project.id,
+      title: project.title,
+    }
+    localStorage.setItem('aillustra-current-project', JSON.stringify(projectInfos))
+    router.push(`/projects/${project.id}`)
+  }
 
-  // const createProjectMutation = useMutation({
-  //   mutationFn: async () => {
-  //     if (!newProjectTitle.trim() || !user) {
-  //       // toast.error("Project title is required")
-  //       throw new Error("Project title is required")
-  //     }
-  //     if (newProjectTitle.trim()) {
-  //       validateIfTitleProjectExists(newProjectTitle)
-  //       await ProjectServices.createProject({ title: newProjectTitle, color: newProjectColor })
+  const handleDeleteOutline = (project: BentoItem<TProject>) => {
+    setProjectToDelete(project)
+    setDeleteDialogOpen(true)
+  }
 
-  //     }
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['projects'] })
-  //     setNewProjectTitle('')
-  //     setNewProjectColor('#6366f1')
-  //     setOpen(false)
-  //     toast("Project created", {
-  //       description: `Successfully created project "${newProjectTitle}!"`
-  //     })
-  //   },
-  //   onError: (error) => {
-  //     console.error('Error creating project:', error)
-  //     toast.error(error instanceof Error ? error.message : 'Failed to create project')
-  //   }
-  // })
-
-  // const updateProjectMutation = useMutation({
-  //   mutationFn: async ({ id, title, color }: TUpdateProject) => {
-  //     if (!user) return
-
-  //     return await ProjectServices.updateProject({ id, title, color })
-  //   },
-  //   onSuccess: (data) => {
-  //     queryClient.invalidateQueries({ queryKey: ['projects'] })
-  //     setEditingProject(null)
-  //     toast("Project updated", {
-  //       description: `Successfully updated project "${data?.title}!"`
-  //     })
-  //   },
-  //   onError: (error) => {
-  //     console.error('Error updating project:', error)
-  //     toast.error('Failed to update project')
-  //   }
-  // })
-
-  // const deleteProjectMutation = useMutation({
-  //   mutationFn: async (id: string) => {
-  //     if (!user) return
-  //     return await ProjectServices.deleteProject({ id: id })
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['projects'] })
-  //     setDeleteDialogOpen(false)
-  //     setProjectToDelete(null)
-  //     toast("Project Deleted", {
-  //       description: `Successfully deleted project!`,
-  //     })
-  //   },
-  //   onError: (error) => {
-  //     console.error('Error deleting project:', error)
-  //     toast.error('Failed to delete project')
-  //   }
-  // })
-
-  // const createProject = () => {
-  //   createProjectMutation.mutate()
-  // }
-
-  // const updateProject = (id: string, newTitle: string, color: string) => {
-  //   updateProjectMutation.mutate({ id, title: newTitle, color })
-  // }
-
-  // const deleteProject = (id: string) => {
-  //   deleteProjectMutation.mutate(id)
-  // }
-
-  // const handleEdit = (project: TProject) => {
-  //   setEditingProject(project)
-  //   setEditDialogOpen(true)
-  // }
-
-  // const handleDeleteClick = (project: TProject) => {
-  //   setProjectToDelete(project)
-  //   setDeleteDialogOpen(true)
-  // }
-
-  // const handleConfirmDelete = () => {
-  //   if (projectToDelete) {
-  //     deleteProject(projectToDelete.id)
-  //   }
-  // }
-
-  // const handleViewProjectId = async (project: TProject) => {
-  //   localStorage.setItem('illustra-current-project', JSON.stringify(project))
-  //   router.push(`/projects/${project.id}`)
-
-  // }
-
+  const handleEditProject = (project: BentoItem<TProject>) => {
+    const projectData = project.meta
+    if (projectData) {
+      setProjectToEdit(projectData)
+      setTitleName(projectData.title)
+      setKeywords(projectData.keywords || [])
+      setSelectedColor(projectData.color)
+      setIsEditMode(true)
+      setOpenCreateSheet(true)
+    }
+  }
 
   const formatCardProjects = (projects: TProject[]): BentoItem<TProject>[] => {
     const formattedOutlines = projects?.map((project): BentoItem<TProject> => {
       return {
+        id: project.id,
         title: project.title,
-        description: project.description || '',
+        status: `${project.books_count} ${project.books_count === 1 ? 'book' : 'books'}`,
         tags: project.keywords || [],
         cta: 'Explore →',
-        status: project.ebooks_count ? `${project.ebooks_count.toString()} Books` : "0 Books",
         icon: <FolderOpenDotIcon className="w-4 h-4 text-purple-500" />,
         meta: project,
+        color: project.color,
       }
     })
     return formattedOutlines
@@ -158,13 +196,40 @@ export default function ProjectsPage() {
             <h1 className="text-3xl font-bold text-primary">Projects</h1>
             <p className="text-muted-foreground mt-2">Organize existing projects and start new ventures effortlessly. </p>
           </div>
-          <Button variant="secondary" className="bg-gradient-to-r from-primary  to-primary/80 text-white">
-            <PlusCircleIcon className="mr-2 h-4 w-4" />
-            Create Project
-          </Button>
+          <ProjectSheet
+            isOpen={isOpenCreateSheet}
+            onOpenChange={(open) => {
+              setOpenCreateSheet(open)
+              if (!open) {
+                // Reset form when closing
+                setIsEditMode(false)
+                setProjectToEdit(null)
+                setTitleName('')
+                setKeywords([])
+                setCurrentKeyword('')
+                setSelectedColor('#E5E5FF')
+              }
+            }}
+            titleName={titleName}
+            setTitleName={setTitleName}
+            setKeywords={setKeywords}
+            keywords={keywords}
+            setCurrentKeyword={setCurrentKeyword}
+            currentKeyword={currentKeyword}
+            onClick={handleCreateOrUpdateProject}
+            isLoading={createProjectMutation.isPending || updateProjectMutation.isPending}
+            setSelectedColor={setSelectedColor}
+            selectedColor={currentColor}
+            isEditMode={isEditMode}
+          >
+            <Button variant="secondary" className="cursor-pointer hover:-translate-y-0.5 bg-gradient-to-r from-primary  to-primary/80 text-white">
+              <PlusCircleIcon className="h-4 w-4" />
+              Create Project
+            </Button>
+          </ProjectSheet>
         </div>
         <div className="px-4 lg:px-6 flex flex-col gap-8">
-          {isLoading ? (
+          {isLoadingProject ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[...Array(6)].map((_, index) => (
                 <div key={index} className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm animate-pulse">
@@ -181,10 +246,51 @@ export default function ProjectsPage() {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : projectsData?.data && projectsData.data.length > 0 ? (
             <>
-              <BentoCard items={formatCardProjects(projectsData?.data || [])} />
-              {projectsData?.total && projectsData.total > itemsPerPage && (
+              {/* Formatting Project Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {formatCardProjects(projectsData.data).map(project => {
+                  return (
+                    <BentoCard
+                      key={project.id}
+                      item={project}
+                      onView={() => handleViewProjectId(project)}
+                      onDelete={() => handleDeleteOutline(project)}
+                      onEdit={() => handleEditProject(project)}
+                    />
+
+                  )
+                })
+
+                }
+
+                {/* Delete Dialog */}
+                <Dialog open={isDeleteDialogOpen} >
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Are you absolutely sure?</DialogTitle>
+                      <DialogDescription>
+                        This action cannot be undone.<br />
+                        This will permanently delete your project <span className='font-bold'>{projectToDelete?.title + " "}</span>
+                        and remove your data from our servers.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button className='cursor-pointer hover:opacity-95' variant="secondary" onClick={() => setDeleteDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button className='cursor-pointer hover:opacity-95' variant="destructive" onClick={() => handleConfirmDelete()}>
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+
+              {/* Pagination */}
+              {projectsData.total && projectsData.total > itemsPerPage && (
                 <div className="flex justify-center mt-6">
                   <Pagination>
                     <PaginationContent>
@@ -192,22 +298,22 @@ export default function ProjectsPage() {
                         <PaginationPrevious
                           href="#"
                           onClick={(e) => {
-                            e.preventDefault()
-                            if (currentPage > 1) setCurrentPage(currentPage - 1)
+                            e.preventDefault();
+                            if (currentPage > 1) setCurrentPage(currentPage - 1);
                           }}
                         />
                       </PaginationItem>
-                      {Array.from({ length: Math.ceil(projectsData.total / itemsPerPage) }).map((_, index) => (
-                        <PaginationItem key={index}>
+                      {Array.from({ length: Math.ceil(projectsData.total / itemsPerPage) }).map((_, i) => (
+                        <PaginationItem key={i}>
                           <PaginationLink
                             href="#"
+                            isActive={currentPage === i + 1}
                             onClick={(e) => {
-                              e.preventDefault()
-                              setCurrentPage(index + 1)
+                              e.preventDefault();
+                              setCurrentPage(i + 1);
                             }}
-                            isActive={currentPage === index + 1}
                           >
-                            {index + 1}
+                            {i + 1}
                           </PaginationLink>
                         </PaginationItem>
                       ))}
@@ -215,9 +321,9 @@ export default function ProjectsPage() {
                         <PaginationNext
                           href="#"
                           onClick={(e) => {
-                            e.preventDefault()
+                            e.preventDefault();
                             if (currentPage < Math.ceil(projectsData?.total! / itemsPerPage)) {
-                              setCurrentPage(currentPage + 1)
+                              setCurrentPage(currentPage + 1);
                             }
                           }}
                         />
@@ -226,7 +332,15 @@ export default function ProjectsPage() {
                   </Pagination>
                 </div>
               )}
+
             </>
+          ) : (
+            <EmptyState
+              title="No Projects Yet"
+              description="Start creating a new project. To help you manage all your books!"
+              renderIcon={() => <FolderCheckIcon className="h-8 w-8 text-primary" />}
+            />
+
           )}
         </div>
       </div>

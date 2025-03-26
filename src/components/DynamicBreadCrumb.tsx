@@ -30,8 +30,8 @@ const DynamicBreadCrumb = () => {
 
   useEffect(() => {
     try {
-      const projectData = localStorage.getItem('illustra-current-project')
-      const bookData = localStorage.getItem('illustra-current-book')
+      const projectData = localStorage.getItem('aillustra-current-project')
+      const bookData = localStorage.getItem('aillustra-current-book')
       setCurrentProject(projectData ? JSON.parse(projectData) : null)
       setCurrentBook(bookData ? JSON.parse(bookData) : null)
     } catch (error) {

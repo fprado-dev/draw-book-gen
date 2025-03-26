@@ -3,7 +3,7 @@ create table if not exists public.projects (
   id uuid primary key,
   title text not null,
   description text,
-  ebooks_count integer not null default 0,
+  books_count integer not null default 0,
   keywords text[] default array[]::text[],
   color text not null default '#7F4A88',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,

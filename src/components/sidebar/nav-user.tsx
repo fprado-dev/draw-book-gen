@@ -79,12 +79,12 @@ export function NavUser({ user }: TNavUser) {
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={userProfile?.avatar} alt={userProfile?.name} />
                 <AvatarFallback className="rounded-lg">
-                  {userProfile?.name?.split(' ').slice(0, 2).map(word => word?.[0] || '').join('')}
+                  {userProfile?.name?.split(' ').slice(0, 2).map(word => word?.[0] || '').join('') || "AI"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{userProfile?.name}</span>
-                <span className="truncate text-xs">{userProfile?.email}</span>
+                <span className="truncate font-semibold">{userProfile?.name || "Welcome"}</span>
+                <span className="truncate text-xs">{userProfile?.email || "Aillustra.com"}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>

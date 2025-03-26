@@ -18,14 +18,36 @@ export const getAllProjects = async (page = 1, limit = 9) => {
   return { data: data as TProject[], total: count }
 }
 
-export const createProject = async ({ title, color }: TNewProject) => {
+export const validateIfTitleProjectExists = async (title: string) => {
+  const { user } = await Auth.getCurrentUser()
+  if (!user?.id) return false
+
+  const { data } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('title', title)
+    .single()
+
+  return data
+}
+
+export const createProject = async ({ title, color, keywords = [], books_count }: TNewProject) => {
   const { user } = await Auth.getCurrentUser()
   if (!user?.id) return null
 
+  // Validate if project title exists
+  const projectExists = await validateIfTitleProjectExists(title)
+
+  if (projectExists) {
+    throw new Error(`A project with the title "${title}" already exists`)
+  }
   const newProject = {
     title,
     color,
+    keywords,
     user_id: user.id,
+    books_count: books_count || 0,
   }
 
   const { error } = await supabase
@@ -35,8 +57,6 @@ export const createProject = async ({ title, color }: TNewProject) => {
   if (error) throw error
 
   return newProject
-
-
 }
 
 export const updateProject = async ({ id, color, title }: TUpdateProject) => {

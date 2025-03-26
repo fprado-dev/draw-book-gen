@@ -4,8 +4,7 @@ export type TUpdateProject = Partial<TProject>
 export type TProject = {
     id: string;
     title: string;
-    description?: string;
-    ebooks_count: number;
+    books_count: number;
     keywords: string[];
     color: string;
     created_at: string;

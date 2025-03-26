@@ -88,7 +88,7 @@ export function StatsCards({ userStats, isLoading }: TStatsCards) {
         <CardHeader className="relative">
           <CardDescription>Total Pages</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            {userStats?.totalPages}
+            {0}
           </CardTitle>
           <div className="absolute right-4 top-0">
             <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">

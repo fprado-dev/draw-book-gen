@@ -4,7 +4,6 @@ import * as AuthService from "./auth.service";
 export interface UserStats {
   totalProjects: number;
   totalBooks: number;
-  totalPages: number;
   totalImages: number;
 }
 
@@ -39,15 +38,8 @@ export async function getUserStats(): Promise<UserStats> {
 
     if (booksError) throw booksError;
 
-    // Get total pages count by summing pages from all books
-    const { data: booksData, error: pagesError } = await supabase
-      .from("books")
-      .select("pages")
-      .eq("user_id", user.id);
 
-    if (pagesError) throw pagesError;
 
-    const pagesCount = booksData?.reduce((sum, book) => sum + book.pages.length, 0);
     // Get images count from storage by listing all book folders and their contents
     const { data: userFolders, error: userFoldersError } = await supabase.storage
       .from("users-generated-images")
@@ -76,8 +68,7 @@ export async function getUserStats(): Promise<UserStats> {
     return {
       totalProjects: projectsCount || 0,
       totalBooks: booksCount || 0,
-      totalPages: pagesCount || 0,
-      totalImages: totalImagesCount,
+      totalImages: totalImagesCount || 0,
     };
   } catch (error) {
     console.error("Error fetching user stats:", error);

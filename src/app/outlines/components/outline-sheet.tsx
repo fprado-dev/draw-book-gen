@@ -87,7 +87,6 @@ export function OutlineSheet({ outline, isOpen, onOpenChange }: OutlineSheetProp
               </div>
               <div className="relative space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold tracking-tight bg-gradient-to-r from-primary/80 to-primary bg-clip-text text-transparent">Chapter {index + 1}</h3>
                   <Button
                     variant="ghost"
                     size="sm"
