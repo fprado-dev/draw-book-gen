@@ -2,7 +2,6 @@ export interface TBook {
   id: string;
   title: string;
   size: string;
-  project_id: string;
   pages: TPage[],
   user_id: string;
   created_at: Date;
@@ -24,7 +23,6 @@ export type TBookStatus = 'draft' | 'published' | 'archived'
 export interface TBookCreate {
   title: string;
   size: TBookSize;
-  project_id: string;
   thumbnail_url?: string;
   status: TBookStatus;
 }

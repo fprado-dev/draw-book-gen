@@ -36,13 +36,13 @@ export const getBookById = async ({ id }: Partial<TBook>) => {
   return data as TBook;
 }
 
-export const createBook = async ({ title, project_id, size, status }: TBookCreate) => {
+export const createBook = async ({ title, size, status }: TBookCreate) => {
   const { user } = await AuthService.getCurrentUser()
-  console.log({ title, project_id, size, status, user_id: user?.id })
+  console.log({ title, project_id: "0", size, status, user_id: user?.id })
   const { data, error } = await supabase
     .from('books')
     .insert([
-      { title, project_id, size, status, user_id: user?.id },
+      { title, project_id: "0", size, status, user_id: user?.id },
     ])
     .select();
   if (error) throw error;
@@ -50,18 +50,18 @@ export const createBook = async ({ title, project_id, size, status }: TBookCreat
 
 }
 
-export const updateBookById = async ({ id, title, project_id, size, status, pages }: Partial<TBook>) => {
+export const updateBookById = async ({ id, title, size, status, pages }: Partial<TBook>) => {
   const { user } = await AuthService.getCurrentUser()
 
   const { data, error } = await supabase
     .from('books')
-    .update({ title, project_id, size, status, pages })
+    .update({ title, project_id: "0", size, status, pages })
     .eq('id', id)
-    .eq("project_id", project_id)
+    .eq("project_id", "0")
     .eq('user_id', user?.id)
     .select();
   if (error) throw error;
-  console.log({ data, title, project_id, size, status, pages })
+  console.log({ data, title, project_id: "0", size, status, pages })
   return data[0] as TBook;
 }
 

@@ -1,7 +1,6 @@
 -- Create books table
 create table if not exists public.books (
   id uuid primary key,
-  project_id uuid references public.projects(id) on delete cascade not null,
   user_id uuid references auth.users(id) on delete cascade not null,
   status text check (status in ('draft', 'published', 'archived')) default 'draft',
   pages jsonb default '[]'::jsonb,
@@ -44,7 +43,6 @@ create policy "Users can delete their own books"
 
 -- Create indexes for faster queries
 create index if not exists books_user_id_idx on public.books(user_id);
-create index if not exists books_project_id_idx on public.books(project_id);
 create index if not exists books_created_at_idx on public.books(created_at);
 
 -- Function to automatically update updated_at timestamp

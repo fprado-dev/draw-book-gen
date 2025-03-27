@@ -1,3 +1,5 @@
+"use server"
+
 export type TOutline = {
   title: string;
   chapters: Array<{

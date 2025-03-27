@@ -1,4 +1,4 @@
-const protectedRoutes = ["/dashboard", "/projects", "/outlines"];
+const protectedRoutes = ["/dashboard", "/books", "/outlines"];
 const authRoutes = ["/sign-in", "/sign-up"];
 
 import { createServerClient } from "@supabase/ssr";

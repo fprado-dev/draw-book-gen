@@ -4,7 +4,6 @@ import { createClient } from "@/utils/supabase/server";
 import { User } from "@supabase/supabase-js";
 
 export interface UserStats {
-  totalProjects: number;
   totalBooks: number;
   totalImages: number;
 }
@@ -20,18 +19,10 @@ export interface DailyOutlinesStats {
 }
 
 
-
 export async function getUserStats(): Promise<UserStats> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth?.getUser()
   try {
-    // Get projects count
-    const { count: projectsCount, error: projectsError } = await supabase
-      .from("projects")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user?.id);
-
-    if (projectsError) throw projectsError;
 
     // Get books count
     const { count: booksCount, error: booksError } = await supabase
@@ -69,7 +60,6 @@ export async function getUserStats(): Promise<UserStats> {
     }
 
     return {
-      totalProjects: projectsCount || 0,
       totalBooks: booksCount || 0,
       totalImages: totalImagesCount || 0,
     };

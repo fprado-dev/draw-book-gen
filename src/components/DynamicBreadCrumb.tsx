@@ -9,7 +9,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { TBook } from "@/types/ebook"
-import { TProject } from "@/types/TProjects"
 import { House } from "lucide-react"
 
 
@@ -18,21 +17,17 @@ import { Fragment, useEffect, useState } from "react"
 
 const routeLabels: Record<string, string> = {
   outlines: 'Outlines',
-  projects: 'Projects',
   'ai-images': 'AI Images',
   books: 'Books'
 }
 
 const DynamicBreadCrumb = () => {
   const pathname = usePathname()
-  const [currentProject, setCurrentProject] = useState<TProject | null>(null)
   const [currentBook, setCurrentBook] = useState<TBook | null>(null)
 
   useEffect(() => {
     try {
-      const projectData = localStorage.getItem('aillustra-current-project')
       const bookData = localStorage.getItem('aillustra-current-book')
-      setCurrentProject(projectData ? JSON.parse(projectData) : null)
       setCurrentBook(bookData ? JSON.parse(bookData) : null)
     } catch (error) {
       console.error('Error accessing localStorage:', error)
@@ -46,39 +41,14 @@ const DynamicBreadCrumb = () => {
   }
 
   const getPathSegments = (): TPathSegments[] => {
-
-    // Handle project route
-    if (pathname.startsWith('/projects/')) {
-      const segments = pathname.split('/')
-      if (segments.length === 3) { // URL pattern: /projects/{projectId}
-        return [
-          {
-            label: 'Projects',
-            href: '/projects',
-            isLast: false,
-          },
-          {
-            label: currentProject?.title || 'Project',
-            href: `projects/${currentProject?.id}`,
-            isLast: true,
-          }
-        ]
-      }
-    }
-
     if (pathname.startsWith('/books/')) {
       const segments = pathname.split('/')
 
       if (segments.length === 3) { // URL pattern: /books/{bookId}
         return [
           {
-            label: 'Projects',
-            href: '/projects',
-            isLast: false,
-          },
-          {
-            label: currentProject?.title || 'Project',
-            href: `/projects/${currentProject?.id}`,
+            label: 'Books',
+            href: '/books',
             isLast: false,
           },
           {

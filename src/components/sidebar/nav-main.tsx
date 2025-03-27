@@ -27,8 +27,8 @@ const navMain = [
     isActive: true,
     items: [
       {
-        title: "Projects",
-        url: "/projects",
+        title: "Books",
+        url: "/books",
       },
       {
         title: "Outlines",
