@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/toggle-group"
 import { useQuery } from "@tanstack/react-query"
 import { DailyImageStats, DailyOutlinesStats, getDailyImageStats, getDailyOutlineStats } from "@/services/dashboard.service"
+import { User } from "@supabase/supabase-js"
 
 
 const chartConfig = {
@@ -48,7 +49,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartAreaInteractive() {
+export function ChartAreaInteractive({ user }: { user: User }) {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("30d")
 
@@ -62,8 +63,8 @@ export function ChartAreaInteractive() {
     queryKey: ["chart-data"],
     queryFn: async () => {
       const [imageStats, outlineStats] = await Promise.all([
-        getDailyImageStats(),
-        getDailyOutlineStats(),
+        getDailyImageStats({ user }),
+        getDailyOutlineStats({ user }),
       ])
       const mergedData = mergeData({ imageStats, outlineStats });
 
