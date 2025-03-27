@@ -1,8 +1,8 @@
+
 export interface TBook {
   id: string;
   title: string;
   size: string;
-  pages: TPage[],
   user_id: string;
   created_at: Date;
   updated_at: Date;
@@ -10,22 +10,8 @@ export interface TBook {
   status: TBookStatus;
 }
 
-export type TPage = {
-  id: string;
-  title: string;
-  type: 'blank' | 'text' | 'illustration';
-  content?: string;
-  imageUrl?: string;
-  order: number;
-};
 
 export type TBookStatus = 'draft' | 'published' | 'archived'
-export interface TBookCreate {
-  title: string;
-  size: TBookSize;
-  thumbnail_url?: string;
-  status: TBookStatus;
-}
 
 export type TBookSize =
   | '5x8'
