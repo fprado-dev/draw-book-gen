@@ -7,21 +7,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string
-    logo: React.ElementType,
-    plan: string,
-    credits: number,
-  }[]
-}) {
-  const [activeTeam] = React.useState(teams[0])
 
-  if (!activeTeam) {
-    return null
-  }
+export function TeamSwitcher() {
 
   return (
     <SidebarMenu>

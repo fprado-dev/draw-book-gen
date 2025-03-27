@@ -1,11 +1,49 @@
-'use client';
+import { forgotPasswordAction } from "@/app/actions";
+import { SubmitButton } from "@/components/submit-button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { FormMessage, Message } from "../components/auth-message";
+import Logo from "@/app/Logo"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-import { LoginForm } from "@/components/login-form";
-export default function SignIn() {
+export default async function ForgotPassword(props: {
+  searchParams: Promise<Message>;
+}) {
+  const searchParams = await props.searchParams;
   return (
-    <div className="relative flex min-h-svh flex-col items-center justify-center bg-background p-6 md:p-10">
+    <div className="relative w-full flex min-h-svh flex-col items-center justify-center bg-background p-6 md:p-10">
       <div className="z-10 relative w-full max-w-sm md:max-w-xl">
-        <LoginForm />
+        <FormMessage message={searchParams} />
+
+        <div className={cn("flex flex-col gap-6 pt-8 w-full")} {...props}>
+          <Card>
+            <CardHeader className="text-center flex items-center justify-center pt-5">
+              <CardTitle>
+                <Logo />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form className="flex-1 flex flex-col w-full gap-2 text-foreground [&>input]:mb-6">
+                <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
+                  <Input name="email" placeholder="you@example.com" required />
+                  <SubmitButton formAction={forgotPasswordAction}>
+                    Reset Password
+                  </SubmitButton>
+                </div>
+                <p className="text-sm text-secondary-foreground text-center">
+                  Already have an account?{" "}
+                  <Link className="text-primary underline" href="/sign-in">
+                    Sign in
+                  </Link>
+                </p>
+              </form>
+
+            </CardContent>
+          </Card>
+        </div>
+
       </div>
       <svg className="absolute top-0 bottom-0  z-0 w-full h-screen" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -19,5 +57,6 @@ export default function SignIn() {
       </svg>
 
     </div>
+
   );
 }

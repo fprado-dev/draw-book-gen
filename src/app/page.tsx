@@ -1,13 +1,16 @@
-"use client"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
 
-export default function Page() {
-  const Router = useRouter()
-  useEffect(() => {
-    Router.push('/dashboard')
-  }, [Router])
-  return (
-    null
-  )
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+
+export default async function Page() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return redirect("/sign-in");
+  }
+  return redirect("/dashboard");
 }

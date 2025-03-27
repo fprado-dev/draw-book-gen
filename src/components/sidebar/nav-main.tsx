@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight, Folder, FolderIcon, LayoutDashboard, type LucideIcon } from "lucide-react"
 
 import {
   Collapsible,
@@ -18,25 +18,56 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "../ui/separator"
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
+const navMain = [
+
+  {
+    title: "Getting Started",
+    url: "#",
+    icon: Folder,
+    isActive: true,
+    items: [
+      {
+        title: "Projects",
+        url: "/projects",
+      },
+      {
+        title: "Outlines",
+        url: "/outlines",
+      },
+      {
+        title: "AI Images",
+        url: "/ai-images",
+      },
+    ],
+  },
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+    isActive: true,
+    items: [
+      {
+        title: "Overview",
+        url: "/dashboard",
+      },
+      {
+        title: "Billing",
+        url: "/dashboard/billing",
+      },
+      {
+        title: "Settings",
+        url: "/dashboard/settings",
+      }
+    ],
+  },
+]
+
+export function NavMain() {
   return (
     <SidebarGroup>
       <Separator className="mb-4" />
       <SidebarMenu>
-        {items.map((item) => (
+        {navMain.map((item) => (
           <Collapsible
             key={item.title}
             asChild

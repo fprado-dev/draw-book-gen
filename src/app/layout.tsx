@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-// import { Analytics } from "@vercel/analytics/react"
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthProvider } from "@/contexts/AuthContext";
-import App from "./app";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import DynamicBreadCrumb from "@/components/DynamicBreadCrumb";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createClient } from "@/utils/supabase/server";
+import { HeaderLayout } from "@/components/header";
 
 // Optimize font loading with display: 'swap' to prevent layout shifts
 const geistSans = Geist({
@@ -33,28 +36,34 @@ export const metadata: Metadata = {
 
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <App>
-            {children}
-          </App>
-        </AuthProvider>
+        <SidebarProvider>
+          <AppSidebar user={user} />
+          <SidebarInset >
+            <HeaderLayout />
+            <div className="flex flex-1 flex-col">
+              {children}
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
         <Toaster position="top-center" toastOptions={{
           closeButton: true,
 
         }} />
-        {/* <Analytics /> */}
       </body>
     </html>
   );

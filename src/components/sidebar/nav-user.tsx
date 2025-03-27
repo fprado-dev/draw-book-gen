@@ -1,71 +1,21 @@
 "use client"
 
 import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react"
-
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
-import { User } from "@supabase/supabase-js"
-import { supabase } from "@/services/supabase"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-type TNavUser = {
-  user: User | undefined,
-}
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { User } from "@supabase/supabase-js";
+import { signOutAction } from "@/app/actions";
 
-type TUserProfile = {
-  id: string;
-  name: string;
-  avatar: string;
-  email: string;
-}
 
-import { useRouter } from "next/navigation"
-export function NavUser({ user }: TNavUser) {
-  const queryClient = useQueryClient()
-  const Router = useRouter()
-  const { isMobile } = useSidebar()
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => {
-      if (!user?.id) return null;
-
-      const { data: profile, error } = await supabase
-        .from('users')
-        .select('id, name, avatar, email')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      return profile as TUserProfile;
-    },
-    enabled: !!user?.id
-  });
-
+export function NavUser({ user }: { user: User | null }) {
+  const isMobile = useIsMobile();
 
   return (
     <SidebarMenu>
@@ -77,14 +27,14 @@ export function NavUser({ user }: TNavUser) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={userProfile?.avatar} alt={userProfile?.name} />
+                <AvatarImage src={user?.user_metadata?.avatar_url} alt="Current user Avatar" />
                 <AvatarFallback className="rounded-lg">
-                  {userProfile?.name?.split(' ').slice(0, 2).map(word => word?.[0] || '').join('') || "AI"}
+                  {user?.email?.split(' ').slice(0, 2).map(word => word?.[0] || '').join('') || "AI"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{userProfile?.name || "Welcome"}</span>
-                <span className="truncate text-xs">{userProfile?.email || "Aillustra.com"}</span>
+                <span className="truncate font-semibold">{user?.user_metadata.full_name || "Welcome"}</span>
+                <span className="truncate text-xs">{user?.email || "Aillustra.com"}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -98,12 +48,12 @@ export function NavUser({ user }: TNavUser) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={userProfile?.avatar} alt={userProfile?.name} />
+                  <AvatarImage src={user?.user_metadata?.avatar_url} alt="Current user Avatar" />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{userProfile?.name}</span>
-                  <span className="truncate text-xs">{userProfile?.email}</span>
+                  <span className="truncate font-semibold">{user?.user_metadata?.name || "Welcome"}</span>
+                  <span className="truncate text-xs">{user?.email || "Aillustra.com"}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -132,9 +82,7 @@ export function NavUser({ user }: TNavUser) {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={
               async () => {
-                await supabase.auth.signOut();
-                queryClient.clear();
-                Router.push("/sign-in")
+                signOutAction()
               }
             }>
               <LogOut className="w-4 h-4 text-slate-500 mr-2" />
@@ -144,5 +92,6 @@ export function NavUser({ user }: TNavUser) {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
+
   )
 }
