@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import DynamicBreadCrumb from "@/components/DynamicBreadCrumb";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/server";
 import { HeaderLayout } from "@/components/header";
+import Providers from "@/components/providers";
 
 // Optimize font loading with display: 'swap' to prevent layout shifts
 const geistSans = Geist({
@@ -34,8 +33,6 @@ export const metadata: Metadata = {
   }
 };
 
-
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -56,7 +53,12 @@ export default async function RootLayout({
           <SidebarInset >
             <HeaderLayout />
             <div className="flex flex-1 flex-col">
-              {children}
+              <Providers>
+
+                {children}
+
+              </Providers>
+
             </div>
           </SidebarInset>
         </SidebarProvider>

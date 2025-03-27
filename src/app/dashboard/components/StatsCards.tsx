@@ -2,7 +2,6 @@
 
 
 import { TrendingDownIcon, TrendingUpIcon } from "lucide-react"
-
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -11,23 +10,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { User } from "@supabase/supabase-js"
-import { useQuery } from "@tanstack/react-query"
+
+import { QueryClient, useQuery } from "@tanstack/react-query"
 import { getUserStats } from "@/services/dashboard.service"
+import { useEffect } from "react"
 
 type TStatsCards = {
-  user: User | null
 }
+const queryClient = new QueryClient();
 
-export function StatsCards({ user }: TStatsCards) {
+export function StatsCards({ }: TStatsCards) {
   const { data: statsInfos, isLoading } = useQuery({
-    queryKey: ["dashboard"],
+    queryKey: ["get-user-stats"],
     queryFn: async () => {
-      const { totalBooks, totalImages, totalProjects } = await getUserStats({ user });
+      const { totalBooks, totalImages, totalProjects } = await getUserStats();
       return { totalBooks, totalImages, totalProjects };
     },
   })
 
+
+  useEffect(() => {
+    return () => {
+      queryClient.clear()
+    }
+  })
 
   if (isLoading) {
     return (

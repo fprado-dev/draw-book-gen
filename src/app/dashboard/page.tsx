@@ -1,13 +1,9 @@
-// 'use client';
 
-import { useQuery } from "@tanstack/react-query";
 import { ChartAreaInteractive } from "./components/ChartArea";
 import { DataTable } from "./components/DataTable";
 import { StatsCards } from "./components/StatsCards";
 import data from "./components/data.json"
-import { getUserStats } from "@/services/dashboard.service";
 import { createClient } from "@/utils/supabase/server";
-// import { createClient } from "@supabase/supabase-js";
 
 
 export default async function Dashboard() {
@@ -26,7 +22,7 @@ export default async function Dashboard() {
             <h1 className="text-3xl font-bold text-primary">Dashboard {user?.email}</h1>
             <p className="text-muted-foreground mt-2">Manage your data and credit usage</p>
           </div>
-          <StatsCards user={user!} />
+          <StatsCards />
           <div className="px-4 lg:px-6">
             <ChartAreaInteractive user={user!} />
           </div>

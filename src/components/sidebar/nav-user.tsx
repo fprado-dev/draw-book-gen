@@ -14,9 +14,9 @@ import { User } from "@supabase/supabase-js";
 import { signOutAction } from "@/app/actions";
 
 
+
 export function NavUser({ user }: { user: User | null }) {
   const isMobile = useIsMobile();
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>

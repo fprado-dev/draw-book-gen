@@ -1,5 +1,6 @@
-import { supabase } from "./supabase";
-import * as AuthService from "./auth.service";
+"use server"
+
+import { createClient } from "@/utils/supabase/server";
 import { User } from "@supabase/supabase-js";
 
 export interface UserStats {
@@ -18,7 +19,11 @@ export interface DailyOutlinesStats {
   outlines: number;
 }
 
-export async function getUserStats({ user }: { user: User | null }): Promise<UserStats> {
+
+
+export async function getUserStats(): Promise<UserStats> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth?.getUser()
   try {
     // Get projects count
     const { count: projectsCount, error: projectsError } = await supabase
@@ -75,6 +80,7 @@ export async function getUserStats({ user }: { user: User | null }): Promise<Use
 }
 
 export async function getDailyImageStats({ user }: { user: User | null }): Promise<DailyImageStats[]> {
+  const supabase = await createClient()
   try {
 
     const { data: userFolders, error: userFoldersError } = await supabase.storage
@@ -120,6 +126,8 @@ export async function getDailyImageStats({ user }: { user: User | null }): Promi
 }
 
 export async function getDailyOutlineStats({ user }: { user: User | null }): Promise<DailyOutlinesStats[]> {
+  const supabase = await createClient()
+
   try {
 
 

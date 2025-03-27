@@ -1,9 +1,17 @@
 "use client"
 
-import * as React from "react"
+import { useEffect, useState } from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useQuery } from "@tanstack/react-query"
+import { User } from "@supabase/supabase-js"
+import {
+  DailyImageStats,
+  DailyOutlinesStats,
+  getDailyImageStats,
+  getDailyOutlineStats
+} from "@/services/dashboard.service"
+
 import {
   Card,
   CardContent,
@@ -30,9 +38,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
-import { useQuery } from "@tanstack/react-query"
-import { DailyImageStats, DailyOutlinesStats, getDailyImageStats, getDailyOutlineStats } from "@/services/dashboard.service"
-import { User } from "@supabase/supabase-js"
+
 
 
 const chartConfig = {
@@ -51,16 +57,16 @@ const chartConfig = {
 
 export function ChartAreaInteractive({ user }: { user: User }) {
   const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("30d")
+  const [timeRange, setTimeRange] = useState("30d")
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isMobile) {
       setTimeRange("7d")
     }
   }, [isMobile])
 
   const { data: chartData } = useQuery({
-    queryKey: ["chart-data"],
+    queryKey: ["get-daily-ai-stats"],
     queryFn: async () => {
       const [imageStats, outlineStats] = await Promise.all([
         getDailyImageStats({ user }),

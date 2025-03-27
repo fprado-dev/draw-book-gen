@@ -5,7 +5,6 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Provider } from "@supabase/supabase-js";
-import { toast } from "sonner";
 
 const signInWith = (provider: Provider) => async () => {
   const supabase = await createClient()
@@ -159,5 +158,6 @@ export const resetPasswordAction = async (formData: FormData) => {
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  
   return redirect("/sign-in");
 };
