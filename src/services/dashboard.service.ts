@@ -1,8 +1,9 @@
-import { supabase } from "./supabase";
-import * as AuthService from "./auth.service";
+'use server';
+
+import { createClient } from '@/utils/supabase/server';
+import { User } from '@supabase/supabase-js';
 
 export interface UserStats {
-  totalProjects: number;
   totalBooks: number;
   totalImages: number;
 }
@@ -18,46 +19,40 @@ export interface DailyOutlinesStats {
 }
 
 export async function getUserStats(): Promise<UserStats> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
   try {
-    const { user } = await AuthService.getCurrentUser();
-    if (!user) throw new Error("User not authenticated");
-
-    // Get projects count
-    const { count: projectsCount, error: projectsError } = await supabase
-      .from("projects")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
-
-    if (projectsError) throw projectsError;
-
     // Get books count
     const { count: booksCount, error: booksError } = await supabase
-      .from("books")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
+      .from('books')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user?.id);
 
     if (booksError) throw booksError;
 
-
-
     // Get images count from storage by listing all book folders and their contents
-    const { data: userFolders, error: userFoldersError } = await supabase.storage
-      .from("users-generated-images")
-      .list(`${user.id}`, {
-        limit: 100000,
-        offset: 0,
-        sortBy: { column: "name", order: "asc" },
-      });
+    const { data: userFolders, error: userFoldersError } =
+      await supabase.storage
+        .from('users-generated-images')
+        .list(`${user?.id}`, {
+          limit: 100000,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' },
+        });
 
     if (userFoldersError) throw userFoldersError;
     // Count all images across all book folders
     let totalImagesCount = 0;
     if (userFolders) {
       for (const folder of userFolders) {
-        if (folder.name) { // Check if it's a folder
-          const { data: bookImages, error: bookImagesError } = await supabase.storage
-            .from("users-generated-images")
-            .list(`${user.id}/${folder.name}`);
+        if (folder.name) {
+          // Check if it's a folder
+          const { data: bookImages, error: bookImagesError } =
+            await supabase.storage
+              .from('users-generated-images')
+              .list(`${user?.id}/${folder.name}`);
 
           if (bookImagesError) throw bookImagesError;
           totalImagesCount += bookImages?.length || 0;
@@ -66,28 +61,30 @@ export async function getUserStats(): Promise<UserStats> {
     }
 
     return {
-      totalProjects: projectsCount || 0,
       totalBooks: booksCount || 0,
       totalImages: totalImagesCount || 0,
     };
   } catch (error) {
-    console.error("Error fetching user stats:", error);
+    console.error('Error fetching user stats:', error);
     throw error;
   }
 }
 
-export async function getDailyImageStats(): Promise<DailyImageStats[]> {
+export async function getDailyImageStats({
+  user,
+}: {
+  user: User | null;
+}): Promise<DailyImageStats[]> {
+  const supabase = await createClient();
   try {
-    const { user } = await AuthService.getCurrentUser();
-    if (!user) throw new Error("User not authenticated");
-
-    const { data: userFolders, error: userFoldersError } = await supabase.storage
-      .from("users-generated-images")
-      .list(`${user.id}`, {
-        limit: 100000,
-        offset: 0,
-        sortBy: { column: "name", order: "asc" },
-      });
+    const { data: userFolders, error: userFoldersError } =
+      await supabase.storage
+        .from('users-generated-images')
+        .list(`${user?.id}`, {
+          limit: 100000,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' },
+        });
 
     if (userFoldersError) throw userFoldersError;
 
@@ -97,14 +94,15 @@ export async function getDailyImageStats(): Promise<DailyImageStats[]> {
     if (userFolders) {
       for (const folder of userFolders) {
         if (folder.name) {
-          const { data: bookImages, error: bookImagesError } = await supabase.storage
-            .from("users-generated-images")
-            .list(`${user.id}/${folder.name}`);
+          const { data: bookImages, error: bookImagesError } =
+            await supabase.storage
+              .from('users-generated-images')
+              .list(`${user?.id}/${folder.name}`);
 
           if (bookImagesError) throw bookImagesError;
 
           // Group images by date
-          bookImages?.forEach(image => {
+          bookImages?.forEach((image) => {
             const date = new Date(image.created_at).toISOString().split('T')[0];
             imagesByDate.set(date, (imagesByDate.get(date) || 0) + 1);
           });
@@ -118,20 +116,23 @@ export async function getDailyImageStats(): Promise<DailyImageStats[]> {
       .sort((a, b) => a.date.localeCompare(b.date));
     return stats;
   } catch (error) {
-    console.error("Error fetching daily image stats:", error);
+    console.error('Error fetching daily image stats:', error);
     throw error;
   }
 }
 
-export async function getDailyOutlineStats(): Promise<DailyOutlinesStats[]> {
-  try {
-    const { user } = await AuthService.getCurrentUser();
-    if (!user) throw new Error("User not authenticated");
+export async function getDailyOutlineStats({
+  user,
+}: {
+  user: User | null;
+}): Promise<DailyOutlinesStats[]> {
+  const supabase = await createClient();
 
+  try {
     const { data: outlines, error } = await supabase
-      .from("outlines")
-      .select("created_at")
-      .eq("user_id", user.id);
+      .from('outlines')
+      .select('created_at')
+      .eq('user_id', user?.id);
 
     if (error) throw error;
 
@@ -139,7 +140,7 @@ export async function getDailyOutlineStats(): Promise<DailyOutlinesStats[]> {
     const outlinesByDate = new Map<string, number>();
 
     // Group outlines by date
-    outlines?.forEach(outline => {
+    outlines?.forEach((outline) => {
       const date = new Date(outline.created_at).toISOString().split('T')[0];
       outlinesByDate.set(date, (outlinesByDate.get(date) || 0) + 1);
     });
@@ -151,8 +152,7 @@ export async function getDailyOutlineStats(): Promise<DailyOutlinesStats[]> {
 
     return stats;
   } catch (error) {
-    console.error("Error fetching daily outline stats:", error);
+    console.error('Error fetching daily outline stats:', error);
     throw error;
   }
 }
-

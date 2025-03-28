@@ -1,76 +1,116 @@
-import { supabase } from './supabase';
-import { TBook, TBookCreate } from '@/types/ebook';
-import * as AuthService from "@/services/auth.service"
-import { TProject } from '@/types/TProjects';
-import { getThumbnailOptions } from './unsplash.service';
+'use server';
 
-export const getBookThumbnailOptions = async (query?: string) => {
-  return getThumbnailOptions(query);
-};
+import {
+  TBook,
+  TBookType,
+  TBookMeasurementUnit,
+  TBookPaperColor,
+  TBookStatus,
+} from '@/types/ebook';
+import { createClient } from '@/utils/supabase/server';
 
+export const onCreateBook = async (
+  formaData: FormData,
+  status: TBookStatus,
+  paperColor: TBookPaperColor,
+  bookType: TBookType,
+  unit: TBookMeasurementUnit
+) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
 
-export const getProjectBooks = async ({ id }: Partial<TProject>) => {
+  const title = formaData.get('title') as string;
+  const size = formaData.get('size') as string;
 
-  const { user } = await AuthService.getCurrentUser()
-  const { data, error } = await supabase
-    .from('books')
-    .select('*')
-    .eq('user_id', user?.id)
-    .eq('project_id', id);
-
-  if (error) throw error;
-
-  return data as TBook[];
-};
-
-export const getBookById = async ({ id }: Partial<TBook>) => {
-  const { user } = await AuthService.getCurrentUser()
-
-  const { data, error } = await supabase
-    .from('books')
-    .select('*')
-    .eq('user_id', user?.id)
-    .eq('id', id)
-    .single();
-  if (error) throw error;
-  return data as TBook;
-}
-
-export const createBook = async ({ title, project_id, size, status }: TBookCreate) => {
-  const { user } = await AuthService.getCurrentUser()
-  console.log({ title, project_id, size, status, user_id: user?.id })
   const { data, error } = await supabase
     .from('books')
     .insert([
-      { title, project_id, size, status, user_id: user?.id },
+      {
+        title,
+        size,
+        status,
+        paper_color: paperColor,
+        book_type: bookType,
+        measurement_unit: unit,
+        user_id: user?.id,
+      },
     ])
-    .select();
+    .single();
+
   if (error) throw error;
-  return data[0] as TBook;
+  return data;
+};
 
-}
+export const getBookById = async (id: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
+  const { data, error } = await supabase
+    .from('books')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', user?.id)
+    .single();
+  if (error) throw error;
+  return data as TBook;
+};
 
-export const updateBookById = async ({ id, title, project_id, size, status, pages }: Partial<TBook>) => {
-  const { user } = await AuthService.getCurrentUser()
+export const onUpdateBook = async (
+  book: Omit<TBook, 'user_id' | 'created_at' | 'updated_at' | 'last_viewed'>
+) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
+  const { data, error } = await supabase
+    .from('books')
+    .update({
+      title: book.title,
+      size: book.size,
+      status: book.status,
+      paper_color: book.paper_color,
+      book_type: book.book_type,
+      measurement_unit: book.measurement_unit,
+    })
+    .eq('id', book.id)
+    .eq('user_id', user?.id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+export const getAllBooks = async () => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
 
   const { data, error } = await supabase
     .from('books')
-    .update({ title, project_id, size, status, pages })
-    .eq('id', id)
-    .eq("project_id", project_id)
+    .select('*')
     .eq('user_id', user?.id)
-    .select();
-  if (error) throw error;
-  console.log({ data, title, project_id, size, status, pages })
-  return data[0] as TBook;
-}
+    .order('created_at', { ascending: false });
 
-export const deleteBookById = async ({ id }: Partial<TBook>) => {
+  if (error) throw error;
+  return {
+    books: data as TBook[],
+  };
+};
+
+export const deleteBook = async (id: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
   const { data, error } = await supabase
     .from('books')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user?.id);
   if (error) throw error;
   return data;
-}
-
+};

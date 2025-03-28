@@ -10,19 +10,20 @@ export const getThumbnailOptions = async (query: string = 'patterns') => {
       query,
       perPage: 20,
       orientation: 'landscape',
-
     });
 
     if (result.errors) {
       throw new Error('Failed to fetch images from Unsplash');
     }
 
-    return result.response?.results.map((photo) => ({
-      url: photo.urls.regular,
-      thumb: photo.urls.thumb,
-      description: photo.description || photo.alt_description,
-      author: photo.user.name,
-    })) || [];
+    return (
+      result.response?.results.map((photo) => ({
+        url: photo.urls.regular,
+        thumb: photo.urls.thumb,
+        description: photo.description || photo.alt_description,
+        author: photo.user.name,
+      })) || []
+    );
   } catch (error) {
     console.error('Error fetching thumbnail options:', error);
     throw error;

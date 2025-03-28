@@ -14,18 +14,21 @@ An innovative web application that uses AI to generate custom coloring pages for
 ## Prerequisites
 
 Before you begin, ensure you have installed:
+
 - [Node.js](https://nodejs.org/) (version 18 or higher)
 - [npm](https://www.npmjs.com/) (usually comes with Node.js)
 
 ## Installation
 
 1. Clone the repository:
+
 ```bash
 git clone [your-repository-url]
 cd draw-book-gen
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -33,6 +36,7 @@ npm install
 3. Set up environment variables:
    - Copy the `.env.example` file to `.env`
    - Fill in your Firebase configuration values
+
 ```bash
 cp .env.example .env
 ```
@@ -86,7 +90,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-
 #### TODO
 
 TODO: INFOS
@@ -96,11 +99,10 @@ TODO: INFOS
 - [x] Get count of Books generated
 - [x] Get count of Projects generated
 
-TODO: Chart 
+TODO: Chart
 
 - [ ] Get Count of Images generated per range
 - [ ] Get Current Credits per range
-
 
 - Billing Page
 

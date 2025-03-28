@@ -1,6 +1,11 @@
 'use client';
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -12,7 +17,11 @@ type OutlineSheetProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-export function OutlineSheet({ outline, isOpen, onOpenChange }: OutlineSheetProps) {
+export function OutlineSheet({
+  outline,
+  isOpen,
+  onOpenChange,
+}: OutlineSheetProps) {
   if (!outline) return null;
 
   const handleCopyChapter = (chapterContent: string) => {
@@ -47,18 +56,22 @@ export function OutlineSheet({ outline, isOpen, onOpenChange }: OutlineSheetProp
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-[80vh] overflow-y-auto bg-white">
-        <SheetHeader className="pb-6 border-b px-8 pt-6 bg-white bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px]">
+        <SheetHeader className="border-b bg-white bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px] px-8 pb-6 pt-6">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <SheetTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">{outline.title}</SheetTitle>
-              <p className="text-sm text-muted-foreground font-medium">{outline.chapters.length} chapters generated</p>
+              <SheetTitle className="from-primary to-primary/80 bg-gradient-to-r bg-clip-text text-3xl font-bold tracking-tight text-transparent">
+                {outline.title}
+              </SheetTitle>
+              <p className="text-muted-foreground text-sm font-medium">
+                {outline.chapters.length} chapters generated
+              </p>
             </div>
             <div className="flex gap-3">
               <Button
                 size="sm"
                 onClick={handleCopyAll}
                 variant="secondary"
-                className="cursor-pointer hover:opacity-90 bg-gradient-to-r from-primary  to-primary/80 text-white"
+                className="from-primary to-primary/80 cursor-pointer bg-gradient-to-r  text-white hover:opacity-90"
               >
                 <CopyIcon className="h-4 w-4" />
                 Copy All
@@ -67,8 +80,7 @@ export function OutlineSheet({ outline, isOpen, onOpenChange }: OutlineSheetProp
                 size="sm"
                 onClick={handleDownload}
                 variant="secondary"
-                className="cursor-pointer hover:opacity-90 bg-gradient-to-r from-primary  to-primary/80 text-white"
-
+                className="from-primary to-primary/80 cursor-pointer bg-gradient-to-r  text-white hover:opacity-90"
               >
                 <DownloadIcon className="h-4 w-4" />
                 Download
@@ -76,13 +88,13 @@ export function OutlineSheet({ outline, isOpen, onOpenChange }: OutlineSheetProp
             </div>
           </div>
         </SheetHeader>
-        <div className="p-8 grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-6 p-8">
           {outline.chapters.map((chapter, index) => (
             <div
               key={index}
-              className="group cursor-pointer relative p-6 rounded-2xl border bg-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/20"
+              className="hover:border-primary/20 group relative cursor-pointer rounded-2xl border bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 overflow-hidden rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px]" />
               </div>
               <div className="relative space-y-3">
@@ -91,13 +103,13 @@ export function OutlineSheet({ outline, isOpen, onOpenChange }: OutlineSheetProp
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCopyChapter(chapter.description)}
-                    className="cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs hover:bg-primary/10 text-primary"
+                    className="hover:bg-primary/10 text-primary cursor-pointer text-xs opacity-0 transition-all duration-200 group-hover:opacity-100"
                   >
                     Copy to Clipboard
                     <CopyIcon className="h-1 w-1" />
                   </Button>
                 </div>
-                <p className="text-sm text-muted-foreground/90 whitespace-pre-wrap leading-relaxed">
+                <p className="text-muted-foreground/90 whitespace-pre-wrap text-sm leading-relaxed">
                   {chapter.description.replace(/[\*]/g, '')}
                 </p>
               </div>

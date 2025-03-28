@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
@@ -18,14 +18,12 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; img-src 'self' https://sphmbocvwmutmvceihez.supabase.co data:; sandbox;",
+    contentSecurityPolicy:
+      "default-src 'self'; script-src 'none'; img-src 'self' https://sphmbocvwmutmvceihez.supabase.co data:; sandbox;",
   },
   // Optimize font loading to prevent preloading warnings
 
-  experimental: {
-
-
-  },
+  experimental: {},
 };
 
 export default nextConfig;

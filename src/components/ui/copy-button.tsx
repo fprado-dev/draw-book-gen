@@ -5,7 +5,8 @@ import { Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from './button';
 
-interface CopyButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface CopyButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
   className?: string;
 }
@@ -37,11 +38,7 @@ export function CopyButton({ value, className, ...props }: CopyButtonProps) {
       }}
       {...props}
     >
-      {hasCopied ? (
-        <Check className="h-4 w-4" />
-      ) : (
-        <Copy className="h-4 w-4" />
-      )}
+      {hasCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
     </Button>
   );
 }

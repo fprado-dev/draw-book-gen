@@ -1,72 +1,64 @@
-import { TrendingDownIcon, TrendingUpIcon } from "lucide-react"
+'use client';
 
-import { Badge } from "@/components/ui/badge"
+import { TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { UserStats } from "@/services/dashboard.service"
+} from '@/components/ui/card';
 
-type TStatsCards = {
-  userStats?: UserStats,
-  isLoading: boolean
-}
+import { QueryClient, useQuery } from '@tanstack/react-query';
+import { getUserStats } from '@/services/dashboard.service';
+import { useEffect } from 'react';
 
-export function StatsCards({ userStats, isLoading }: TStatsCards) {
+const queryClient = new QueryClient();
+
+export function StatsCards() {
+  const { data: statsInfos, isLoading } = useQuery({
+    queryKey: ['get-user-stats'],
+    queryFn: async () => {
+      const { totalBooks, totalImages } = await getUserStats();
+      return { totalBooks, totalImages };
+    },
+  });
+
+  useEffect(() => {
+    return () => {
+      queryClient.clear();
+    };
+  });
+
   if (isLoading) {
     return (
-      <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4 px-4 dark:*:data-[slot=card]:bg-card lg:px-6">
+      <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <Card key={index} className="@container/card">
             <CardHeader className="relative">
-              <div className="h-4 w-24 bg-muted rounded animate-pulse" />
-              <div className="h-8 w-16 bg-muted rounded mt-2 animate-pulse" />
+              <div className="bg-muted h-4 w-24 animate-pulse rounded" />
+              <div className="bg-muted mt-2 h-8 w-16 animate-pulse rounded" />
               <div className="absolute right-4 top-4">
-                <div className="h-6 w-16 bg-muted rounded animate-pulse" />
+                <div className="bg-muted h-6 w-16 animate-pulse rounded" />
               </div>
             </CardHeader>
             <CardFooter className="flex-col items-start gap-1 text-sm">
-              <div className="h-4 w-32 bg-muted rounded animate-pulse" />
-              <div className="h-4 w-40 bg-muted rounded animate-pulse" />
+              <div className="bg-muted h-4 w-32 animate-pulse rounded" />
+              <div className="bg-muted h-4 w-40 animate-pulse rounded" />
             </CardFooter>
           </Card>
         ))}
       </div>
     );
   }
-
   return (
-    <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4 px-4 dark:*:data-[slot=card]:bg-card lg:px-6">
-      <Card className="@container/card">
-        <CardHeader className="relative">
-          <CardDescription>Total Projects</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            {userStats?.totalProjects}
-          </CardTitle>
-          <div className="absolute right-4 top-0">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingUpIcon className="size-3" />
-              +12.5%
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month <TrendingUpIcon className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            New books created this month
-          </div>
-        </CardFooter>
-      </Card>
+    <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4">
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>Total Books</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            {userStats?.totalBooks}
+            {statsInfos?.totalBooks}
           </CardTitle>
           <div className="absolute right-4 top-0">
             <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
@@ -79,9 +71,7 @@ export function StatsCards({ userStats, isLoading }: TStatsCards) {
           <div className="line-clamp-1 flex gap-2 font-medium">
             Down 20% this period <TrendingDownIcon className="size-4" />
           </div>
-          <div className="text-muted-foreground">
-            Books created this month
-          </div>
+          <div className="text-muted-foreground">Books created this month</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
@@ -99,16 +89,19 @@ export function StatsCards({ userStats, isLoading }: TStatsCards) {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Pages created in {userStats?.totalBooks} Books    <TrendingUpIcon className="size-4" />
+            Pages created in {statsInfos?.totalBooks} Books{' '}
+            <TrendingUpIcon className="size-4" />
           </div>
-          <div className="text-muted-foreground">Money saved with zero effort </div>
+          <div className="text-muted-foreground">
+            Money saved with zero effort{' '}
+          </div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>Images Generated</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            {userStats?.totalImages}
+            {statsInfos?.totalImages}
           </CardTitle>
           <div className="absolute right-4 top-0">
             <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
@@ -119,11 +112,12 @@ export function StatsCards({ userStats, isLoading }: TStatsCards) {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Using Ailustra model<TrendingUpIcon className="size-4" />
+            Using Ailustra model
+            <TrendingUpIcon className="size-4" />
           </div>
           <div className="text-muted-foreground">Cost of $0,001 each</div>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

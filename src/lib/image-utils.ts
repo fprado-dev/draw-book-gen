@@ -19,15 +19,15 @@ export function isBase64Image(url: string): boolean {
  */
 export function formatImageUrl(url: string): string {
   if (!url) return '';
-  
+
   // If already a data URL, return as is
   if (isBase64Image(url)) return url;
-  
+
   // If it's a base64 string without the data URL prefix, add it
   if (url.match(/^[A-Za-z0-9+/=]+$/)) {
     return `data:image/png;base64,${url}`;
   }
-  
+
   // Otherwise, it's a regular URL
   return url;
 }
@@ -37,7 +37,10 @@ export function formatImageUrl(url: string): string {
  * @param aspectRatio The aspect ratio (e.g., 'portrait', 'square')
  * @returns An object with width and height
  */
-export function getImageDimensions(aspectRatio: string = 'portrait'): { width: number; height: number } {
+export function getImageDimensions(aspectRatio: string = 'portrait'): {
+  width: number;
+  height: number;
+} {
   switch (aspectRatio) {
     case 'portrait':
       return { width: 600, height: 800 };
