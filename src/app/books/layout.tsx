@@ -13,10 +13,8 @@ export default function RootLayout({
 
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BookImagesProvider>
-        {children}
-      </BookImagesProvider>
-    </QueryClientProvider>
+    <BookImagesProvider>
+      {children}
+    </BookImagesProvider>
   );
 }

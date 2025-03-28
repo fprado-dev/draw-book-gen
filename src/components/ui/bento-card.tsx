@@ -24,7 +24,7 @@ export interface BentoItem<T> {
 interface BentoGridProps<T> {
   item: BentoItem<T>;
   onView?: () => void;
-  onDelete?: () => void;
+  onDelete: (id: string, title: string) => void;
   onEdit?: () => void;
 }
 
@@ -58,9 +58,10 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
 
       <div className="relative flex flex-col space-y-3">
         <div className="flex items-center justify-between">
-          {item.icon && <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/10 group-hover:bg-gradient-to-br transition-all duration-300`}>
-            {item.icon}
-          </div>}
+          <div className='flex gap-2 items-center'>
+            {item.icon && <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/10 group-hover:bg-gradient-to-br transition-all duration-300`}> {item.icon}</div>}
+            <span className='text-xs'>{item.description}</span>
+          </div>
           <span
             className={cn(
               "text-xs font-medium px-2 py-1 rounded-lg backdrop-blur-sm",
@@ -72,15 +73,12 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
           </span>
         </div>
 
-        <div className="space-y-2">
-          <h3 onClick={onView} className="cursor-pointer hover:-translate-0.5 transition-all font-medium text-gray-900 dark:text-gray-100 tracking-tight text-[15px]">
+        <div className="flex items-center gap-2">
+          <h3 onClick={onView} className="cursor-pointer hover:-translate-y-0.5 transition-all font-medium text-gray-900 dark:text-gray-100 tracking-tight">
             {item.title}
-            {item.meta && <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">
-              {formatDate((item?.meta as unknown as { created_at: string })?.created_at)}
-            </span>}
           </h3>
-        </div>
 
+        </div>
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
             {item.tags && item.tags?.map((tag, i) => (
@@ -88,7 +86,7 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
                 key={i}
                 className="px-2 py-1 rounded-md bg-black/5 dark:bg-white/10 backdrop-blur-sm transition-all duration-200 hover:bg-black/10 dark:hover:bg-white/20"
               >
-                #{tag}
+                {tag}
               </span>
             ))}
           </div>
@@ -112,7 +110,7 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
                     Edit
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={onDelete} className='flex items-center gap-4 justify-start text-destructive cursor-pointer'>
+                <DropdownMenuItem onClick={() => onDelete(item.id, item.title)} className='flex items-center gap-4 justify-start text-destructive cursor-pointer'>
                   <Trash2Icon className='w-4 h-4' />
                   Delete
                 </DropdownMenuItem>

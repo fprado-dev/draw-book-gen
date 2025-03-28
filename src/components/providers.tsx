@@ -8,11 +8,11 @@ interface Props {
   session?: any
 }
 
-const queryClient = new QueryClient();
+export const mainQueryClient = new QueryClient();
 export default function Providers({ children }: Props) {
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={mainQueryClient}>
       <main>
         {children}
       </main>
