@@ -33,7 +33,6 @@ export default function Page() {
           <FormCreateBook closeModal={() => setIsCreating(false)} />
         </SheetContent>
       </Sheet>
-
       <BooksList />
     </PageWrapper>
   );

@@ -23,9 +23,9 @@ export interface BentoItem<T> {
 
 interface BentoGridProps<T> {
   item: BentoItem<T>;
-  onView?: () => void;
+  onView: (id: string) => void;
   onDelete: (id: string, title: string) => void;
-  onEdit?: () => void;
+  onEdit?: (id: string) => void;
 }
 
 
@@ -74,7 +74,7 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
         </div>
 
         <div className="flex items-center gap-2">
-          <h3 onClick={onView} className="cursor-pointer hover:-translate-y-0.5 transition-all font-medium text-gray-900 dark:text-gray-100 tracking-tight">
+          <h3 onClick={() => onView(item.id)} className="cursor-pointer hover:-translate-y-0.5 transition-all font-medium text-gray-900 dark:text-gray-100 tracking-tight">
             {item.title}
           </h3>
 
@@ -100,12 +100,12 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={onView} className='flex items-center gap-4 justify-start cursor-pointer'>
+                <DropdownMenuItem onClick={() => onView(item.id)} className='flex items-center gap-4 justify-start cursor-pointer'>
                   <EyeIcon className='w-4 h-4' />
                   View
                 </DropdownMenuItem>
                 {onEdit && (
-                  <DropdownMenuItem onClick={onEdit} className='flex items-center gap-4 justify-start cursor-pointer'>
+                  <DropdownMenuItem onClick={() => onEdit(item.id)} className='flex items-center gap-4 justify-start cursor-pointer'>
                     <EditIcon className='w-4 h-4' />
                     Edit
                   </DropdownMenuItem>

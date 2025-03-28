@@ -12,7 +12,6 @@ export const onCreateBook = async (formaData: FormData, status: TBookStatus, pap
   const title = formaData.get("title") as string;
   const size = formaData.get("size") as string;
 
-  console.log({ title, size, status })
   const { data, error } = await supabase
     .from('books')
     .insert([{
@@ -30,6 +29,39 @@ export const onCreateBook = async (formaData: FormData, status: TBookStatus, pap
   return data;
 }
 
+export const getBookById = async (id: string) => {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth?.getUser()
+  const { data, error } = await supabase
+    .from('books')
+    .select("*")
+    .eq('id', id)
+    .eq("user_id", user?.id)
+    .single()
+  if (error) throw error;
+  return data as TBook;
+}
+
+export const onUpdateBook = async (book: Omit<TBook, "user_id" | "created_at" | "updated_at" | "last_viewed">) => {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth?.getUser()
+  const { data, error } = await supabase
+    .from('books')
+    .update({
+      title: book.title,
+      size: book.size,
+      status: book.status,
+      paper_color: book.paper_color,
+      book_type: book.book_type,
+      measurement_unit: book.measurement_unit,
+    })
+    .eq('id', book.id)
+    .eq("user_id", user?.id)
+    .select()
+    .single()
+  if (error) throw error;
+  return data;
+}
 
 export const getAllBooks = async () => {
   const supabase = await createClient()
