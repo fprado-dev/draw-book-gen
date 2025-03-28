@@ -3,7 +3,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Square, RectangleHorizontal, Loader2 } from 'lucide-react';
 import { useBookImages } from '@/contexts/BookImagesContext';
 import { generateColoringBookImage } from '@/services/stability-ai.service';
@@ -12,7 +18,7 @@ import { supabase } from '@/services/supabase';
 
 type TGeneratePanel = {
   bookId: string;
-}
+};
 
 export default function GeneratePanel({ bookId }: TGeneratePanel) {
   const [introduction, setIntroduction] = useState('');
@@ -41,9 +47,10 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
       }
 
       // Determine dimensions based on aspect ratio
-      const dimensions = aspectRatio === 'portrait'
-        ? { width: 768, height: 1024 }
-        : { width: 1024, height: 1024 };
+      const dimensions =
+        aspectRatio === 'portrait'
+          ? { width: 768, height: 1024 }
+          : { width: 1024, height: 1024 };
 
       // Generate the image using Stability AI
       const imageUrl = await generateColoringBookImage({
@@ -55,7 +62,10 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
         difficultyLevel,
       });
 
-      const compressImage = async (blob: Blob, maxSizeInBytes: number): Promise<Blob> => {
+      const compressImage = async (
+        blob: Blob,
+        maxSizeInBytes: number
+      ): Promise<Blob> => {
         const createImageBitmap = (blob: Blob): Promise<ImageBitmap> => {
           return new Promise((resolve, reject) => {
             const img = new Image();
@@ -97,7 +107,9 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
 
           const compressedDataUrl = canvas.toDataURL('image/png', quality);
           const base64Data = compressedDataUrl.split(',')[1];
-          compressedBlob = await fetch(`data:image/png;base64,${base64Data}`).then(res => res.blob());
+          compressedBlob = await fetch(
+            `data:image/png;base64,${base64Data}`
+          ).then((res) => res.blob());
 
           quality -= 0.1;
         }
@@ -108,7 +120,9 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
       if (imageUrl) {
         // Convert base64 to blob and check file size
         const base64Data = imageUrl.split(',')[1];
-        let blob = await fetch(`data:image/png;base64,${base64Data}`).then(res => res.blob());
+        let blob = await fetch(`data:image/png;base64,${base64Data}`).then(
+          (res) => res.blob()
+        );
 
         // Check if file size is greater than 50MB
         const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
@@ -116,7 +130,9 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
           try {
             blob = await compressImage(blob, MAX_FILE_SIZE);
             if (blob.size > MAX_FILE_SIZE) {
-              toast.error('Unable to compress image to target size. Please try with simpler prompt or lower resolution.');
+              toast.error(
+                'Unable to compress image to target size. Please try with simpler prompt or lower resolution.'
+              );
               return;
             }
           } catch (error) {
@@ -145,7 +161,7 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
           .from('users-generated-images')
           .upload(filePath, blob, {
             contentType: 'image/png',
-            cacheControl: '3600'
+            cacheControl: '3600',
           });
 
         if (uploadError) {
@@ -155,7 +171,9 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
         }
 
         // Get the public URL
-        const { data: { publicUrl } } = supabase.storage
+        const {
+          data: { publicUrl },
+        } = supabase.storage
           .from('users-generated-images')
           .getPublicUrl(filePath);
 
@@ -176,7 +194,7 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
   const ConfigurationPanel = (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-mono" htmlFor="introduction">
+        <label className="font-mono text-sm" htmlFor="introduction">
           Introduction:
         </label>
         <Textarea
@@ -187,11 +205,10 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
           onChange={(e) => setIntroduction(e.target.value)}
           rows={4}
         />
-
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-mono" htmlFor="style">
+        <label className="font-mono text-sm" htmlFor="style">
           Style
         </label>
         <Textarea
@@ -202,12 +219,10 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
           onChange={(e) => setStyle(e.target.value)}
           rows={4}
         />
-
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-
           <Select value={themeCollection} onValueChange={setThemeCollection}>
             <SelectTrigger>
               <SelectValue placeholder="Select a Theme" />
@@ -223,7 +238,6 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
         </div>
 
         <div className="space-y-2">
-
           <Select value={artStyle} onValueChange={setArtStyle}>
             <SelectTrigger>
               <SelectValue placeholder="Select a Style" />
@@ -242,7 +256,6 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-
           <Select value={aspectRatio} onValueChange={setAspectRatio}>
             <SelectTrigger>
               <SelectValue placeholder="Select a Mode" />
@@ -261,7 +274,6 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
         </div>
 
         <div className="space-y-2">
-
           <Select value={difficultyLevel} onValueChange={setDifficultyLevel}>
             <SelectTrigger>
               <SelectValue placeholder="Select Level" />
@@ -293,9 +305,5 @@ export default function GeneratePanel({ bookId }: TGeneratePanel) {
     </div>
   );
 
-  return (
-    <main className="container mx-auto">
-      {ConfigurationPanel}
-    </main>
-  );
+  return <main className="container mx-auto">{ConfigurationPanel}</main>;
 }

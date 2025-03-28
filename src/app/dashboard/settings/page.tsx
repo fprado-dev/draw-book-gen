@@ -1,25 +1,31 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { toast } from 'sonner';
 
 export default function Settings() {
   const [settings, setSettings] = useState({
-    theme: "light",
-    defaultModel: "default",
-    defaultStyle: "line-art",
-    defaultAspectRatio: "portrait",
+    theme: 'light',
+    defaultModel: 'default',
+    defaultStyle: 'line-art',
+    defaultAspectRatio: 'portrait',
     emailNotifications: true,
     autoSave: true,
-    apiKey: "",
-    promptTemplate: "",
+    apiKey: '',
+    promptTemplate: '',
   });
 
   const handleSettingChange = (key: string, value: unknown) => {
@@ -28,11 +34,11 @@ export default function Settings() {
 
   const handleSave = () => {
     // Here you would typically save to your backend
-    toast.success("Settings saved successfully");
+    toast.success('Settings saved successfully');
   };
 
   return (
-    <div className="container py-4 px-4">
+    <div className="container px-4 py-4">
       <Tabs defaultValue="appearance" className="space-y-4">
         <TabsList>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
@@ -51,7 +57,7 @@ export default function Settings() {
                 <Label>Theme</Label>
                 <Select
                   value={settings.theme}
-                  onValueChange={(value) => handleSettingChange("theme", value)}
+                  onValueChange={(value) => handleSettingChange('theme', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select theme" />
@@ -77,7 +83,9 @@ export default function Settings() {
                 <Label>Default Model</Label>
                 <Select
                   value={settings.defaultModel}
-                  onValueChange={(value) => handleSettingChange("defaultModel", value)}
+                  onValueChange={(value) =>
+                    handleSettingChange('defaultModel', value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select model" />
@@ -94,7 +102,9 @@ export default function Settings() {
                 <Label>Default Style</Label>
                 <Select
                   value={settings.defaultStyle}
-                  onValueChange={(value) => handleSettingChange("defaultStyle", value)}
+                  onValueChange={(value) =>
+                    handleSettingChange('defaultStyle', value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select style" />
@@ -111,7 +121,9 @@ export default function Settings() {
                 <Label>Default Aspect Ratio</Label>
                 <Select
                   value={settings.defaultAspectRatio}
-                  onValueChange={(value) => handleSettingChange("defaultAspectRatio", value)}
+                  onValueChange={(value) =>
+                    handleSettingChange('defaultAspectRatio', value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select aspect ratio" />
@@ -129,7 +141,9 @@ export default function Settings() {
                 <Input
                   placeholder="Enter your default prompt template"
                   value={settings.promptTemplate}
-                  onChange={(e) => handleSettingChange("promptTemplate", e.target.value)}
+                  onChange={(e) =>
+                    handleSettingChange('promptTemplate', e.target.value)
+                  }
                 />
               </div>
             </CardContent>
@@ -147,7 +161,7 @@ export default function Settings() {
                 <Switch
                   checked={settings.emailNotifications}
                   onCheckedChange={(checked) =>
-                    handleSettingChange("emailNotifications", checked)
+                    handleSettingChange('emailNotifications', checked)
                   }
                 />
               </div>
@@ -157,7 +171,7 @@ export default function Settings() {
                 <Switch
                   checked={settings.autoSave}
                   onCheckedChange={(checked) =>
-                    handleSettingChange("autoSave", checked)
+                    handleSettingChange('autoSave', checked)
                   }
                 />
               </div>
@@ -177,7 +191,9 @@ export default function Settings() {
                   type="password"
                   placeholder="Enter your API key"
                   value={settings.apiKey}
-                  onChange={(e) => handleSettingChange("apiKey", e.target.value)}
+                  onChange={(e) =>
+                    handleSettingChange('apiKey', e.target.value)
+                  }
                 />
               </div>
             </CardContent>

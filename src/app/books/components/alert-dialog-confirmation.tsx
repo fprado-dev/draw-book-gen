@@ -7,23 +7,28 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from '@/components/ui/alert-dialog';
 
 type TAlertDialogConfirmationProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onConfirm: () => void;
   title: string;
-}
-export function AlertDialogConfirmation({ isOpen, onOpenChange, onConfirm, title }: TAlertDialogConfirmationProps) {
+};
+export function AlertDialogConfirmation({
+  isOpen,
+  onOpenChange,
+  onConfirm,
+  title,
+}: TAlertDialogConfirmationProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            Book <b>{title}</b> and remove your data from our servers.
+            This action cannot be undone. This will permanently delete your Book{' '}
+            <b>{title}</b> and remove your data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -32,5 +37,5 @@ export function AlertDialogConfirmation({ isOpen, onOpenChange, onConfirm, title
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

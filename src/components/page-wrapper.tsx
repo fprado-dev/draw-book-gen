@@ -1,6 +1,6 @@
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="@container/main flex flex-1 flex-col gap-4 mx-6">
+    <div className="@container/main mx-6 flex flex-1 flex-col gap-4">
       {children}
     </div>
   );

@@ -1,16 +1,19 @@
-"use client"
+'use client';
 
-import { useState } from "react";
-import { BookPlus } from "lucide-react";
+import { useState } from 'react';
+import { BookPlus } from 'lucide-react';
 
-import { PageHeader } from "@/components/page-header";
-import { PageWrapper } from "@/components/page-wrapper";
+import { PageHeader } from '@/components/page-header';
+import { PageWrapper } from '@/components/page-wrapper';
 
-
-import { FormCreateBook } from "./components/form-create";
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
-import { BooksList } from "./components/books-list";
-
+import { FormCreateBook } from './components/form-create';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { BooksList } from './components/books-list';
 
 export default function Page() {
   const [isCreating, setIsCreating] = useState(false);
@@ -28,7 +31,9 @@ export default function Page() {
         <SheetContent className="px-4 py-4">
           <SheetTitle>Create New Book</SheetTitle>
           <SheetDescription>
-            Start by entering the title of your new book. This will be the main identifier for your book, so make sure it's descriptive and easy to remember.
+            Start by entering the title of your new book. This will be the main
+            identifier for your book, so make sure it's descriptive and easy to
+            remember.
           </SheetDescription>
           <FormCreateBook closeModal={() => setIsCreating(false)} />
         </SheetContent>
@@ -37,7 +42,3 @@ export default function Page() {
     </PageWrapper>
   );
 }
-
-
-
-

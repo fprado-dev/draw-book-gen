@@ -24,7 +24,7 @@ export function SupabaseImage({
     return (
       <div
         className={cn(
-          'flex items-center justify-center bg-muted text-muted-foreground rounded-md',
+          'bg-muted text-muted-foreground flex items-center justify-center rounded-md',
           className,
           fallbackClassName
         )}

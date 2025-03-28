@@ -7,5 +7,9 @@ export function formatDate(date: string | Date): string {
   if (!date) return '';
 
   const dateObject = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).format(dateObject);
+  return new Intl.DateTimeFormat('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+  }).format(dateObject);
 }

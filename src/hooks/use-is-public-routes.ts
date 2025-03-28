@@ -1,10 +1,15 @@
-import { usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation';
 
-const publicRoutes = ["/sign-in", "/sign-up", "/404", "/forgot-password", "/sales"]
-
+const publicRoutes = [
+  '/sign-in',
+  '/sign-up',
+  '/404',
+  '/forgot-password',
+  '/sales',
+];
 
 export const useIsPublicRoute = () => {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
-  return publicRoutes.includes(pathname)
-}
+  return publicRoutes.includes(pathname);
+};

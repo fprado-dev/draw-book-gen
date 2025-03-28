@@ -1,4 +1,4 @@
-"use server"
+'use server';
 
 import { Outline } from '@/types/outlines';
 import { createClient } from '@/utils/supabase/server';
@@ -8,9 +8,13 @@ import { createClient } from '@/utils/supabase/server';
  * @param outline The outline data to create
  * @returns The created outline or error
  */
-export async function createOutline(outline: Omit<Outline, "id">): Promise<{ success: boolean; error?: string; data?: Outline }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth?.getUser()
+export async function createOutline(
+  outline: Omit<Outline, 'id'>
+): Promise<{ success: boolean; error?: string; data?: Outline }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
   try {
     // Validate input
     if (!outline.title || !user?.id || !Array.isArray(outline.chapters)) {
@@ -35,8 +39,8 @@ export async function createOutline(outline: Omit<Outline, "id">): Promise<{ suc
         {
           title: outline.title,
           user_id: user.id,
-          chapters: outline.chapters
-        }
+          chapters: outline.chapters,
+        },
       ])
       .select()
       .single();
@@ -45,13 +49,14 @@ export async function createOutline(outline: Omit<Outline, "id">): Promise<{ suc
 
     return {
       success: true,
-      data: data as Outline
+      data: data as Outline,
     };
   } catch (error) {
     console.error('Error creating outline:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'An unknown error occurred'
+      error:
+        error instanceof Error ? error.message : 'An unknown error occurred',
     };
   }
 }
@@ -61,12 +66,20 @@ export async function createOutline(outline: Omit<Outline, "id">): Promise<{ suc
  * @param userId The ID of the user
  * @returns Array of outlines or error
  */
-export async function getOutlinesByUserId(page: number = 1, limit: number = 6): Promise<{ success: boolean; error?: string; data?: Outline[]; total?: number }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth?.getUser()
+export async function getOutlinesByUserId(
+  page: number = 1,
+  limit: number = 6
+): Promise<{
+  success: boolean;
+  error?: string;
+  data?: Outline[];
+  total?: number;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
   try {
-
-
     const offset = (page - 1) * limit;
 
     const [{ count }, { data }] = await Promise.all([
@@ -79,26 +92,33 @@ export async function getOutlinesByUserId(page: number = 1, limit: number = 6): 
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1)
+        .range(offset, offset + limit - 1),
     ]);
 
     return {
       success: true,
       data: data as Outline[],
-      total: count!
+      total: count!,
     };
   } catch (error) {
     console.error('Error retrieving outlines:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'An unknown error occurred'
+      error:
+        error instanceof Error ? error.message : 'An unknown error occurred',
     };
   }
 }
 
-export async function deleteOutline({ outline_id }: { outline_id: string }): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth?.getUser()
+export async function deleteOutline({
+  outline_id,
+}: {
+  outline_id: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
 
   try {
     const { error } = await supabase
@@ -110,6 +130,10 @@ export async function deleteOutline({ outline_id }: { outline_id: string }): Pro
     return { success: true };
   } catch (error) {
     console.error('Error deleting outline:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'An unknown error occurred',
+    };
   }
 }

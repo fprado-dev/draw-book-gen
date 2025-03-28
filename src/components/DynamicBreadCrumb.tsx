@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import {
   Breadcrumb,
@@ -7,44 +7,44 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { TBook } from "@/types/ebook"
-import { House } from "lucide-react"
+} from '@/components/ui/breadcrumb';
+import { TBook } from '@/types/ebook';
+import { House } from 'lucide-react';
 
-
-import { usePathname } from 'next/navigation'
-import { Fragment, useEffect, useState } from "react"
+import { usePathname } from 'next/navigation';
+import { Fragment, useEffect, useState } from 'react';
 
 const routeLabels: Record<string, string> = {
   outlines: 'Outlines',
   'ai-images': 'AI Images',
-  books: 'Books'
-}
+  books: 'Books',
+};
 
 const DynamicBreadCrumb = () => {
-  const pathname = usePathname()
-  const [currentBook, setCurrentBook] = useState<TBook | null>(null)
+  const pathname = usePathname();
+  const [currentBook, setCurrentBook] = useState<TBook | null>(null);
 
   useEffect(() => {
     try {
-      const bookData = localStorage.getItem('aillustra-current-book')
-      setCurrentBook(bookData ? JSON.parse(bookData) : null)
+      const bookData = localStorage.getItem('aillustra-current-book');
+      setCurrentBook(bookData ? JSON.parse(bookData) : null);
     } catch (error) {
-      console.error('Error accessing localStorage:', error)
+      console.error('Error accessing localStorage:', error);
     }
-  }, [pathname])
+  }, [pathname]);
 
   type TPathSegments = {
-    label: string,
-    href: string,
-    isLast: boolean,
-  }
+    label: string;
+    href: string;
+    isLast: boolean;
+  };
 
   const getPathSegments = (): TPathSegments[] => {
     if (pathname.startsWith('/books/')) {
-      const segments = pathname.split('/')
+      const segments = pathname.split('/');
 
-      if (segments.length === 3) { // URL pattern: /books/{bookId}
+      if (segments.length === 3) {
+        // URL pattern: /books/{bookId}
         return [
           {
             label: 'Books',
@@ -55,29 +55,29 @@ const DynamicBreadCrumb = () => {
             label: currentBook?.title || 'Book',
             href: pathname,
             isLast: true,
-          }
-        ]
+          },
+        ];
       }
     }
-
-
 
     return [
       {
         label: routeLabels[pathname.split('/')[1]] || 'Dashboard',
         href: '/',
         isLast: true,
-      }]
-  }
+      },
+    ];
+  };
 
-  const segments = getPathSegments()
+  const segments = getPathSegments();
 
-  if (segments.length === 0) return null
+  if (segments.length === 0) return null;
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <House className="h-4 w-4 text-foreground" /> <span className="text-xs text-foreground">/</span>
+        <House className="text-foreground h-4 w-4" />{' '}
+        <span className="text-foreground text-xs">/</span>
         {segments.map((segment, index) => (
           <Fragment key={index}>
             <BreadcrumbItem key={segment.href}>
@@ -94,7 +94,7 @@ const DynamicBreadCrumb = () => {
         ))}
       </BreadcrumbList>
     </Breadcrumb>
-  )
-}
+  );
+};
 
-export default DynamicBreadCrumb
+export default DynamicBreadCrumb;

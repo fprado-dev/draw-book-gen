@@ -19,12 +19,18 @@ export class OutlineFormatter {
   static format(rawOutline: string): FormattedOutline {
     // Remove common AI thinking patterns and prefixes
     const cleanedOutline = rawOutline
-      .replace(/^(Let me think about|Let me think|Let me|I'll|Here's|Sure|Okay)[^\n]*\n*/i, '')
-      .replace(/Would you like me to elaborate on any of these descriptions\?/, '')
+      .replace(
+        /^(Let me think about|Let me think|Let me|I'll|Here's|Sure|Okay)[^\n]*\n*/i,
+        ''
+      )
+      .replace(
+        /Would you like me to elaborate on any of these descriptions\?/,
+        ''
+      )
       .trim();
 
     // Split the outline into lines
-    const lines = cleanedOutline.split('\n').filter(line => line.trim());
+    const lines = cleanedOutline.split('\n').filter((line) => line.trim());
 
     // Extract title (first line)
     const title = lines[0].replace(/^#*\s*/, '').trim();
@@ -47,7 +53,7 @@ export class OutlineFormatter {
         // Start new scene
         currentScene = {
           number: parseInt(sceneMatch[1]),
-          description: sceneMatch[2].trim()
+          description: sceneMatch[2].trim(),
         };
       } else if (currentScene && line) {
         // Add to current scene description
@@ -62,10 +68,10 @@ export class OutlineFormatter {
 
     return {
       title,
-      chapters: scenes.map(scene => ({
+      chapters: scenes.map((scene) => ({
         title: `Scene ${scene.number}`,
-        description: scene.description
-      }))
+        description: scene.description,
+      })),
     };
   }
 

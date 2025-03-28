@@ -1,5 +1,5 @@
-import { Alert, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { Alert, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 export type Message =
   | { success: string }
@@ -9,32 +9,24 @@ export type Message =
 export function FormMessage({ message }: { message: Message }) {
   return (
     <>
-      {"success" in message && (
-        <Alert >
+      {'success' in message && (
+        <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>
-            {message.success}
-          </AlertTitle>
+          <AlertTitle>{message.success}</AlertTitle>
         </Alert>
       )}
-      {"error" in message && (
-        <Alert variant="destructive" >
+      {'error' in message && (
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>
-            {message.error}
-          </AlertTitle>
+          <AlertTitle>{message.error}</AlertTitle>
         </Alert>
-
       )}
-      {"message" in message && (
-        <Alert >
+      {'message' in message && (
+        <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>
-            {message.message}
-          </AlertTitle>
+          <AlertTitle>{message.message}</AlertTitle>
         </Alert>
       )}
     </>
   );
 }
-

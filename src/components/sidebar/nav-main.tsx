@@ -1,12 +1,18 @@
-"use client"
+'use client';
 
-import { ChevronRight, Folder, FolderIcon, LayoutDashboard, type LucideIcon } from "lucide-react"
+import {
+  ChevronRight,
+  Folder,
+  FolderIcon,
+  LayoutDashboard,
+  type LucideIcon,
+} from 'lucide-react';
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from '@/components/ui/collapsible';
 import {
   SidebarGroup,
   SidebarMenu,
@@ -15,52 +21,51 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
-import { Separator } from "../ui/separator"
+} from '@/components/ui/sidebar';
+import { Separator } from '../ui/separator';
 
 const navMain = [
-
   {
-    title: "Getting Started",
-    url: "#",
+    title: 'Getting Started',
+    url: '#',
     icon: Folder,
     isActive: true,
     items: [
       {
-        title: "Books",
-        url: "/books",
+        title: 'Books',
+        url: '/books',
       },
       {
-        title: "Outlines",
-        url: "/outlines",
+        title: 'Outlines',
+        url: '/outlines',
       },
       {
-        title: "AI Images",
-        url: "/ai-images",
+        title: 'AI Images',
+        url: '/ai-images',
       },
     ],
   },
   {
-    title: "Dashboard",
-    url: "/dashboard",
+    title: 'Dashboard',
+    url: '/dashboard',
     icon: LayoutDashboard,
     isActive: true,
     items: [
       {
-        title: "Overview",
-        url: "/dashboard",
+        title: 'Overview',
+        url: '/dashboard',
       },
       {
-        title: "Billing",
-        url: "/dashboard/billing",
+        title: 'Billing',
+        url: '/dashboard/billing',
       },
       {
-        title: "Settings",
-        url: "/dashboard/settings",
-      }
+        title: 'Settings',
+        url: '/dashboard/settings',
+      },
     ],
   },
-]
+];
 
 export function NavMain() {
   return (
@@ -101,5 +106,5 @@ export function NavMain() {
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

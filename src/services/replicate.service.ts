@@ -1,4 +1,4 @@
-"use server"
+'use server';
 
 export type TOutline = {
   title: string;
@@ -6,16 +6,23 @@ export type TOutline = {
     title: string;
     description: string;
   }>;
-}
+};
 
 type TGenerateBookOutline = {
   prompt: string;
   style?: string;
   complexity?: string;
   chapters: number;
-}
+};
 
-export const generateBookOutline = async ({ prompt, chapters }: TGenerateBookOutline): Promise<{ success: boolean; outline?: TOutline; error?: string }> => {
+export const generateBookOutline = async ({
+  prompt,
+  chapters,
+}: TGenerateBookOutline): Promise<{
+  success: boolean;
+  outline?: TOutline;
+  error?: string;
+}> => {
   try {
     // Validate input parameters
     if (!prompt?.trim()) {
@@ -23,9 +30,11 @@ export const generateBookOutline = async ({ prompt, chapters }: TGenerateBookOut
     }
 
     if (chapters < 1 || chapters > 10) {
-      return { success: false, error: 'Number of chapters must be between 1 and 10' };
+      return {
+        success: false,
+        error: 'Number of chapters must be between 1 and 10',
+      };
     }
-
 
     const response = await fetch('/api/outline', {
       method: 'POST',
@@ -34,8 +43,8 @@ export const generateBookOutline = async ({ prompt, chapters }: TGenerateBookOut
       },
       body: JSON.stringify({
         prompt,
-        chapters
-      })
+        chapters,
+      }),
     });
 
     const data = await response.json();
@@ -46,16 +55,14 @@ export const generateBookOutline = async ({ prompt, chapters }: TGenerateBookOut
 
     return {
       success: true,
-      outline: data.outline
+      outline: data.outline,
     };
-
-
   } catch (error) {
     console.error('Error generating book outline:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'An unknown error occurred'
+      error:
+        error instanceof Error ? error.message : 'An unknown error occurred',
     };
   }
 };
-

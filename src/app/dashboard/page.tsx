@@ -1,10 +1,8 @@
-
-import { PageHeader } from "@/components/page-header";
-import { ChartAreaInteractive } from "./components/ChartArea";
-import { StatsCards } from "./components/StatsCards";
-import { createClient } from "@/utils/supabase/server";
-import { PageWrapper } from "@/components/page-wrapper";
-
+import { PageHeader } from '@/components/page-header';
+import { ChartAreaInteractive } from './components/ChartArea';
+import { StatsCards } from './components/StatsCards';
+import { createClient } from '@/utils/supabase/server';
+import { PageWrapper } from '@/components/page-wrapper';
 
 export default async function Dashboard() {
   const supabase = await createClient();

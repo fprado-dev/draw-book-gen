@@ -1,8 +1,8 @@
-const protectedRoutes = ["/dashboard", "/books", "/outlines"];
-const authRoutes = ["/sign-in", "/sign-up"];
+const protectedRoutes = ['/dashboard', '/books', '/outlines'];
+const authRoutes = ['/sign-in', '/sign-up'];
 
-import { createServerClient } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
+import { createServerClient } from '@supabase/ssr';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export const updateSession = async (request: NextRequest) => {
   try {
@@ -22,42 +22,48 @@ export const updateSession = async (request: NextRequest) => {
           },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value),
+              request.cookies.set(name, value)
             );
             response = NextResponse.next({
               request,
             });
             cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options),
+              response.cookies.set(name, value, options)
             );
           },
         },
-      },
+      }
     );
 
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    const isProtectedRoute = protectedRoutes.some(route =>
+    const isProtectedRoute = protectedRoutes.some((route) =>
       request.nextUrl.pathname.startsWith(route)
     );
 
-    const isAuthRoute = authRoutes.some(route =>
+    const isAuthRoute = authRoutes.some((route) =>
       request.nextUrl.pathname.startsWith(route)
     );
-    console.log("request.nextUrl.pathname", request.nextUrl.pathname);
-    console.log({ isAuthRoute })
 
     if (isProtectedRoute && error) {
       const currentPath = request.nextUrl.pathname;
-      return NextResponse.redirect(new URL(`/sign-in?redirect=${encodeURIComponent(currentPath)}`, request.url));
+      return NextResponse.redirect(
+        new URL(
+          `/sign-in?redirect=${encodeURIComponent(currentPath)}`,
+          request.url
+        )
+      );
     }
 
     if (isAuthRoute && user) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    if (request.nextUrl.pathname === "/" && user) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    if (request.nextUrl.pathname === '/' && user) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
     return response;

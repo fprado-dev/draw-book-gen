@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { useQuery } from "@tanstack/react-query"
-import { User } from "@supabase/supabase-js"
+import { useEffect, useState } from 'react';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useQuery } from '@tanstack/react-query';
+import { User } from '@supabase/supabase-js';
 import {
   DailyImageStats,
   DailyOutlinesStats,
   getDailyImageStats,
-  getDailyOutlineStats
-} from "@/services/dashboard.service"
+  getDailyOutlineStats,
+} from '@/services/dashboard.service';
 
 import {
   Card,
@@ -18,7 +18,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from '@/components/ui/card';
 import {
   ChartConfig,
   ChartContainer,
@@ -26,98 +26,105 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from '@/components/ui/chart';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group"
-
-
+} from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 const chartConfig = {
   visitors: {
-    label: "Visitors",
+    label: 'Visitors',
   },
   images: {
-    label: "AI Images",
-    color: "hsl(var(--primary))",
+    label: 'AI Images',
+    color: 'hsl(var(--primary))',
   },
   outlines: {
-    label: "AI Outlines",
-    color: "hsl(var(--primary))",
+    label: 'AI Outlines',
+    color: 'hsl(var(--primary))',
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function ChartAreaInteractive({ user }: { user: User }) {
-  const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = useState("30d")
+  const isMobile = useIsMobile();
+  const [timeRange, setTimeRange] = useState('30d');
 
   useEffect(() => {
     if (isMobile) {
-      setTimeRange("7d")
+      setTimeRange('7d');
     }
-  }, [isMobile])
+  }, [isMobile]);
 
   const { data: chartData } = useQuery({
-    queryKey: ["get-daily-ai-stats"],
+    queryKey: ['get-daily-ai-stats'],
     queryFn: async () => {
       const [imageStats, outlineStats] = await Promise.all([
         getDailyImageStats({ user }),
         getDailyOutlineStats({ user }),
-      ])
+      ]);
       const mergedData = mergeData({ imageStats, outlineStats });
 
-      return mergedData
+      return mergedData;
     },
-  })
+  });
 
-
-  const mergeData = ({ imageStats, outlineStats }: { outlineStats: DailyOutlinesStats[], imageStats: DailyImageStats[] }) => {
+  const mergeData = ({
+    imageStats,
+    outlineStats,
+  }: {
+    outlineStats: DailyOutlinesStats[];
+    imageStats: DailyImageStats[];
+  }) => {
     if (!imageStats || !outlineStats) return [];
 
     const dateMap = new Map();
 
     // Initialize with image data
-    imageStats.forEach(item => {
-      dateMap.set(item.date, { date: item.date, images: item.images, outlines: 0 });
+    imageStats.forEach((item) => {
+      dateMap.set(item.date, {
+        date: item.date,
+        images: item.images,
+        outlines: 0,
+      });
     });
 
     // Merge outline data
-    outlineStats.forEach(item => {
+    outlineStats.forEach((item) => {
       if (dateMap.has(item.date)) {
         const existing = dateMap.get(item.date);
         existing.outlines = item.outlines;
       } else {
-        dateMap.set(item.date, { date: item.date, images: 0, outlines: item.outlines });
+        dateMap.set(item.date, {
+          date: item.date,
+          images: 0,
+          outlines: item.outlines,
+        });
       }
     });
 
-    return Array.from(dateMap.values())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return Array.from(dateMap.values()).sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
   };
 
   const filteredData = chartData?.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date()
-    let daysToSubtract = 90
-    if (timeRange === "15d") {
-      daysToSubtract = 15
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7
+    const date = new Date(item.date);
+    const referenceDate = new Date();
+    let daysToSubtract = 90;
+    if (timeRange === '15d') {
+      daysToSubtract = 15;
+    } else if (timeRange === '7d') {
+      daysToSubtract = 7;
     }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
-
-
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+    return date >= startDate;
+  });
 
   return (
     <Card className="@container/card">
@@ -208,11 +215,11 @@ export function ChartAreaInteractive({ user }: { user: User }) {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "2-digit",
-                  day: "numeric",
-                })
+                const date = new Date(value);
+                return date.toLocaleDateString('en-US', {
+                  month: '2-digit',
+                  day: 'numeric',
+                });
               }}
             />
             <ChartTooltip
@@ -220,10 +227,10 @@ export function ChartAreaInteractive({ user }: { user: User }) {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
+                    return new Date(value).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    });
                   }}
                   indicator="dot"
                 />
@@ -252,5 +259,5 @@ export function ChartAreaInteractive({ user }: { user: User }) {
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

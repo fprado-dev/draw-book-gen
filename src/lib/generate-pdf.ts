@@ -1,19 +1,26 @@
-import { GeneratedImage } from "@/contexts/BookImagesContext";
-import { TBook } from "@/types/ebook";
+import { GeneratedImage } from '@/contexts/BookImagesContext';
+import { TBook } from '@/types/ebook';
 import jsPDF from 'jspdf';
 
 // Function to create and download PDF with correct KDP dimensions
-export const handleCreatePDF = async (images: GeneratedImage[], bookTitle: string, book: TBook) => {
+export const handleCreatePDF = async (
+  images: GeneratedImage[],
+  bookTitle: string,
+  book: TBook
+) => {
   try {
     // Get book size dimensions in inches
-    const bookSizeDimensions: Record<string, { width: number, height: number }> = {
+    const bookSizeDimensions: Record<
+      string,
+      { width: number; height: number }
+    > = {
       '5x8': { width: 5, height: 8 },
       '5.25x8': { width: 5.25, height: 8 },
       '5.5x8.5': { width: 5.5, height: 8.5 },
       '6x9': { width: 6, height: 9 },
       '7x10': { width: 7, height: 10 },
       '8x10': { width: 8, height: 10 },
-      '8.5x11': { width: 8.5, height: 11 }
+      '8.5x11': { width: 8.5, height: 11 },
     };
 
     // KDP recommends 300 DPI for print quality
@@ -30,7 +37,7 @@ export const handleCreatePDF = async (images: GeneratedImage[], bookTitle: strin
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'pt',
-      format: [pageWidth, pageHeight]
+      format: [pageWidth, pageHeight],
     });
 
     const sortedImages = [...images].sort((a, b) => a.order - b.order);
@@ -73,7 +80,14 @@ export const handleCreatePDF = async (images: GeneratedImage[], bookTitle: strin
           }
 
           // Add image to PDF with proper dimensions and centering
-          pdf.addImage(base64 as string, 'PNG', xOffset, yOffset, renderWidth, renderHeight);
+          pdf.addImage(
+            base64 as string,
+            'PNG',
+            xOffset,
+            yOffset,
+            renderWidth,
+            renderHeight
+          );
           resolve();
         };
       });

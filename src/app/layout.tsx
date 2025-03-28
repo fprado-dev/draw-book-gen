@@ -1,36 +1,35 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { createClient } from "@/utils/supabase/server";
-import { HeaderLayout } from "@/components/header";
-import Providers from "@/components/providers";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/sidebar/app-sidebar';
+import { createClient } from '@/utils/supabase/server';
+import { HeaderLayout } from '@/components/header';
+import Providers from '@/components/providers';
 
 // Optimize font loading with display: 'swap' to prevent layout shifts
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+  display: 'swap',
   preload: false,
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+  display: 'swap',
   preload: false,
 });
 
 export const metadata: Metadata = {
-  title: "AIllustra - No Skills, No Problem",
-  description: "No Skills, No Problem",
+  title: 'AIllustra - No Skills, No Problem',
+  description: 'No Skills, No Problem',
   appleWebApp: {
-    title: "AIllustra",
-    statusBarStyle: "black-translucent",
-
-  }
+    title: 'AIllustra',
+    statusBarStyle: 'black-translucent',
+  },
 };
 
 export default async function RootLayout({
@@ -50,22 +49,19 @@ export default async function RootLayout({
       >
         <SidebarProvider>
           <AppSidebar user={user} />
-          <SidebarInset >
+          <SidebarInset>
             <HeaderLayout />
             <div className="flex flex-1 flex-col">
-              <Providers>
-
-                {children}
-
-              </Providers>
-
+              <Providers>{children}</Providers>
             </div>
           </SidebarInset>
         </SidebarProvider>
-        <Toaster position="top-center" toastOptions={{
-          closeButton: true,
-
-        }} />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            closeButton: true,
+          }}
+        />
       </body>
     </html>
   );

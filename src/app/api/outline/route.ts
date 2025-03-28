@@ -4,7 +4,7 @@ import { OutlineFormatter } from '@/services/outline-formatter.service';
 
 // Initialize Replicate client
 const replicate = new Replicate({
-  auth: process.env.NEXT_PUBLIC_REPLICATE_API_KEY || ''
+  auth: process.env.NEXT_PUBLIC_REPLICATE_API_KEY || '',
 });
 
 export async function POST(request: Request) {
@@ -46,23 +46,21 @@ export async function POST(request: Request) {
     }
 
     if (complexity) {
-      enhancedPrompt += complexity === 'detailed'
-        ? '\nMake the descriptions rich in detail, focusing on textures, colors, and sensory elements'
-        : '\nKeep the descriptions concise but evocative';
+      enhancedPrompt +=
+        complexity === 'detailed'
+          ? '\nMake the descriptions rich in detail, focusing on textures, colors, and sensory elements'
+          : '\nKeep the descriptions concise but evocative';
     }
 
     let outlineText = '';
 
-    for await (const event of replicate.stream(
-      "deepseek-ai/deepseek-r1",
-      {
-        input: {
-          prompt: enhancedPrompt,
-          temperature: 0.7, // Balanced creativity
-          top_p: 0.9,       // Focused randomness
-        }
-      }
-    )) {
+    for await (const event of replicate.stream('deepseek-ai/deepseek-r1', {
+      input: {
+        prompt: enhancedPrompt,
+        temperature: 0.7, // Balanced creativity
+        top_p: 0.9, // Focused randomness
+      },
+    })) {
       outlineText += event;
     }
 
@@ -70,16 +68,16 @@ export async function POST(request: Request) {
     const formattedOutline = OutlineFormatter.format(outlineText);
     return NextResponse.json({
       outline: formattedOutline,
-      success: true
+      success: true,
     });
-
   } catch (error) {
     console.error('Error generating outline:', error);
     return NextResponse.json(
       {
         outline: '',
         success: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred'
+        error:
+          error instanceof Error ? error.message : 'An unknown error occurred',
       },
       { status: 500 }
     );
