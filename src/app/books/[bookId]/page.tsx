@@ -13,7 +13,7 @@ type EboookParams = {
 export default function EbookPage() {
   const params = useParams<EboookParams>();
 
-  const { data, isLoading } = useQuery({
+  useQuery({
     queryKey: ['book-id', params.bookId],
     queryFn: () => getBookById(params.bookId),
     enabled: true,

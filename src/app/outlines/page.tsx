@@ -15,7 +15,6 @@ import {
 import { SparklesIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/services/supabase';
 import { toast } from 'sonner';
 import { BentoCard, BentoItem } from '@/components/ui/bento-card';
 import { Badge } from '@/components/ui/badge';

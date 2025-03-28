@@ -14,10 +14,9 @@ import { QueryClient, useQuery } from '@tanstack/react-query';
 import { getUserStats } from '@/services/dashboard.service';
 import { useEffect } from 'react';
 
-type TStatsCards = {};
 const queryClient = new QueryClient();
 
-export function StatsCards({}: TStatsCards) {
+export function StatsCards() {
   const { data: statsInfos, isLoading } = useQuery({
     queryKey: ['get-user-stats'],
     queryFn: async () => {

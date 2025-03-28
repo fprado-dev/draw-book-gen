@@ -32,7 +32,7 @@ export default function Page() {
           <SheetTitle>Create New Book</SheetTitle>
           <SheetDescription>
             Start by entering the title of your new book. This will be the main
-            identifier for your book, so make sure it's descriptive and easy to
+            identifier for your book, so make sure to be descriptive and easy to
             remember.
           </SheetDescription>
           <FormCreateBook closeModal={() => setIsCreating(false)} />

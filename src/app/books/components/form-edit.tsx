@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { onCreateBook, onUpdateBook } from '@/services/book.service';
+import { onUpdateBook } from '@/services/book.service';
 import {
   TBookType,
   TBookMeasurementUnit,

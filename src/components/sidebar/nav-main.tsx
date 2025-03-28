@@ -3,9 +3,7 @@
 import {
   ChevronRight,
   Folder,
-  FolderIcon,
   LayoutDashboard,
-  type LucideIcon,
 } from 'lucide-react';
 
 import {

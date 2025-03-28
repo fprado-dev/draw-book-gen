@@ -67,7 +67,11 @@ export const updateSession = async (request: NextRequest) => {
     }
 
     return response;
-  } catch (e) {
+  } catch (error) {
+    console.error('Authentication middleware error:', error);
+    // If an error occurred during authentication, return the original request
+    // unmodified
+
     return NextResponse.next({
       request: {
         headers: request.headers,

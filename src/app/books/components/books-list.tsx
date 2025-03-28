@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/sheet';
 import { FormUpdateBook } from './form-edit';
 import { useRouter } from 'next/navigation';
-import { title } from 'process';
 
 export function BooksList() {
   const router = useRouter();
@@ -87,7 +86,7 @@ export function BooksList() {
           <SheetTitle>Create New Book</SheetTitle>
           <SheetDescription>
             Start by entering the title of your new book. This will be the main
-            identifier for your book, so make sure it's descriptive and easy to
+            identifier for your book, so make sure to be descriptive and easy to
             remember.
           </SheetDescription>
           <FormUpdateBook
