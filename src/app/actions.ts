@@ -8,12 +8,10 @@ import { Provider } from '@supabase/supabase-js';
 
 const signInWith = (provider: Provider) => async () => {
   const supabase = await createClient();
-  const origin = (await headers()).get('origin');
-
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
     },
   });
 
@@ -85,7 +83,6 @@ export const signInAction = async (formData: FormData) => {
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get('email')?.toString();
   const supabase = await createClient();
-  const origin = (await headers()).get('origin');
   const callbackUrl = formData.get('callbackUrl')?.toString();
 
   if (!email) {
@@ -93,7 +90,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?redirect_to=/protected/reset-password`,
   });
 
   if (error) {

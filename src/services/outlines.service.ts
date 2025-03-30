@@ -1,55 +1,78 @@
 'use server';
 
-import { Outline } from '@/types/outlines';
+import { TOutlines } from '@/types/outlines';
 import { createClient } from '@/utils/supabase/server';
+import { generateOutline } from './replicate.service';
 
 /**
  * Creates a new outline in Supabase
  * @param outline The outline data to create
  * @returns The created outline or error
  */
-export async function createOutline(
-  outline: Omit<Outline, 'id'>
-): Promise<{ success: boolean; error?: string; data?: Outline }> {
+
+export async function getAllOutlines(): Promise<{
+  success: boolean;
+  error?: string;
+  data?: TOutlines[];
+}> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth?.getUser();
   try {
-    // Validate input
-    if (!outline.title || !user?.id || !Array.isArray(outline.chapters)) {
-      throw new Error('Invalid outline data: Missing required fields');
-    }
-
-    if (outline.chapters.length === 0) {
-      throw new Error('Invalid outline data: Chapters array cannot be empty');
-    }
-
-    // Validate each chapter
-    for (const chapter of outline.chapters) {
-      if (!chapter.title || !chapter.description) {
-        throw new Error('Invalid chapter data: Missing title or description');
-      }
-    }
-
-    // Insert into Supabase
     const { data, error } = await supabase
       .from('outlines')
-      .insert([
-        {
-          title: outline.title,
-          user_id: user.id,
-          chapters: outline.chapters,
-        },
-      ])
-      .select()
-      .single();
-
+      .select('*')
+      .order('created_at', { ascending: false })
+      .eq('user_id', user?.id);
     if (error) throw error;
-
     return {
       success: true,
-      data: data as Outline,
+      data: data as TOutlines[],
+    };
+  } catch (error) {
+    console.error('Error getting outlines:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'An unknown error occurred',
+    };
+  }
+}
+
+export async function createOutline({
+  title,
+  outlineQuantity,
+}: {
+  title: string;
+  outlineQuantity: string;
+}): Promise<{
+  success: boolean;
+  error?: string;
+  data?: TOutlines;
+}> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
+  try {
+    const outlines = await generateOutline({ title, outlineQuantity });
+
+    if (outlines.data) {
+      const { data, error } = await supabase
+        .from('outlines')
+        .insert({ title, ...outlines.data, user_id: user?.id })
+        .select()
+        .single();
+      if (error) throw error;
+      return {
+        success: true,
+        data: data as TOutlines,
+      };
+    }
+    return {
+      success: false,
+      error: 'Error generating outline',
     };
   } catch (error) {
     console.error('Error creating outline:', error);
@@ -61,47 +84,33 @@ export async function createOutline(
   }
 }
 
-/**
- * Retrieves all outlines for a specific user
- * @param userId The ID of the user
- * @returns Array of outlines or error
- */
-export async function getOutlinesByUserId(
-  page: number = 1,
-  limit: number = 6
-): Promise<{
+export async function updateOutlineById({
+  id,
+  title,
+}: {
+  id: string;
+  title: string;
+}): Promise<{
   success: boolean;
   error?: string;
-  data?: Outline[];
-  total?: number;
+  data?: TOutlines[];
 }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth?.getUser();
   try {
-    const offset = (page - 1) * limit;
-
-    const [{ count }, { data }] = await Promise.all([
-      supabase
-        .from('outlines')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id),
-      supabase
-        .from('outlines')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1),
-    ]);
-
+    const { error } = await supabase
+      .from('outlines')
+      .update({ title })
+      .eq('id', id)
+      .eq('user_id', user?.id);
+    if (error) throw error;
     return {
       success: true,
-      data: data as Outline[],
-      total: count!,
     };
   } catch (error) {
-    console.error('Error retrieving outlines:', error);
+    console.error('Error updating outline:', error);
     return {
       success: false,
       error:

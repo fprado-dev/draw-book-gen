@@ -1,6 +1,12 @@
-export function SkeletonBook() {
+import { useSidebar } from '@/components/ui/sidebar';
+
+export function SkeletonOutline() {
+  const { open } = useSidebar();
+
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <div
+      className={`grid grid-cols-1 gap-4 ${open ? 'xl:grid-cols-3' : 'xl:grid-cols-4'} transition-all`}
+    >
       {[...Array(4)].map((_, index) => (
         <div
           key={index}

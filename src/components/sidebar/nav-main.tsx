@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  ChevronRight,
-  Folder,
-  LayoutDashboard,
-} from 'lucide-react';
+import { ChevronRight, Folder, LayoutDashboard } from 'lucide-react';
 
 import {
   Collapsible,

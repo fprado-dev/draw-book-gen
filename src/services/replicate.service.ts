@@ -1,65 +1,53 @@
 'use server';
 
-export type TOutline = {
-  title: string;
-  chapters: Array<{
-    title: string;
-    description: string;
-  }>;
-};
+import { TFormatOutlineResponse } from '@/types/outlines';
+import { formatOutline } from '@/utils/ai-outlines';
+import { headers } from 'next/headers';
 
 type TGenerateBookOutline = {
-  prompt: string;
-  style?: string;
-  complexity?: string;
-  chapters: number;
+  title: string;
+  outlineQuantity: string;
 };
 
-export const generateBookOutline = async ({
-  prompt,
-  chapters,
-}: TGenerateBookOutline): Promise<{
+type TGenerateBookOutlineResponse = {
   success: boolean;
-  outline?: TOutline;
-  error?: string;
-}> => {
+  error?: Error | string;
+  data: TFormatOutlineResponse | null;
+};
+
+export const generateOutline = async ({
+  title,
+  outlineQuantity,
+}: TGenerateBookOutline): Promise<TGenerateBookOutlineResponse> => {
   try {
-    // Validate input parameters
-    if (!prompt?.trim()) {
-      return { success: false, error: 'Prompt is required' };
-    }
+    const headersList = await headers();
+    const getUrl =
+      process.env.NODE_ENV === 'development'
+        ? process.env.NEXT_PUBLIC_SITE_URL
+        : headersList.get('x-forwarded-host');
 
-    if (chapters < 1 || chapters > 10) {
-      return {
-        success: false,
-        error: 'Number of chapters must be between 1 and 10',
-      };
-    }
-
-    const response = await fetch('/api/outline', {
+    const response = await fetch(`${getUrl}/api/outline`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        prompt,
-        chapters,
+        prompt: title,
+        quantity: outlineQuantity,
       }),
     });
 
     const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.error || 'Failed to generate outline');
-    }
+    const outlines = formatOutline(data.output);
 
     return {
       success: true,
-      outline: data.outline,
+      data: outlines,
     };
   } catch (error) {
     console.error('Error generating book outline:', error);
     return {
+      data: null,
       success: false,
       error:
         error instanceof Error ? error.message : 'An unknown error occurred',

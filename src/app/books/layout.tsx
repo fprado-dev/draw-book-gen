@@ -2,7 +2,6 @@
 
 import { BookImagesProvider } from '@/contexts/BookImagesContext';
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
