@@ -24,7 +24,7 @@ export const generateOutline = async ({
     const getUrl =
       process.env.NODE_ENV === 'development'
         ? process.env.NEXT_PUBLIC_SITE_URL
-        : headersList.get('x-forwarded-host');
+        : `https://${headersList.get('x-forwarded-host')}`;
 
     const response = await fetch(`${getUrl}/api/outline`, {
       method: 'POST',
