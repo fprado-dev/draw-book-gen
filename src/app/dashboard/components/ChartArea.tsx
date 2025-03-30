@@ -60,13 +60,14 @@ export function ChartAreaInteractive({ user }: { user: User }) {
     }
   }, [isMobile]);
 
-  const { data: chartData } = useQuery({
+  const { data: chartData, isLoading } = useQuery({
     queryKey: ['get-daily-ai-stats'],
     queryFn: async () => {
       const [imageStats, outlineStats] = await Promise.all([
         getDailyImageStats({ user }),
         getDailyOutlineStats({ user }),
       ]);
+
       const mergedData = mergeData({ imageStats, outlineStats });
 
       return mergedData;
@@ -126,8 +127,27 @@ export function ChartAreaInteractive({ user }: { user: User }) {
     return date >= startDate;
   });
 
+  if (isLoading) {
+    return (
+      <Card className="@container/card">
+        <CardHeader className="relative">
+          <CardTitle className="bg-muted h-3 w-24 animate-pulse rounded" />
+          <CardDescription>
+            <div className="bg-muted h-4 w-40 animate-pulse rounded" />
+          </CardDescription>
+          <div className="absolute right-4 top-4">
+            <div className="bg-muted h-8 w-40 animate-pulse rounded" />
+          </div>
+        </CardHeader>
+        <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+          <div className="bg-muted h-[250px] w-full animate-pulse rounded" />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="@container/card">
+    <Card className="@container/card relative">
       <CardHeader className="relative">
         <CardTitle>AI Usage</CardTitle>
         <CardDescription>
@@ -258,6 +278,18 @@ export function ChartAreaInteractive({ user }: { user: User }) {
           </AreaChart>
         </ChartContainer>
       </CardContent>
+      {!chartData ||
+        (chartData.length <= 5 && (
+          <div className="roun left-o absolute top-0 flex h-full w-full items-center justify-center rounded-xl bg-slate-100/80">
+            <div className="text-muted-foreground text-center">
+              <p>No AI usage data available yet!</p>
+              <p className="mt-2 text-sm">
+                Try generating some AI images or outlines to see your usage
+                statistics.
+              </p>
+            </div>
+          </div>
+        ))}
     </Card>
   );
 }

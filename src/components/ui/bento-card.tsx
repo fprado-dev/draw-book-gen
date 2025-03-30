@@ -59,10 +59,11 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
       )}
     >
       <div
-        className={`inset - 0 absolute ${item.hasPersistentHover
-          ? 'opacity-100'
-          : 'opacity-0 group-hover:opacity-100'
-          } - opacity duration - 300 transition`}
+        className={`inset - 0 absolute ${
+          item.hasPersistentHover
+            ? 'opacity-100'
+            : 'opacity-0 group-hover:opacity-100'
+        } - opacity duration - 300 transition`}
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02)_1px,transparent_1px)]" />
       </div>
@@ -154,10 +155,11 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
       </div>
 
       <div
-        className={`inset - 0 - z - 10 - xl p - px bg - gradient - to - br from - transparent via - gray - 100 / 50 to - transparent dark: via - white / 10 absolute rounded ${item.hasPersistentHover
-          ? 'opacity-100'
-          : 'opacity-0 group-hover:opacity-100'
-          } - opacity duration - 300 transition`}
+        className={`inset - 0 - z - 10 - xl p - px bg - gradient - to - br from - transparent via - gray - 100 / 50 to - transparent dark: via - white / 10 absolute rounded ${
+          item.hasPersistentHover
+            ? 'opacity-100'
+            : 'opacity-0 group-hover:opacity-100'
+        } - opacity duration - 300 transition`}
       />
     </div>
   );

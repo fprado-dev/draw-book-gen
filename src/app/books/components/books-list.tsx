@@ -18,9 +18,12 @@ import {
 } from '@/components/ui/sheet';
 import { FormUpdateBook } from './form-edit';
 import { useRouter } from 'next/navigation';
+import { useSidebar } from '@/components/ui/sidebar';
 
 export function BooksList() {
   const router = useRouter();
+  const { open } = useSidebar();
+
   const queryClient = useQueryClient(mainQueryClient);
 
   const [isOpenDialogDelete, setDialogDelete] = useState(false);
@@ -50,6 +53,7 @@ export function BooksList() {
       toast.success(`Book ${bookToDelete.bookTitle} deleted successfully`);
     },
   });
+
   const onConfirmDelete = async () => {
     deleteBookMutation.mutate(bookToDelete.bookId);
   };
@@ -83,11 +87,11 @@ export function BooksList() {
       />
       <Sheet onOpenChange={setUpdateSheet} open={isOpenUpdateSheet}>
         <SheetContent className="px-4 py-4">
-          <SheetTitle>Create New Book</SheetTitle>
+          <SheetTitle>Update Book</SheetTitle>
           <SheetDescription>
-            Start by entering the title of your new book. This will be the main
-            identifier for your book, so make sure to be descriptive and easy to
-            remember.
+            Make changes to your book's details below. The title serves as the
+            main identifier for your book, so ensure it remains clear and
+            memorable.
           </SheetDescription>
           <FormUpdateBook
             book={bookToUpdate!}
@@ -96,7 +100,9 @@ export function BooksList() {
         </SheetContent>
       </Sheet>
       {isLoading && <SkeletonBook />}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div
+        className={`grid grid-cols-1 gap-4 md:grid-cols-2 ${open ? 'lg:grid-cols-3 xl:grid-cols-3' : 'lg:grid-cols-4 xl:grid-cols-4'}`}
+      >
         {data?.books &&
           data.books.length > 0 &&
           formatBookCard(data.books!).map((book) => (
