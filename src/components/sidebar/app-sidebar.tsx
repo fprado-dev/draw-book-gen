@@ -13,7 +13,10 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { User } from '@supabase/supabase-js';
-import { useIsPublicRoute } from '@/hooks/use-is-public-routes';
+import {
+  useIsEditorRoute,
+  useIsPublicRoute,
+} from '@/hooks/use-is-public-routes';
 
 export function AppSidebar({
   user,
@@ -22,8 +25,13 @@ export function AppSidebar({
   user: User | null;
   props?: ComponentProps<typeof Sidebar>;
 }) {
+  const isEditorRoute = useIsEditorRoute();
   const isPublicRoute = useIsPublicRoute();
   if (isPublicRoute) {
+    return null;
+  }
+
+  if (isEditorRoute) {
     return null;
   }
   return (

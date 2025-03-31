@@ -2,11 +2,19 @@
 
 import { SidebarTrigger } from './ui/sidebar';
 import DynamicBreadCrumb from './DynamicBreadCrumb';
-import { useIsPublicRoute } from '@/hooks/use-is-public-routes';
+import {
+  useIsEditorRoute,
+  useIsPublicRoute,
+} from '@/hooks/use-is-public-routes';
 
 export const HeaderLayout = () => {
+  const isEditorRoute = useIsEditorRoute();
   const isPublicRoute = useIsPublicRoute();
   if (isPublicRoute) {
+    return null;
+  }
+
+  if (isEditorRoute) {
     return null;
   }
   return (
