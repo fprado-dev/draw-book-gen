@@ -4,8 +4,14 @@ import * as React from 'react';
 import { motion } from 'framer-motion';
 import {
   BadgeCheck,
+  Cog,
+  Coins,
   CreditCard,
+  HandPlatter,
+  Headset,
+  ImageUp,
   LineChart,
+  PlusCircle,
   Sparkles,
   Star,
   TrendingUp,
@@ -22,6 +28,8 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useQuery } from '@tanstack/react-query';
+import { getUserSubscriptionsData } from '@/services/dashboard.service';
 
 const creditPackages = [
   {
@@ -74,8 +82,14 @@ const usageStats = {
 };
 
 export default function BillingPage() {
-  const [, setSelectedPackage] = React.useState(creditPackages[1]);
+  const [, setSelectedPackage] = React.useState("PRO");
 
+
+  const { data: userSubscriptions, error } = useQuery({
+    queryKey: ['all-prices'],
+    queryFn: getUserSubscriptionsData
+  });
+  console.log(userSubscriptions);
   return (
     <div className="container mx-auto space-y-8 p-6">
       <div className="flex items-start justify-between">
@@ -89,8 +103,8 @@ export default function BillingPage() {
           variant="secondary"
           className="from-primary to-primary/80  bg-gradient-to-r text-white"
         >
-          <Sparkles className="mr-2 h-4 w-4" />
-          Upgrade Now
+          <Cog className="h-4 w-4" />
+          Manage Subscription
         </Button>
       </div>
 
@@ -105,15 +119,13 @@ export default function BillingPage() {
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
+
                 <CardDescription>
-                  Credits Used: {usageStats.creditsUsed}
-                </CardDescription>
-                <CardDescription>
-                  Total Credits: {usageStats.totalCredits}
+                  {userSubscriptions?.credits_usage}/{userSubscriptions?.credits!}
                 </CardDescription>
               </div>
               <Progress
-                value={(usageStats.creditsUsed / usageStats.totalCredits) * 100}
+                value={(Number(userSubscriptions?.credits_usage!) / Number(userSubscriptions?.credits!)) * 100}
               />
             </div>
             <div className="grid grid-cols-3 gap-4 text-center">
@@ -191,48 +203,63 @@ export default function BillingPage() {
       </div>
 
       <Tabs defaultValue="monthly" className="w-full">
-        <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+        <TabsList>
           <TabsTrigger value="monthly">Monthly Billing</TabsTrigger>
-          <TabsTrigger value="yearly">Yearly Billing (Save 20%)</TabsTrigger>
         </TabsList>
         <TabsContent value="monthly" className="mt-6">
           <div className="grid gap-6 md:grid-cols-3">
-            {creditPackages.map((pkg) => (
+            {userSubscriptions?.plans.map((plan) => (
               <motion.div
-                key={pkg.name}
+                key={plan.name}
                 whileHover={{ scale: 1.02 }}
-                className={`relative ${pkg.popular ? 'ring-primary rounded-lg ring-2' : ''}`}
+                className={`relative ${plan.name === "PRO" ? 'ring-primary rounded-lg ring-2' : ''}`}
               >
-                {pkg.popular && (
+                {plan.name === "PRO" && (
                   <span className="bg-primary/100 border-primary absolute -top-10 left-1/2 -translate-x-1/2 rounded-full border px-3 py-1 text-sm text-white">
                     Most Popular
                   </span>
                 )}
-                <Card className={`h-full ${pkg.popular ? 'mt-4' : ''}}`}>
+                <Card className={`h-full ${plan.name === "PRO" ? 'mt-4' : ''}}`}>
                   <CardHeader>
-                    <CardTitle>{pkg.name}</CardTitle>
+                    <CardTitle>{plan.name}</CardTitle>
                     <CardDescription>
-                      <span className="text-3xl font-bold">${pkg.price}</span>
+                      <span className="text-3xl font-bold">${plan.price}</span>
                       /month
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {pkg.features.map((feature, i) => (
-                        <li key={i} className="flex items-center">
-                          <BadgeCheck className="text-primary mr-2 h-4 w-4" />
-                          {feature}
-                        </li>
-                      ))}
+
+                      <li key={plan.features.credits_available} className="flex items-center">
+                        <Coins className="text-primary mr-2 h-4 w-4" />
+                        {plan.features.credits_available}
+                      </li>
+                      <li key={plan.features.support} className="flex items-center">
+                        <Headset className="text-primary mr-2 h-4 w-4" />
+                        {plan.features.support}
+                      </li>
+                      <li key={plan.features.resolution} className="flex items-center">
+                        <ImageUp className="text-primary mr-2 h-4 w-4" />
+                        {plan.features.resolution}
+                      </li>
+                      <li key={plan.features.online} className="flex items-center">
+                        <HandPlatter className="text-primary mr-2 h-4 w-4" />
+                        {plan.features.online}
+                      </li>
+                      {plan.features.plus !== "x" && <li key={plan.features.id} className="flex items-center">
+                        <PlusCircle className="text-primary mr-2 h-4 w-4" />
+                        {plan.features.plus}
+                      </li>}
                     </ul>
                   </CardContent>
                   <CardFooter>
                     <Button
+                      disabled={plan.name === userSubscriptions.plan}
                       className="w-full"
-                      variant={pkg.popular ? 'default' : 'outline'}
-                      onClick={() => setSelectedPackage(pkg)}
+                      variant={plan.name === "PRO" ? 'default' : 'outline'}
+                      onClick={() => setSelectedPackage(plan.name)}
                     >
-                      {pkg.popular ? 'Upgrade Now' : 'Get Started'}
+                      {plan.name === userSubscriptions.plan ? 'Current Plan' : 'Upgrade Now'}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -240,56 +267,7 @@ export default function BillingPage() {
             ))}
           </div>
         </TabsContent>
-        <TabsContent value="yearly" className="mt-6">
-          <div className="grid gap-6 md:grid-cols-3">
-            {creditPackages.map((pkg) => {
-              const yearlyPrice = (pkg.price * 12 * 0.8).toFixed(2);
-              return (
-                <motion.div
-                  key={pkg.name}
-                  whileHover={{ scale: 1.02 }}
-                  className={`relative ${pkg.popular ? 'ring-primary rounded-lg ring-2' : ''}`}
-                >
-                  {pkg.popular && (
-                    <span className="bg-primary/100 border-primary absolute -top-10 left-1/2 -translate-x-1/2 rounded-full border px-3 py-1 text-sm text-white">
-                      Most Popular
-                    </span>
-                  )}
-                  <Card className={`h-full ${pkg.popular ? 'mt-4' : ''}}`}>
-                    <CardHeader>
-                      <CardTitle>{pkg.name}</CardTitle>
-                      <CardDescription>
-                        <span className="text-3xl font-bold">
-                          ${yearlyPrice}
-                        </span>
-                        /year
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {pkg.features.map((feature, i) => (
-                          <li key={i} className="flex items-center">
-                            <BadgeCheck className="text-primary mr-2 h-4 w-4" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                    <CardFooter>
-                      <Button
-                        className="w-full"
-                        variant={pkg.popular ? 'default' : 'outline'}
-                        onClick={() => setSelectedPackage(pkg)}
-                      >
-                        {pkg.popular ? 'Upgrade Now' : 'Get Started'}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        </TabsContent>
+
       </Tabs>
     </div>
   );

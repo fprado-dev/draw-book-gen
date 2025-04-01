@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { User } from '@supabase/supabase-js';
+import Stripe from "stripe";
 
 export interface UserStats {
   totalBooks: number;
@@ -155,4 +156,82 @@ export async function getDailyOutlineStats({
     console.error('Error fetching daily outline stats:', error);
     throw error;
   }
+}
+
+
+type TUserSubscriptions = {
+  created_at: string;
+  credits: number;
+  credits_usage: number;
+  id: string;
+  plan: string;
+  stripe_costumer_id: string;
+  plans: {
+    id: string;
+    name: string;
+    price: number;
+    currency: string;
+    features: {
+      id: string;
+      credits_available: string,
+      included: string,
+      online: string,
+      plus: string,
+      resolution: string,
+      support: string;
+    };
+  }[];
+};
+
+export async function getUserSubscriptionsData(): Promise<TUserSubscriptions> {
+  const supabase = await createClient();
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    httpClient: Stripe.createFetchHttpClient(),
+    apiVersion: "2025-02-24.acacia",
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
+  try {
+    const { data: user_subscriptions, error: userDataError } = await supabase
+      .from('user_subscriptions')
+      .select('*')
+      .eq('id', user?.id).single();
+
+    if (userDataError) throw userDataError;
+
+    const { data: prices } = await stripe.prices.list();
+    const unsortedPlans = await Promise.all(
+      prices.map(async (price) => {
+        const product = await stripe.products.retrieve(String(price.product));
+        console.log(product);
+
+        if (price?.unit_amount === undefined || price?.unit_amount === null) {
+          throw new Error(`Price ${price.id} has no unit amount`);
+        }
+
+        return {
+          id: price.id,
+          name: product.name,
+          price: price?.unit_amount / 100,
+          currency: price.currency,
+          features: {
+            ...product.metadata
+          }
+        };
+      })
+    );
+
+
+    const plans = unsortedPlans.sort((a, b) => a.price - b.price);
+    return {
+      ...user_subscriptions,
+      plans,
+    };
+  } catch (error) {
+    console.error('Error fetching daily outline stats:', error);
+    throw error;
+  }
+
 }
