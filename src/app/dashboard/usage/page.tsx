@@ -29,7 +29,8 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
-import { getUserSubscriptionsData } from '@/services/dashboard.service';
+import { getUserSubscriptionsData, handleStripeCheckout } from '@/services/dashboard.service';
+import { loadStripe } from '@stripe/stripe-js';
 
 const creditPackages = [
   {
@@ -82,14 +83,34 @@ const usageStats = {
 };
 
 export default function BillingPage() {
-  const [, setSelectedPackage] = React.useState("PRO");
+  const [selectedPlan, setSelectedPlan] = React.useState("PRO");
 
 
-  const { data: userSubscriptions, error } = useQuery({
+  const { data: userSubscriptions } = useQuery({
     queryKey: ['all-prices'],
     queryFn: getUserSubscriptionsData
   });
-  console.log(userSubscriptions);
+
+
+  const handleSelectedPlan = async (plan: string) => {
+    setSelectedPlan(plan);
+    const selectedPlanData = userSubscriptions?.plans.find((p) => p.name === plan);
+    if (!selectedPlanData) return;
+    try {
+      const { id, url } = await handleStripeCheckout({
+        planId: selectedPlanData.id,
+        stripe_customer_id: userSubscriptions?.stripe_costumer_id!
+      });
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!, {
+      });
+      stripe?.redirectToCheckout({
+        sessionId: id,
+      });
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+    }
+  };
+
   return (
     <div className="container mx-auto space-y-8 p-6">
       <div className="flex items-start justify-between">
@@ -257,7 +278,7 @@ export default function BillingPage() {
                       disabled={plan.name === userSubscriptions.plan}
                       className="w-full"
                       variant={plan.name === "PRO" ? 'default' : 'outline'}
-                      onClick={() => setSelectedPackage(plan.name)}
+                      onClick={() => handleSelectedPlan(plan.name)}
                     >
                       {plan.name === userSubscriptions.plan ? 'Current Plan' : 'Upgrade Now'}
                     </Button>

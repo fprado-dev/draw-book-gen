@@ -205,7 +205,6 @@ export async function getUserSubscriptionsData(): Promise<TUserSubscriptions> {
     const unsortedPlans = await Promise.all(
       prices.map(async (price) => {
         const product = await stripe.products.retrieve(String(price.product));
-        console.log(product);
 
         if (price?.unit_amount === undefined || price?.unit_amount === null) {
           throw new Error(`Price ${price.id} has no unit amount`);
@@ -234,4 +233,26 @@ export async function getUserSubscriptionsData(): Promise<TUserSubscriptions> {
     throw error;
   }
 
+}
+
+type THandleStripeCheckout = {
+  planId: string;
+  stripe_customer_id: string;
+};
+
+export async function handleStripeCheckout({ planId, stripe_customer_id }: THandleStripeCheckout): Promise<{ url: string; id: string; }> {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase.functions.invoke('create-stripe-checkout', {
+      body: { planId, stripe_customer_id }
+    });
+
+    if (error) throw error;
+    console.log({ data });
+    return { url: data.url, id: data.id };
+  } catch (error) {
+    console.error('Error creating Stripe checkout session:', error);
+    throw error;
+  }
 }
