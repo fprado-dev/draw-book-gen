@@ -1,16 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useQuery } from '@tanstack/react-query';
-import { User } from '@supabase/supabase-js';
 import {
   DailyImageStats,
   DailyOutlinesStats,
   getDailyImageStats,
   getDailyOutlineStats,
 } from '@/services/dashboard.service';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
 import {
   Card,
@@ -50,7 +49,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ChartAreaInteractive({ user }: { user: User; }) {
+export function ChartAreaInteractive() {
+
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = useState('30d');
 
@@ -63,9 +63,10 @@ export function ChartAreaInteractive({ user }: { user: User; }) {
   const { data: chartData, isLoading } = useQuery({
     queryKey: ['get-daily-ai-stats'],
     queryFn: async () => {
+
       const [imageStats, outlineStats] = await Promise.all([
-        getDailyImageStats({ user }),
-        getDailyOutlineStats({ user }),
+        getDailyImageStats(),
+        getDailyOutlineStats(),
       ]);
 
       const mergedData = mergeData({ imageStats, outlineStats });

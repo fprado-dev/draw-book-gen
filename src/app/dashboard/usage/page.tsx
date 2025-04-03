@@ -1,6 +1,20 @@
 'use client';
 
-import * as React from 'react';
+import { PageHeader } from '@/components/page-header';
+import { PageWrapper } from '@/components/page-wrapper';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { getUserStats, getUserSubscriptionsData, handleStripeCustomerPortal } from '@/services/dashboard.service';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   BookUp,
@@ -14,25 +28,10 @@ import {
   Sparkle,
   Zap,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useQuery } from '@tanstack/react-query';
-import { getUserStats, getUserSubscriptionsData, handleStripeCheckout } from '@/services/dashboard.service';
-import { loadStripe } from '@stripe/stripe-js';
 import { SkeletonCards } from './components/skeleton-cards';
 
-
-
 export default function Page() {
+
   const { data: userSubscriptions, isLoading: isLoadingUserSubscriptions } = useQuery({
     queryKey: ['all-prices'],
     queryFn: getUserSubscriptionsData
@@ -44,42 +43,20 @@ export default function Page() {
   });
 
 
-  const handleSelectedPlan = async (plan: string) => {
-    const selectedPlanData = userSubscriptions?.plans.find((p) => p.name === plan);
-    if (!selectedPlanData) return;
-    try {
-      const { id } = await handleStripeCheckout({
-        planId: selectedPlanData.id,
-        stripe_customer_id: userSubscriptions?.stripe_costumer_id!
-      });
-      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!, {
-      });
-      stripe?.redirectToCheckout({
-        sessionId: id,
-      });
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
-    }
+  const handleManageSubscription = async () => {
+    const { url } = await handleStripeCustomerPortal();
+    window.location.href = url;
   };
 
   return (
-    <div className="container mx-auto space-y-8 p-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-primary text-3xl font-bold">Billing & Credits</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your subscription and credit usage
-          </p>
-        </div>
-        <Button
-          variant="secondary"
-          className="from-primary to-primary/80  bg-gradient-to-r text-white"
-        >
-          <Cog className="h-4 w-4" />
-          Manage Subscription
-        </Button>
-      </div>
-
+    <PageWrapper>
+      <PageHeader
+        titleText="Billing & Credits"
+        description="Manage your subscription and credit usage"
+        icon={<Cog className="h-4 w-4" />}
+        button_text='Manage Subscription'
+        onClick={handleManageSubscription}
+      />
       {isLoadingUserSubscriptions || isLoadingUserStats ? (
         <SkeletonCards />
       ) : (
@@ -251,7 +228,7 @@ export default function Page() {
                           disabled={plan.name === userSubscriptions.plan}
                           className="w-full"
                           variant={plan.name === "PRO" ? 'default' : 'outline'}
-                          onClick={() => handleSelectedPlan(plan.name)}
+                          onClick={handleManageSubscription}
                         >
                           {plan.name === userSubscriptions.plan ? 'Current Plan' : 'Upgrade Now'}
                         </Button>
@@ -266,6 +243,7 @@ export default function Page() {
         </>
       )}
 
-    </div>
+    </PageWrapper>
+
   );
 }

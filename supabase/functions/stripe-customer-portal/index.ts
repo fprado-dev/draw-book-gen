@@ -21,8 +21,6 @@ const supabase = createClient(
 
 Deno.serve(async (req) => {
 
-  const { planId } = await req.json();
-
   const token = req.headers.get("Authorization")!.replace("Bearer ", "");
   const { user } = await supabase.auth.api.getUser(token);
 
@@ -44,22 +42,12 @@ Deno.serve(async (req) => {
     .match({ id: user.id })
     .single();
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await stripe.billingPortal.sessions.create({
     customer: stripe_customer_id,
-    payment_method_types: ["card"],
-    mode: "subscription",
-    subscription_data: {
-      items: [
-        {
-          plan: planId,
-        },
-      ],
-    },
-    success_url: `http://localhost:3000/dashboard?status=success`,
-    cancel_url: `http://localhost:3000/dashboard?status=cancelled`,
+    return_url: "http://localhost:3000/dashboard/usage?status=ok",
   });
 
-  return new Response(JSON.stringify({ id: session.id }), {
+  return new Response(JSON.stringify({ url: session.url }), {
     status: 200,
     headers: {
       "Content-Type": "application/json",
@@ -69,4 +57,12 @@ Deno.serve(async (req) => {
   });
 
 })
+
+
+
+
+
+
+
+
 

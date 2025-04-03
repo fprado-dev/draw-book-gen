@@ -1,7 +1,6 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
-import { User } from '@supabase/supabase-js';
 import Stripe from "stripe";
 
 export interface UserStats {
@@ -66,12 +65,11 @@ export async function getUserStats(): Promise<UserStats> {
   }
 }
 
-export async function getDailyImageStats({
-  user,
-}: {
-  user: User | null;
-}): Promise<DailyImageStats[]> {
+export async function getDailyImageStats(): Promise<DailyImageStats[]> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
   try {
     const { data: userImages, error: userImagesError } =
       await supabase.storage
@@ -106,13 +104,11 @@ export async function getDailyImageStats({
   }
 }
 
-export async function getDailyOutlineStats({
-  user,
-}: {
-  user: User | null;
-}): Promise<DailyOutlinesStats[]> {
+export async function getDailyOutlineStats(): Promise<DailyOutlinesStats[]> {
   const supabase = await createClient();
-
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
   try {
     const { data: outlines, error } = await supabase
       .from('outlines')
@@ -149,7 +145,7 @@ type TUserSubscriptions = {
   credits_usage: number;
   id: string;
   plan: string;
-  stripe_costumer_id: string;
+  stripe_customer_id: string;
   plans: {
     id: string;
     name: string;
@@ -171,7 +167,6 @@ export async function getUserSubscriptionsData(): Promise<TUserSubscriptions> {
   const supabase = await createClient();
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     httpClient: Stripe.createFetchHttpClient(),
-    apiVersion: "2025-02-24.acacia",
   });
 
   const {
@@ -221,15 +216,14 @@ export async function getUserSubscriptionsData(): Promise<TUserSubscriptions> {
 
 type THandleStripeCheckout = {
   planId: string;
-  stripe_customer_id: string;
 };
 
-export async function handleStripeCheckout({ planId, stripe_customer_id }: THandleStripeCheckout): Promise<{ url: string; id: string; }> {
+export async function handleStripeCheckout({ planId }: THandleStripeCheckout): Promise<{ url: string; id: string; }> {
   const supabase = await createClient();
 
   try {
     const { data, error } = await supabase.functions.invoke('create-stripe-checkout', {
-      body: { planId, stripe_customer_id }
+      body: { planId }
     });
 
     if (error) throw error;
@@ -238,4 +232,15 @@ export async function handleStripeCheckout({ planId, stripe_customer_id }: THand
     console.error('Error creating Stripe checkout session:', error);
     throw error;
   }
+}
+
+
+export async function handleStripeCustomerPortal(): Promise<{ url: string; }> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.functions.invoke(
+    "stripe-customer-portal"
+  );
+  if (error) throw error;
+  return { url: data.url };
 }

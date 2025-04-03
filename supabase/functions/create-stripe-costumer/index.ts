@@ -1,11 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import Stripe from "https://esm.sh/stripe?target=deno";
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@1.35.5";
-import { version } from "os";
+import Stripe from "https://esm.sh/stripe?target=deno";
 
 const stripe = Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
   httpClient: Stripe.createFetchHttpClient(),
-  apiVersion: "2025-02-24.acacia",
+  apiVersion: "2025-03-31.basil",
 });
 
 const supabase = createClient(
@@ -23,13 +23,17 @@ Deno.serve(async (req) => {
     },
   });
 
+  // Create a FREE subscription for the new customer
+  await stripe.subscriptions.create({
+    customer: customer.id,
+    items: [{ price: Deno.env.get("STRIPE_FREE_PRICE_ID")! }],
+  });
 
-
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("user_subscriptions")
     .insert({
       id: record.id,
-      stripe_costumer_id: customer.id,
+      stripe_customer_id: customer.id,
     })
     .select();
   if (error) {
