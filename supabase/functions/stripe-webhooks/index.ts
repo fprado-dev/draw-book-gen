@@ -1,18 +1,17 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@1.35.5";
-import Stripe from "https://esm.sh/stripe?target=deno";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@1.35.5';
+import Stripe from 'https://esm.sh/stripe?target=deno';
 
-const stripe = Stripe(Deno.env.get("STRIPE_SECRET_KEY"), {
+const stripe = Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
   httpClient: Stripe.createFetchHttpClient(),
-  apiVersion: "2025-03-31.basil",
+  apiVersion: '2025-03-31.basil',
 });
 
 const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
-
 
 // This is needed in order to use the Web Crypto API in Deno.
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
@@ -20,7 +19,7 @@ const cryptoProvider = Stripe.createSubtleCryptoProvider();
 console.log(`Function "stripe-webhooks" up and running!`);
 
 Deno.serve(async (request) => {
-  const signature = request.headers.get("Stripe-Signature");
+  const signature = request.headers.get('Stripe-Signature');
 
   // First step is to verify the event. The .text() method must be used as the
   // verification relies on the raw request body rather than the parsed JSON.
@@ -30,7 +29,7 @@ Deno.serve(async (request) => {
     receivedEvent = await stripe.webhooks.constructEventAsync(
       body,
       signature,
-      Deno.env.get("STRIPE_SIGNING_SECRET"),
+      Deno.env.get('STRIPE_SIGNING_SECRET'),
       undefined,
       cryptoProvider
     );
@@ -44,8 +43,8 @@ Deno.serve(async (request) => {
   const requestOptions =
     receivedEvent.request && receivedEvent.request.idempotency_key
       ? {
-        idempotencyKey: receivedEvent.request.idempotency_key,
-      }
+          idempotencyKey: receivedEvent.request.idempotency_key,
+        }
       : {};
 
   let retrievedEvent;
@@ -62,28 +61,28 @@ Deno.serve(async (request) => {
 
   const handleCreditsUpdate = (plan: string) => {
     switch (plan) {
-      case "PRO":
+      case 'PRO':
         return 500;
-      case "PREMIUM":
+      case 'PREMIUM':
         return 2000;
       default:
         return 0;
     }
   };
   switch (retrievedEvent.type) {
-    case "customer.subscription.deleted":
+    case 'customer.subscription.deleted':
       await supabase
-        .from("user_subscriptions")
+        .from('user_subscriptions')
         .update({
-          plan: "FREE",
+          plan: 'FREE',
         })
         .match({ stripe_customer_id: subscription.customer });
       // Then define and call a function to handle the retrievedEvent customer.subscription.deleted
       break;
-    case "customer.subscription.updated":
+    case 'customer.subscription.updated':
       const product = await stripe.products.retrieve(subscription.plan.product);
       await supabase
-        .from("user_subscriptions")
+        .from('user_subscriptions')
         .update({
           plan: product.name.toUpperCase(),
           credits: handleCreditsUpdate(product.name.toUpperCase()),
@@ -96,11 +95,8 @@ Deno.serve(async (request) => {
       console.log(`Unhandled retrievedEvent type ${retrievedEvent.type}`);
   }
 
-  return new Response(JSON.stringify({ id: retrievedEvent.id, status: "ok" }), {
+  return new Response(JSON.stringify({ id: retrievedEvent.id, status: 'ok' }), {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
   });
 });
-
-
-

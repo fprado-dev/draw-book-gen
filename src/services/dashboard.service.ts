@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
-import Stripe from "stripe";
+import Stripe from 'stripe';
 
 export interface UserStats {
   totalBooks: number;
@@ -42,17 +42,15 @@ export async function getUserStats(): Promise<UserStats> {
     if (outlinesError) throw outlinesError;
 
     // Get images count from storage by listing all book folders and their contents
-    const { data: userImages, error: userImagesError } =
-      await supabase.storage
-        .from('users-generated-images')
-        .list(`${user?.id}`, {
-          limit: 100000,
-          offset: 0,
-          sortBy: { column: 'name', order: 'asc' },
-        });
+    const { data: userImages, error: userImagesError } = await supabase.storage
+      .from('users-generated-images')
+      .list(`${user?.id}`, {
+        limit: 100000,
+        offset: 0,
+        sortBy: { column: 'name', order: 'asc' },
+      });
 
     if (userImagesError) throw userImagesError;
-
 
     return {
       totalBooks: booksCount || 0,
@@ -71,14 +69,13 @@ export async function getDailyImageStats(): Promise<DailyImageStats[]> {
     data: { user },
   } = await supabase.auth?.getUser();
   try {
-    const { data: userImages, error: userImagesError } =
-      await supabase.storage
-        .from('users-generated-images')
-        .list(`${user?.id}`, {
-          limit: 100000,
-          offset: 0,
-          sortBy: { column: 'name', order: 'asc' },
-        });
+    const { data: userImages, error: userImagesError } = await supabase.storage
+      .from('users-generated-images')
+      .list(`${user?.id}`, {
+        limit: 100000,
+        offset: 0,
+        sortBy: { column: 'name', order: 'asc' },
+      });
 
     if (userImagesError) throw userImagesError;
 
@@ -138,7 +135,6 @@ export async function getDailyOutlineStats(): Promise<DailyOutlinesStats[]> {
   }
 }
 
-
 type TUserSubscriptions = {
   created_at: string;
   credits: number;
@@ -153,11 +149,11 @@ type TUserSubscriptions = {
     currency: string;
     features: {
       id: string;
-      credits_available: string,
-      included: string,
-      online: string,
-      plus: string,
-      resolution: string,
+      credits_available: string;
+      included: string;
+      online: string;
+      plus: string;
+      resolution: string;
       support: string;
     };
   }[];
@@ -176,7 +172,8 @@ export async function getUserSubscriptionsData(): Promise<TUserSubscriptions> {
     const { data: user_subscriptions, error: userDataError } = await supabase
       .from('user_subscriptions')
       .select('*')
-      .eq('id', user?.id).single();
+      .eq('id', user?.id)
+      .single();
 
     if (userDataError) throw userDataError;
 
@@ -195,12 +192,11 @@ export async function getUserSubscriptionsData(): Promise<TUserSubscriptions> {
           price: price?.unit_amount / 100,
           currency: price.currency,
           features: {
-            ...product.metadata
-          }
+            ...product.metadata,
+          },
         };
       })
     );
-
 
     const plans = unsortedPlans.sort((a, b) => a.price - b.price);
     return {
@@ -211,20 +207,24 @@ export async function getUserSubscriptionsData(): Promise<TUserSubscriptions> {
     console.error('Error fetching daily outline stats:', error);
     throw error;
   }
-
 }
 
 type THandleStripeCheckout = {
   planId: string;
 };
 
-export async function handleStripeCheckout({ planId }: THandleStripeCheckout): Promise<{ url: string; id: string; }> {
+export async function handleStripeCheckout({
+  planId,
+}: THandleStripeCheckout): Promise<{ url: string; id: string }> {
   const supabase = await createClient();
 
   try {
-    const { data, error } = await supabase.functions.invoke('create-stripe-checkout', {
-      body: { planId }
-    });
+    const { data, error } = await supabase.functions.invoke(
+      'create-stripe-checkout',
+      {
+        body: { planId },
+      }
+    );
 
     if (error) throw error;
     return { url: data.url, id: data.id };
@@ -234,12 +234,11 @@ export async function handleStripeCheckout({ planId }: THandleStripeCheckout): P
   }
 }
 
-
-export async function handleStripeCustomerPortal(): Promise<{ url: string; }> {
+export async function handleStripeCustomerPortal(): Promise<{ url: string }> {
   const supabase = await createClient();
 
   const { data, error } = await supabase.functions.invoke(
-    "stripe-customer-portal"
+    'stripe-customer-portal'
   );
   if (error) throw error;
   return { url: data.url };

@@ -1,16 +1,16 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@1.35.5";
-import Stripe from "https://esm.sh/stripe?target=deno";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@1.35.5';
+import Stripe from 'https://esm.sh/stripe?target=deno';
 
-const stripe = Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
+const stripe = Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   httpClient: Stripe.createFetchHttpClient(),
-  apiVersion: "2025-03-31.basil",
+  apiVersion: '2025-03-31.basil',
 });
 
 const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
 Deno.serve(async (req) => {
@@ -26,11 +26,11 @@ Deno.serve(async (req) => {
   // Create a FREE subscription for the new customer
   await stripe.subscriptions.create({
     customer: customer.id,
-    items: [{ price: Deno.env.get("STRIPE_FREE_PRICE_ID")! }],
+    items: [{ price: Deno.env.get('STRIPE_FREE_PRICE_ID')! }],
   });
 
   const { error } = await supabase
-    .from("user_subscriptions")
+    .from('user_subscriptions')
     .insert({
       id: record.id,
       stripe_customer_id: customer.id,
@@ -40,9 +40,7 @@ Deno.serve(async (req) => {
     console.error({ error });
   }
 
-
   return new Response(JSON.stringify({ stripe_customer_id: customer.id }), {
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
   });
 });
-

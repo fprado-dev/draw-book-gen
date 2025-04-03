@@ -50,7 +50,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function ChartAreaInteractive() {
-
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = useState('30d');
 
@@ -63,7 +62,6 @@ export function ChartAreaInteractive() {
   const { data: chartData, isLoading } = useQuery({
     queryKey: ['get-daily-ai-stats'],
     queryFn: async () => {
-
       const [imageStats, outlineStats] = await Promise.all([
         getDailyImageStats(),
         getDailyOutlineStats(),
