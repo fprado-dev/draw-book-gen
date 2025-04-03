@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     })
     .select();
   if (error) {
-    console.log({ error });
+    console.error({ error });
   }
 
 

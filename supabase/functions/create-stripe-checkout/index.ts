@@ -51,9 +51,8 @@ Deno.serve(async (req) => {
     success_url: `http://localhost:3000/success`,
     cancel_url: `http://localhost:3000/cancel`,
   });
-  console.log(planId, stripe_customer_id);
 
-  return new Response(JSON.stringify({ id: session.id, url: session.url }), {
+  return new Response(JSON.stringify({ id: session.id }), {
     status: 200,
     headers: {
       "Content-Type": "application/json",

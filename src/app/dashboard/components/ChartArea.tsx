@@ -50,7 +50,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ChartAreaInteractive({ user }: { user: User }) {
+export function ChartAreaInteractive({ user }: { user: User; }) {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = useState('30d');
 
@@ -112,7 +112,6 @@ export function ChartAreaInteractive({ user }: { user: User }) {
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
   };
-
   const filteredData = chartData?.filter((item) => {
     const date = new Date(item.date);
     const referenceDate = new Date();
@@ -279,7 +278,7 @@ export function ChartAreaInteractive({ user }: { user: User }) {
         </ChartContainer>
       </CardContent>
       {!chartData ||
-        (chartData.length <= 5 && (
+        (chartData.length <= 1 && (
           <div className="roun left-o absolute top-0 flex h-full w-full items-center justify-center rounded-xl bg-slate-100/80">
             <div className="text-muted-foreground text-center">
               <p>No AI usage data available yet!</p>

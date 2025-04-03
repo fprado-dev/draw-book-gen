@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
+import { Sparkles, TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -20,8 +20,8 @@ export function StatsCards() {
   const { data: statsInfos, isLoading } = useQuery({
     queryKey: ['get-user-stats'],
     queryFn: async () => {
-      const { totalBooks, totalImages } = await getUserStats();
-      return { totalBooks, totalImages };
+      const { totalBooks, totalImages, totalOutlines } = await getUserStats();
+      return { totalBooks, totalImages, totalOutlines };
     },
   });
 
@@ -95,6 +95,27 @@ export function StatsCards() {
           <div className="text-muted-foreground">
             Money saved with zero effort{' '}
           </div>
+        </CardFooter>
+      </Card>
+      <Card className="@container/card">
+        <CardHeader className="relative">
+          <CardDescription>Outlines Generated</CardDescription>
+          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+            {statsInfos?.totalOutlines}
+          </CardTitle>
+          <div className="absolute right-4 top-0">
+            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+              <Sparkles className="size-3" />
+              Prompt Ideas
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardFooter className="flex-col items-start gap-1 text-sm">
+          <div className="line-clamp-1 flex gap-2 font-medium">
+            Using Ailustra model
+            <TrendingUpIcon className="size-4" />
+          </div>
+          <div className="text-muted-foreground">Cost of $0.00</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">

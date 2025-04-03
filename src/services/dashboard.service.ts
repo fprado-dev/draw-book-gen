@@ -7,6 +7,7 @@ import Stripe from "stripe";
 export interface UserStats {
   totalBooks: number;
   totalImages: number;
+  totalOutlines: number;
 }
 
 export interface DailyImageStats {
@@ -33,8 +34,16 @@ export async function getUserStats(): Promise<UserStats> {
 
     if (booksError) throw booksError;
 
+    // Get Outlines count
+    const { count: outlinesCount, error: outlinesError } = await supabase
+      .from('outlines')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user?.id);
+
+    if (outlinesError) throw outlinesError;
+
     // Get images count from storage by listing all book folders and their contents
-    const { data: userFolders, error: userFoldersError } =
+    const { data: userImages, error: userImagesError } =
       await supabase.storage
         .from('users-generated-images')
         .list(`${user?.id}`, {
@@ -43,27 +52,13 @@ export async function getUserStats(): Promise<UserStats> {
           sortBy: { column: 'name', order: 'asc' },
         });
 
-    if (userFoldersError) throw userFoldersError;
-    // Count all images across all book folders
-    let totalImagesCount = 0;
-    if (userFolders) {
-      for (const folder of userFolders) {
-        if (folder.name) {
-          // Check if it's a folder
-          const { data: bookImages, error: bookImagesError } =
-            await supabase.storage
-              .from('users-generated-images')
-              .list(`${user?.id}/${folder.name}`);
+    if (userImagesError) throw userImagesError;
 
-          if (bookImagesError) throw bookImagesError;
-          totalImagesCount += bookImages?.length || 0;
-        }
-      }
-    }
 
     return {
       totalBooks: booksCount || 0,
-      totalImages: totalImagesCount || 0,
+      totalImages: userImages.length || 0,
+      totalOutlines: outlinesCount || 0,
     };
   } catch (error) {
     console.error('Error fetching user stats:', error);
@@ -78,7 +73,7 @@ export async function getDailyImageStats({
 }): Promise<DailyImageStats[]> {
   const supabase = await createClient();
   try {
-    const { data: userFolders, error: userFoldersError } =
+    const { data: userImages, error: userImagesError } =
       await supabase.storage
         .from('users-generated-images')
         .list(`${user?.id}`, {
@@ -87,28 +82,17 @@ export async function getDailyImageStats({
           sortBy: { column: 'name', order: 'asc' },
         });
 
-    if (userFoldersError) throw userFoldersError;
+    if (userImagesError) throw userImagesError;
 
     // Store image counts by date
     const imagesByDate = new Map<string, number>();
 
-    if (userFolders) {
-      for (const folder of userFolders) {
-        if (folder.name) {
-          const { data: bookImages, error: bookImagesError } =
-            await supabase.storage
-              .from('users-generated-images')
-              .list(`${user?.id}/${folder.name}`);
-
-          if (bookImagesError) throw bookImagesError;
-
-          // Group images by date
-          bookImages?.forEach((image) => {
-            const date = new Date(image.created_at).toISOString().split('T')[0];
-            imagesByDate.set(date, (imagesByDate.get(date) || 0) + 1);
-          });
-        }
-      }
+    if (userImages) {
+      // Group images by date
+      userImages?.forEach((image) => {
+        const date = new Date(image.created_at).toISOString().split('T')[0];
+        imagesByDate.set(date, (imagesByDate.get(date) || 0) + 1);
+      });
     }
 
     // Convert map to array and sort by date
@@ -249,7 +233,6 @@ export async function handleStripeCheckout({ planId, stripe_customer_id }: THand
     });
 
     if (error) throw error;
-    console.log({ data });
     return { url: data.url, id: data.id };
   } catch (error) {
     console.error('Error creating Stripe checkout session:', error);
