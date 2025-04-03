@@ -13,7 +13,6 @@ export const mainQueryClient = new QueryClient();
 export default function Providers({ children }: Props) {
   return (
     <QueryClientProvider client={mainQueryClient}>
-
       {children}
       <ReactQueryDevtools />
     </QueryClientProvider>

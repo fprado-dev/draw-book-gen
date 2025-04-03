@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-export function NavUser({ user }: { user: User | null; }) {
+export function NavUser({ user }: { user: User | null }) {
   const isMobile = useIsMobile();
   return (
     <SidebarMenu>

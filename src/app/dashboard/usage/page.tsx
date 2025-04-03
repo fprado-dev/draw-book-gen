@@ -193,7 +193,7 @@ export default function Page() {
                     className={`relative ${plan.name === 'PRO' ? 'ring-primary rounded-lg ring-2' : ''}`}
                   >
                     {plan.name === 'PRO' && (
-                      <span className="bg-primary border-primary absolute -top-10 left-1/2 -translate-x-1/2 rounded-full border px-3 py-1 text-sm text-primary-foreground">
+                      <span className="bg-primary border-primary text-primary-foreground absolute -top-10 left-1/2 -translate-x-1/2 rounded-full border px-3 py-1 text-sm">
                         Most Popular
                       </span>
                     )}

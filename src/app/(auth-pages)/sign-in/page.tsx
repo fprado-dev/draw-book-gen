@@ -13,7 +13,7 @@ export default async function SignIn(props: {
       <div className="relative z-10 w-full max-w-sm md:max-w-xl">
         <FormMessage message={searchParams} />
         <LoginForm />
-        <div className="flex items-center justify-center mt-6">
+        <div className="mt-6 flex items-center justify-center">
           <ThemeToggle />
         </div>
       </div>
@@ -40,7 +40,6 @@ export default async function SignIn(props: {
 
         <rect width="100%" height="100%" fill="url(#a)" />
       </svg>
-
     </div>
   );
 }

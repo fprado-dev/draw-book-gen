@@ -75,10 +75,7 @@ export function FormCreateBook({ closeModal }: TFormCreateBook) {
   return (
     <form className="space-y-4">
       <div>
-        <Label
-          htmlFor="title"
-          className="block text-sm font-medium"
-        >
+        <Label htmlFor="title" className="block text-sm font-medium">
           Title
         </Label>
         <div className="mt-1">
@@ -95,10 +92,7 @@ export function FormCreateBook({ closeModal }: TFormCreateBook) {
       </div>
 
       <div>
-        <Label
-          htmlFor="size"
-          className="block text-sm font-medium"
-        >
+        <Label htmlFor="size" className="block text-sm font-medium">
           Size
         </Label>
         <div className="mt-1">
@@ -117,9 +111,7 @@ export function FormCreateBook({ closeModal }: TFormCreateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium ">
-          Book Type
-        </Label>
+        <Label className="block text-sm font-medium ">Book Type</Label>
         <div className="mt-1 flex gap-2">
           <ToggleGroup
             onValueChange={setBookType}
@@ -142,9 +134,7 @@ export function FormCreateBook({ closeModal }: TFormCreateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium ">
-          Paper Color
-        </Label>
+        <Label className="block text-sm font-medium ">Paper Color</Label>
         <div className="mt-1 flex gap-2">
           <ToggleGroup
             onValueChange={setBookPaperColor}
@@ -167,9 +157,7 @@ export function FormCreateBook({ closeModal }: TFormCreateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium ">
-          Measurement Units
-        </Label>
+        <Label className="block text-sm font-medium ">Measurement Units</Label>
         <div className="mt-1 flex gap-2">
           <ToggleGroup
             onValueChange={setMeasurementUnit}
@@ -192,9 +180,7 @@ export function FormCreateBook({ closeModal }: TFormCreateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium ">
-          Status
-        </Label>
+        <Label className="block text-sm font-medium ">Status</Label>
         <div className="mt-1 flex gap-2">
           <ToggleGroup
             onValueChange={setStatus}

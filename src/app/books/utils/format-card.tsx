@@ -12,7 +12,7 @@ export const formatBookCard = (books: TBook[]): BentoItem<TBook>[] => {
       description: `${formatDistanceToNow(book.created_at)} ago`,
       status: book.status.charAt(0).toUpperCase() + book.status.slice(1),
       tags: [book.size, book.book_type, book.paper_color],
-      icon: <Book className="h-4 w-4 text-primary" />,
+      icon: <Book className="text-primary h-4 w-4" />,
     };
   });
   return formattedOutlines;

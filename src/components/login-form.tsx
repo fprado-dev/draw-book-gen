@@ -1,6 +1,12 @@
 import Logo from '@/app/Logo';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -19,7 +25,7 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<'div'>) {
   return (
     <div className={cn('flex flex-col gap-4', className)} {...props}>
-      <Card className='pt-10 gap-2'>
+      <Card className="gap-2 pt-10">
         <CardHeader className="flex items-center justify-center text-center">
           <CardTitle>
             <Logo />
@@ -56,7 +62,7 @@ export function LoginForm({
           </form>
         </CardContent>
 
-        <CardFooter className='flex-col gap-2 w-full'>
+        <CardFooter className="w-full flex-col gap-2">
           <p className="text-foreground text-center text-sm">
             Don't have an account?{' '}
             <Link
@@ -66,12 +72,12 @@ export function LoginForm({
               Sign up
             </Link>
           </p>
-          <div className="w-full after:border-border relative py-4 text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+          <div className="after:border-border relative w-full py-4 text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-card text-muted-foreground relative z-10 px-2">
               Or continue with
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-4 w-full">
+          <div className="grid w-full grid-cols-2 gap-4">
             <Button
               onClick={signinWithGoogle}
               variant="outline"

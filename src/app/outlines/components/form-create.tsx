@@ -21,7 +21,7 @@ const quantities = [
     value: '20',
   },
 ];
-export function FormCreateOutline({ closeModal }: { closeModal: () => void; }) {
+export function FormCreateOutline({ closeModal }: { closeModal: () => void }) {
   const [outlineQuantity, setOutlineQuantity] = useState('5');
   const queryClient = useQueryClient(mainQueryClient);
 
@@ -38,10 +38,7 @@ export function FormCreateOutline({ closeModal }: { closeModal: () => void; }) {
   return (
     <form className="space-y-4">
       <div>
-        <Label
-          htmlFor="title"
-          className="block text-sm font-medium"
-        >
+        <Label htmlFor="title" className="block text-sm font-medium">
           Title
         </Label>
         <div className="mt-1">
@@ -58,10 +55,7 @@ export function FormCreateOutline({ closeModal }: { closeModal: () => void; }) {
       </div>
 
       <div>
-        <Label
-          htmlFor="size"
-          className="block text-sm font-medium "
-        >
+        <Label htmlFor="size" className="block text-sm font-medium ">
           Number of Prompts
         </Label>
         <div className="mt-1 flex gap-2">

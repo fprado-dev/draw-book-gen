@@ -278,7 +278,7 @@ export function ChartAreaInteractive() {
       </CardContent>
       {!chartData ||
         (chartData.length <= 1 && (
-          <div className="left-o absolute top-0 flex h-full w-full items-center justify-center rounded-xl bg-primary-foreground/40 dark:bg-primary-foreground/70">
+          <div className="left-o bg-primary-foreground/40 dark:bg-primary-foreground/70 absolute top-0 flex h-full w-full items-center justify-center rounded-xl">
             <div className="text-muted-foreground text-center">
               <p>No AI usage data available yet!</p>
               <p className="mt-2 text-sm">

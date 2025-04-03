@@ -52,7 +52,6 @@ export function ViewPromptSheet({
       <SheetContent className="min-w-2xl flex h-screen flex-col px-8 py-4 ">
         <div className="flex items-center justify-start gap-4">
           <SheetTitle>Generated Prompts</SheetTitle>
-
         </div>
         <SheetDescription>
           Below are all the AI-generated prompts created for this outline.
@@ -73,16 +72,13 @@ export function ViewPromptSheet({
             ))}
           </div>
           <div>
-
             <Button
               variant="outline"
               size="sm"
               className="gap-2"
               onClick={handleDownloadOutlinePrompts}
             >
-              <span>
-                Download All Prompts
-              </span>
+              <span>Download All Prompts</span>
               <Download className="h-3 w-3" />
             </Button>
           </div>
@@ -97,9 +93,8 @@ export function ViewPromptSheet({
                   transition={{ delay: index * 0.2 }}
                 >
                   <Card className="flex flex-col  gap-4">
-                    <CardHeader className="flex justify-between items-center gap-2">
-                      <div className='flex gap-2'>
-
+                    <CardHeader className="flex items-center justify-between gap-2">
+                      <div className="flex gap-2">
                         {outline.keywords.map((keyword, keywordIndex) => (
                           <Badge
                             key={keywordIndex}
@@ -111,7 +106,6 @@ export function ViewPromptSheet({
                         ))}
                       </div>
                       <CopyButton value={outline.description} />
-
                     </CardHeader>
                     <CardContent>
                       <p className="text-muted-foreground max-h-[120px] overflow-y-auto text-sm">

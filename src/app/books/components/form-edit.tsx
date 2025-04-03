@@ -81,10 +81,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
   return (
     <form className="space-y-4">
       <div>
-        <Label
-          htmlFor="title"
-          className="block text-sm font-medium"
-        >
+        <Label htmlFor="title" className="block text-sm font-medium">
           Title
         </Label>
         <div className="mt-1">
@@ -102,10 +99,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
       </div>
 
       <div>
-        <Label
-          htmlFor="size"
-          className="block text-sm font-medium"
-        >
+        <Label htmlFor="size" className="block text-sm font-medium">
           Size
         </Label>
         <div className="mt-1">
@@ -124,9 +118,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium">
-          Book Type
-        </Label>
+        <Label className="block text-sm font-medium">Book Type</Label>
         <div className="mt-1 flex gap-2">
           <ToggleGroup
             onValueChange={(value: TBookType) => setBookType(value)}
@@ -149,9 +141,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium">
-          Paper Color
-        </Label>
+        <Label className="block text-sm font-medium">Paper Color</Label>
         <div className="mt-1 flex gap-2">
           <ToggleGroup
             onValueChange={(value: TBookPaperColor) => setBookPaperColor(value)}
@@ -174,9 +164,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium">
-          Measurement Units
-        </Label>
+        <Label className="block text-sm font-medium">Measurement Units</Label>
         <div className="mt-1 flex gap-2">
           <ToggleGroup
             onValueChange={(value: TBookMeasurementUnit) =>
@@ -201,9 +189,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium">
-          Status
-        </Label>
+        <Label className="block text-sm font-medium">Status</Label>
         <div className="mt-1 flex gap-2">
           <ToggleGroup
             onValueChange={(value: TBookStatus) => setStatus(value)}
