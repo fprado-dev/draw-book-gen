@@ -14,7 +14,7 @@ export const formatOutlineCard = (
       cta: 'Explore →',
       description: `${formatDistanceToNow(outline.created_at)} ago`,
       tags: outline.info.keywords,
-      icon: <Sparkle className="h-4 w-4 text-purple-500" />,
+      icon: <Sparkle className="h-4 w-4 text-primary" />,
     };
   });
   return formattedOutlines;

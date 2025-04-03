@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import './globals.css';
-import { Toaster } from '@/components/ui/sonner';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/sidebar/app-sidebar';
-import { createClient } from '@/utils/supabase/server';
 import { HeaderLayout } from '@/components/header';
 import Providers from '@/components/providers';
+import { AppSidebar } from '@/components/sidebar/app-sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Toaster } from '@/components/ui/sonner';
+import { createClient } from '@/utils/supabase/server';
+import type { Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
 
 // Optimize font loading with display: 'swap' to prevent layout shifts
 const geistSans = Geist({
@@ -47,15 +48,20 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SidebarProvider>
-          <AppSidebar user={user} />
-          <SidebarInset>
-            <HeaderLayout />
-            <div className="flex flex-1 flex-col">
-              <Providers>{children}</Providers>
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
+        <ThemeProvider attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange>
+          <SidebarProvider>
+            <AppSidebar user={user} />
+            <SidebarInset>
+              <HeaderLayout />
+              <div className="flex flex-1 flex-col">
+                <Providers>{children}</Providers>
+              </div>
+            </SidebarInset>
+          </SidebarProvider>
+        </ThemeProvider>
         <Toaster
           position="top-center"
           toastOptions={{

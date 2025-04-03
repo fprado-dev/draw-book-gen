@@ -25,7 +25,7 @@ export function PageHeader({
         <Button
           {...props}
           variant="secondary"
-          className="from-primary to-primary/80 cursor-pointer bg-gradient-to-r  text-white hover:opacity-90"
+          className="from-primary to-primary/80 cursor-pointer bg-gradient-to-r text-primary-foreground hover:opacity-90"
         >
           {icon}
           {button_text}

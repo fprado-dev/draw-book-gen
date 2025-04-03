@@ -11,12 +11,12 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { onUpdateBook } from '@/services/book.service';
 import {
-  TBookType,
+  TBook,
   TBookMeasurementUnit,
   TBookPaperColor,
   TBookSize,
   TBookStatus,
-  TBook,
+  TBookType,
 } from '@/types/ebook';
 import { useQueryClient } from '@tanstack/react-query';
 import { Archive, BookDashed, BookOpenCheck } from 'lucide-react';
@@ -83,7 +83,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
       <div>
         <Label
           htmlFor="title"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium"
         >
           Title
         </Label>
@@ -104,7 +104,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
       <div>
         <Label
           htmlFor="size"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium"
         >
           Size
         </Label>
@@ -124,7 +124,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium text-gray-700">
+        <Label className="block text-sm font-medium">
           Book Type
         </Label>
         <div className="mt-1 flex gap-2">
@@ -138,7 +138,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
             {bookTypes.map((type) => (
               <ToggleGroupItem
                 key={type}
-                className="flex gap-2 border border-slate-100 text-xs"
+                className="flex gap-2 border text-xs"
                 value={type}
                 aria-label={`Toggle ${type}`}
               >
@@ -149,7 +149,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium text-gray-700">
+        <Label className="block text-sm font-medium">
           Paper Color
         </Label>
         <div className="mt-1 flex gap-2">
@@ -163,7 +163,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
             {bookPaperColor.map((color) => (
               <ToggleGroupItem
                 key={color}
-                className="flex gap-2 border border-slate-100 text-xs"
+                className="flex gap-2 border text-xs"
                 value={color}
                 aria-label={`Toggle ${color}`}
               >
@@ -174,7 +174,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium text-gray-700">
+        <Label className="block text-sm font-medium">
           Measurement Units
         </Label>
         <div className="mt-1 flex gap-2">
@@ -190,7 +190,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
             {bookMeasurementUnits.map((unit) => (
               <ToggleGroupItem
                 key={unit}
-                className="flex gap-2 border border-slate-100 text-xs"
+                className="flex gap-2 border text-xs"
                 value={unit}
                 aria-label={`Toggle ${unit}`}
               >
@@ -201,7 +201,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
         </div>
       </div>
       <div>
-        <Label className="block text-sm font-medium text-gray-700">
+        <Label className="block text-sm font-medium">
           Status
         </Label>
         <div className="mt-1 flex gap-2">
@@ -215,7 +215,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
             {bookStatus.map((status) => (
               <ToggleGroupItem
                 key={status}
-                className="flex gap-2 border border-slate-100 text-xs"
+                className="flex gap-2 border text-xs"
                 value={status}
                 aria-label={`Toggle ${status}`}
               >
