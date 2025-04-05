@@ -6,7 +6,7 @@ import { getGeneratedImages } from "@/services/supabase-storage.service";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
-function GalleryImages({ onSelectItemFromGallery }: { onSelectItemFromGallery: (url: any) => void; }) {
+function TabGalleryImages({ onSelectItemFromGallery }: { onSelectItemFromGallery: (url: any) => void; }) {
   const { data, isLoading } = useQuery({
     queryKey: ["gallery-images"],
     queryFn: getGeneratedImages
@@ -61,4 +61,4 @@ function GalleryImages({ onSelectItemFromGallery }: { onSelectItemFromGallery: (
   );
 }
 
-export default GalleryImages;
+export default TabGalleryImages;

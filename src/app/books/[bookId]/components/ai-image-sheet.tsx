@@ -25,7 +25,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
-import GalleryImages from './gallery-images';
+import TabGalleryImages from './gallery-images';
+import TabOutlines from './outlines';
 
 type AIImageSheetProps = {
   open: boolean;
@@ -35,6 +36,8 @@ type AIImageSheetProps = {
 
 export function AIImageSheet({ open, onOpenChange, onClick }: AIImageSheetProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('generate-image');
+  const [promptText, setPromptText] = useState('');
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -46,18 +49,20 @@ export function AIImageSheet({ open, onOpenChange, onClick }: AIImageSheetProps)
             generate your images.
           </SheetDescription>
         </SheetHeader>
-        <Tabs defaultValue="basic" className="mt-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="basic">Generate Images</TabsTrigger>
+            <TabsTrigger value="generate-image">Generate Images</TabsTrigger>
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
             <TabsTrigger value="outlines">Outlines</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="basic" className="space-y-4 py-4">
+          <TabsContent value="generate-image" className="space-y-4 py-4">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Prompt</Label>
                 <Textarea
+                  value={promptText}
+                  onChange={(e) => setPromptText(e.target.value)}
                   placeholder="Describe the image you want to generate..."
                   className="min-h-[100px]"
                 />
@@ -127,21 +132,14 @@ export function AIImageSheet({ open, onOpenChange, onClick }: AIImageSheetProps)
           </TabsContent>
 
           <TabsContent value="gallery" className="space-y-4 py-4 h-10/12 px-2">
-            <GalleryImages onSelectItemFromGallery={onClick} />
+            <TabGalleryImages onSelectItemFromGallery={onClick} />
           </TabsContent>
 
           <TabsContent value="outlines" className="space-y-4 py-4">
-            <div className="space-y-4">
-              {/* Placeholder for outlines */}
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="rounded-lg border border-gray-200 p-4">
-                  <h3 className="font-medium">Outline {i + 1}</h3>
-                  <p className="text-sm text-gray-500">
-                    Sample outline description goes here...
-                  </p>
-                </div>
-              ))}
-            </div>
+            <TabOutlines onDescriptionSelect={(description) => {
+              setPromptText(description);
+              setActiveTab('generate-image');
+            }} />
           </TabsContent>
         </Tabs>
       </SheetContent>
