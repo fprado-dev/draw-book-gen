@@ -1,6 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Sheet,
   SheetContent,
@@ -9,35 +22,23 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { Card, CardContent } from '@/components/ui/card';
 import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import GalleryImages from './gallery-images';
 
 type AIImageSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onClick: (url: string) => void;
 };
 
-export function AIImageSheet({ open, onOpenChange }: AIImageSheetProps) {
+export function AIImageSheet({ open, onOpenChange, onClick }: AIImageSheetProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="px-4" side="right">
+      <SheetContent className="px-4 min-w-xl" side="right">
         <SheetHeader className="p-0 py-4">
           <SheetTitle>Generate AI Image</SheetTitle>
           <SheetDescription>
@@ -47,7 +48,7 @@ export function AIImageSheet({ open, onOpenChange }: AIImageSheetProps) {
         </SheetHeader>
         <Tabs defaultValue="basic" className="mt-4">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="basic">Basic</TabsTrigger>
+            <TabsTrigger value="basic">Generate Images</TabsTrigger>
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
             <TabsTrigger value="outlines">Outlines</TabsTrigger>
           </TabsList>
@@ -125,40 +126,8 @@ export function AIImageSheet({ open, onOpenChange }: AIImageSheetProps) {
             </div>
           </TabsContent>
 
-          <TabsContent value="gallery" className="space-y-4 py-4">
-            <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-              <div className="text-center">
-                <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                  <label
-                    htmlFor="file-upload"
-                    className="text-primary relative cursor-pointer rounded-md bg-white font-semibold"
-                  >
-                    <span>Upload a file</span>
-                    <input
-                      id="file-upload"
-                      name="file-upload"
-                      type="file"
-                      className="sr-only"
-                    />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs leading-5 text-gray-600">
-                  PNG, JPG, GIF up to 10MB
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {/* Placeholder for generated images */}
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <CardContent className="p-2">
-                    <div className="aspect-square bg-slate-100" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <TabsContent value="gallery" className="space-y-4 py-4 h-10/12 px-2">
+            <GalleryImages onSelectItemFromGallery={onClick} />
           </TabsContent>
 
           <TabsContent value="outlines" className="space-y-4 py-4">

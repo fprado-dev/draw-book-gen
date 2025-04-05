@@ -153,17 +153,43 @@ export const onCreatePage = async (bookId: string) => {
     data: { user },
   } = await supabase.auth?.getUser();
 
-  const { data, error } = await supabase
+  // Get the current highest sequence number for this book
+  const { data: existingPages } = await supabase
+    .from('pages')
+    .select('sequence_number')
+    .eq('book_id', bookId)
+    .eq('user_id', user?.id)
+    .order('sequence_number', { ascending: false })
+    .limit(1);
+
+  const nextSequenceNumber = existingPages && existingPages[0]
+    ? existingPages[0].sequence_number + 1
+    : 1;
+
+  // Insert new page with sequence number
+  const { data: newPage, error: insertError } = await supabase
     .from('pages')
     .insert([
       {
         book_id: bookId,
         user_id: user?.id,
+        sequence_number: nextSequenceNumber,
       },
     ])
+    .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  if (insertError) throw insertError;
+
+  // Update book's last_viewed timestamp
+  const { error: updateError } = await supabase
+    .from('books')
+    .update({ last_viewed: new Date().toISOString() })
+    .eq('id', bookId)
+    .eq('user_id', user?.id);
+
+  if (updateError) throw updateError;
+
+  return newPage as TPage;
 };
 

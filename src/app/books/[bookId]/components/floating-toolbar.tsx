@@ -1,6 +1,5 @@
 'use client';
 
-import { AIImageSheet } from '@/components/ui/ai-image-sheet';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -20,10 +19,8 @@ import {
   Undo,
   Wand2
 } from 'lucide-react';
-import { useState } from 'react';
 
-export function FloatingToolbar() {
-  const [isAISheetOpen, setIsAISheetOpen] = useState(false);
+export function FloatingToolbar({ setIsAISheetOpen }: { setIsAISheetOpen: (open: boolean) => void; }) {
   return (
     <div className="absolute right-4 top-4 flex flex-col items-center gap-2 rounded-lg p-2 border">
       <Button
@@ -35,7 +32,6 @@ export function FloatingToolbar() {
       >
         <Wand2 className="h-4 w-4 " />
       </Button>
-      <AIImageSheet open={isAISheetOpen} onOpenChange={setIsAISheetOpen} />
       <Button size="icon" variant="ghost" title="Undo" className='hover:text-muted-foreground'>
         <Undo className="h-4 w-4" />
       </Button>

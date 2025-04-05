@@ -69,3 +69,18 @@ export const updatePageSequence = async (updates: UpdatePageSequenceParams[]) =>
 
   await Promise.all(updatePromises);
 };
+
+export const updatePageImage = async (pageId: string, imageUrl: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
+
+  const { error } = await supabase
+    .from('pages')
+    .update({ image_url: imageUrl })
+    .eq('id', pageId)
+    .eq('user_id', user?.id);
+
+  if (error) throw error;
+};

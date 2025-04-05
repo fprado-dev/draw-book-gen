@@ -2,48 +2,68 @@
 
 import { mainQueryClient } from '@/components/providers';
 import { Button } from '@/components/ui/button';
-import { SidebarContent, SidebarMenu, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { getAllPagesByBookId, onCreatePage, TPage } from '@/services/book.service';
-import { deletePage, updatePageSequence } from '@/services/page.service';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getAllPagesByBookId, getBookById, onCreatePage, TPage } from '@/services/book.service';
+import { deletePage, updatePageImage, updatePageSequence } from '@/services/page.service';
 import {
-  closestCenter,
-  DndContext,
   DragEndEvent,
   KeyboardSensor,
   PointerSensor,
-  SensorDescriptor,
   useSensor,
-  useSensors,
+  useSensors
 } from '@dnd-kit/core';
 import {
   arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  sortableKeyboardCoordinates
 } from '@dnd-kit/sortable';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowLeft, FilePlus } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { SortablePage } from './components/sortable-page';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AIImageSheet } from './components/ai-image-sheet';
+import { FloatingToolbar } from './components/floating-toolbar';
+import { AppSidebar } from './components/sidebar-pages';
 
 export default function BookPages() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient(mainQueryClient);
+  const [isAISheetOpen, setIsAISheetOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const { data, isLoading } = useQuery({
+  const [selectedPage, setSelectedPage] = useState<TPage | null>(null);
+
+  const { data: currentBook } = useQuery({
+    queryKey: ['current-book', params.bookId],
+    queryFn: () => getBookById(params.bookId! as string),
+    enabled: !!params.bookId,
+  });
+
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['pages-by-book-id', params.bookId],
     queryFn: () => getAllPagesByBookId(params.bookId! as string),
   });
-  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+
+  const deletePageMutation = useMutation({
+    mutationFn: deletePage,
+    mutationKey: ['delete-page'],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pages-by-book-id'] });
+    },
+  });
 
   useEffect(() => {
     if (data && data?.pages?.length > 0) {
-      setSelectedPageId(data.pages[0].id);
+      if (!selectedPage?.id) {
+        setSelectedPage(data.pages[0]);
+      }
     }
   }, [data?.pages]);
+
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -51,9 +71,7 @@ export default function BookPages() {
     })
   );
 
-
-
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id && data?.pages) {
@@ -62,46 +80,65 @@ export default function BookPages() {
 
       const newPages = arrayMove(data.pages, oldIndex, newIndex);
 
-      // Prepare sequence updates
       const updates = newPages.map((page, index) => ({
         pageId: page.id,
         newSequence: index + 1,
       }));
 
-      // Optimistically update the UI
       queryClient.setQueryData(['pages-by-book-id', params.bookId], {
         pages: newPages,
       });
 
-      // Update the sequence numbers in the database
       await updatePageSequence(updates);
     }
 
     setActiveId(null);
-  };
+  }, [data?.pages, params.bookId, queryClient]);
 
-
-
-  const handleCreatePage = async (bookId: string) => {
-    await onCreatePage(bookId!);
+  const handleCreatePage = useCallback(async (bookId: string) => {
+    const data: TPage = await onCreatePage(bookId!);
+    setSelectedPage(data);
     queryClient.invalidateQueries({
       queryKey: ['pages-by-book-id', params.bookId],
     });
-  };
+  }, [params.bookId, queryClient]);
 
-  const handleDeletePage = async (pageId: string) => {
-    await deletePage(pageId);
-    queryClient.invalidateQueries({
-      queryKey: ['pages-by-book-id', params.bookId],
-    });
-  };
+  const handleDeletePage = useCallback(async (pageId: string) => {
+    deletePageMutation.mutate(pageId);
+    setSelectedPage(data?.pages![0]!);
 
+  }, []);
 
   const handleOnSelectItem = (pageId: string) => {
-    setSelectedPageId(pageId);
+    console.log('handleOnSelectItem', pageId);
+    setSelectedPage(data?.pages.find(page => page.id === pageId)!);
   };
+
+  const getImageSelectedFromGallery = useCallback(async (url: string) => {
+    if (selectedPage?.id) {
+      await updatePageImage(selectedPage.id, url);
+      await queryClient.invalidateQueries({
+        queryKey: ['pages-by-book-id', params.bookId],
+      }
+      );
+      const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>(['pages-by-book-id', params.bookId]);
+      const updatedPage = updatedData?.pages.find(page => page.id === selectedPage.id);
+      if (updatedPage) {
+        setSelectedPage(updatedPage);
+      }
+      setIsAISheetOpen(false);
+    }
+  }, [params.bookId, queryClient, selectedPage?.id]);
+
+  const isEmptyState = useMemo(() => data?.pages?.length! <= 0, [data?.pages?.length]);
+
+
+
+
   return (
     <SidebarProvider>
+      <AIImageSheet onClick={getImageSelectedFromGallery} open={isAISheetOpen} onOpenChange={setIsAISheetOpen} />
+
       <AppSidebar
         sensors={sensors}
         bookId={params.bookId! as string}
@@ -111,7 +148,9 @@ export default function BookPages() {
         handleOnSelectItem={handleOnSelectItem}
         handleDragEnd={handleDragEnd}
         setActiveId={setActiveId}
-        selectedPageId={selectedPageId}
+        activeId={activeId}
+        selectedPageId={selectedPage?.id as string}
+        isLoading={isLoading}
       />
       <main className='
       w-full relative h-screen
@@ -120,6 +159,7 @@ export default function BookPages() {
       hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:hover:shadow-[0_2px_12px_rgba(255,255,255,0.08)]
       bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px] will-change-transform hover:-translate-y-0.5 dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08)_1px,transparent_1px)]
       '>
+
         <div className='flex items-center justify-start w-full absolute top-5 left-5'>
           <SidebarTrigger />
           <Button
@@ -133,169 +173,45 @@ export default function BookPages() {
           </Button>
         </div>
         <div className="w-full flex items-center justify-center h-full">
-          <FloatingToolbar />
+          <FloatingToolbar setIsAISheetOpen={setIsAISheetOpen} />
+          {isEmptyState ? (
+            <EmptyState
+              title="Your book is empty"
+              description="Create your first page by clicking the '+' button above"
+              renderIcon={() => <FilePlus className='h-4 w-4' />} />
+          ) : (
+            <div className='flex h-[800px] w-full flex-col items-center justify-center'>
+              {deletePageMutation.isPending && <Skeleton className='h-[800px] w-[600px] animatee animate-pulse' />}
+              <>
+                <AnimatePresence mode='popLayout' >
+                  {data?.pages && selectedPage?.id && (
+                    <motion.div
+                      key={selectedPage.id}
+                      layout
+                      initial={{ y: 300, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: "100%", opacity: 0 }}
+                      transition={{ duration: .3, ease: "anticipate", delay: 0.4, bounce: 0.4 }}
 
-          <div className='flex h-[800px] w-full items-center justify-center'>
-            {data?.pages && selectedPageId && (
-              <Image
-                src={data.pages.find(page => page.id === selectedPageId)?.image_url || ''}
-                alt={`Page ${data.pages.find(page => page.id === selectedPageId)?.sequence_number}`}
-                style={{ objectFit: 'cover' }}
-                width={600}
-                height={900}
-                className="rounded-xl border-2 shadow-md"
-              />
-
-            )}
-          </div>
+                    >
+                      <Image
+                        src={selectedPage.image_url}
+                        alt={`Page ${selectedPage.sequence_number}`}
+                        style={{ objectFit: 'contain' }}
+                        priority
+                        width={600}
+                        height={900}
+                        className="rounded-xl border-2 shadow-md aspect-auto"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            </div>
+          )}
         </div>
       </main>
     </SidebarProvider>
-    // <div className="grid grid-cols-6">
-    //   {/* SIDEBAR */}
-    //   <div className="col-span-1 border-r bg-sidebar fixed h-screen w-xs">
-    //     <ScrollArea className="h-full data-[state]:visible py-10 -mx-2">
-    //       {isLoading && <SkeletonPages />}
-    //       <div className="flex flex-col gap-6 items-center justify-center">
-    //         <DndContext
-    //           sensors={sensors}
-    //           collisionDetection={closestCenter}
-    //           onDragEnd={handleDragEnd}
-    //           onDragStart={(event) => setActiveId(event.active.id as string)}
-
-    //         >
-    //           <SortableContext
-    //             items={data?.pages || []}
-    //             strategy={verticalListSortingStrategy}
-
-    //           >
-    //             {data?.pages &&
-    //               data.pages.length > 0 &&
-    //               data.pages.map((page) => (
-    //                 <SortablePage
-    //                   key={page.id}
-    //                   id={page.id}
-    //                   sequence_number={page.sequence_number}
-    //                   image_url={page.image_url}
-    //                   onDelete={handleDeletePage}
-    //                   onClick={() => handleOnSelectItem(page.id)}
-    //                   isSelected={selectedPageId === page.id}
-    //                 />
-    //               ))}
-    //           </SortableContext>
-    //         </DndContext>
-    //         <div className='flex w-full items-center justify-center'>
-    //           <Button
-    //             size="icon"
-    //             variant="ghost"
-    //             onClick={() => handleCreatePage(params.bookId! as string)}
-    //           >
-    //             <Plus className="h-4 w-4" />
-    //           </Button>
-    //         </div>
-    //       </div>
-    //     </ScrollArea>
-    //   </div>
-
-    //   {/* EDIT 2 */}
-    //   <div className="col-span-5 w-full">
-    //     {/* <FloatingToolbar /> */}
-    //     <div className='flex flex-col w-full' >
-    //       <div className='flex items-center justify-start w-full h-10 bg-amber-200'>
-    //         <Button
-    //           size="sm"
-    //           variant="ghost"
-    //           className="text-sm "
-    //           onClick={() => router.back()}
-    //         >
-    //           <ArrowLeft className="h-4 w-4" />
-    //           Back
-    //         </Button>
-    //       </div>
-    //       <div className='flex h-[calc(100vh-2.5rem)] w-full items-center justify-center bg-red-200'>
-    //         {data?.pages && selectedPageId && (
-    //           <div className="relative h-screen w-xl" >
-    //             <Image
-    //               src={data.pages.find(page => page.id === selectedPageId)?.image_url || ''}
-    //               alt={`Page ${data.pages.find(page => page.id === selectedPageId)?.sequence_number}`}
-    //               fill
-    //               style={{ objectFit: 'contain' }}
-    //               className="rounded-sm"
-    //             />
-    //           </div>
-
-    //         )}
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
   );
 }
 
-import { FloatingToolbar } from '@/components/ui/floating-toolbar';
-import { Sidebar } from "@/components/ui/sidebar";
-
-type TAppSidebar = {
-  sensors: SensorDescriptor<any>[];
-  handleDragEnd: (event: DragEndEvent) => void;
-  setActiveId: (id: string) => void;
-  data: {
-    pages: TPage[];
-  } | undefined;
-  handleCreatePage: (bookId: string) => void;
-  handleDeletePage: (pageId: string) => void;
-  handleOnSelectItem: (pageId: string) => void;
-  selectedPageId: string | null;
-  bookId: string;
-};
-export function AppSidebar({ sensors, bookId, handleDragEnd, setActiveId, data, handleCreatePage, handleDeletePage, handleOnSelectItem, selectedPageId }: TAppSidebar) {
-  return (
-    <Sidebar >
-      {/* <ScrollArea className="h-full data-[state]:visible py-10 -mx-2"> */}
-      <SidebarContent className='gap-4'>
-        <div className="flex flex-col gap-6 items-center justify-center">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-            onDragStart={(event) => setActiveId(event.active.id as string)}
-
-          >
-            <SortableContext
-              items={data?.pages || []}
-              strategy={verticalListSortingStrategy}
-
-            >
-              <SidebarMenu className='gap-4 items-center justify-center py-8'>
-                {data?.pages &&
-                  data.pages.length > 0 &&
-                  data.pages.map((page) => (
-                    <SidebarMenuItem key={page.id} onClick={() => handleOnSelectItem(page.id)}>
-                      <SortablePage
-                        id={page.id}
-                        sequence_number={page.sequence_number}
-                        image_url={page.image_url}
-                        onDelete={handleDeletePage}
-                        isSelected={selectedPageId === page.id}
-                      />
-                    </SidebarMenuItem>
-
-                  ))}
-              </SidebarMenu>
-            </SortableContext>
-          </DndContext>
-          <div className='flex w-full items-center justify-center'>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => handleCreatePage(bookId)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-      </SidebarContent>
-      {/* </ScrollArea> */}
-    </Sidebar>);
-}
