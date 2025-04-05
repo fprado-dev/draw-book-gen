@@ -1,15 +1,10 @@
+'use client';
 import { PageHeader } from '@/components/page-header';
+import { PageWrapper } from '@/components/page-wrapper';
 import { ChartAreaInteractive } from './components/ChartArea';
 import { StatsCards } from './components/StatsCards';
-import { createClient } from '@/utils/supabase/server';
-import { PageWrapper } from '@/components/page-wrapper';
 
-export default async function Dashboard() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+export default function Dashboard() {
   return (
     <PageWrapper>
       <PageHeader
@@ -17,7 +12,7 @@ export default async function Dashboard() {
         description="View detailed analytics and generation history through interactive visualizations."
       />
       <StatsCards />
-      <ChartAreaInteractive user={user!} />
+      <ChartAreaInteractive />
     </PageWrapper>
   );
 }

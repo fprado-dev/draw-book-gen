@@ -2,7 +2,7 @@ import { mainQueryClient } from '@/components/providers';
 import { SubmitButton } from '@/components/submit-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ToggleGroupItem, ToggleGroup } from '@/components/ui/toggle-group';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { createOutline } from '@/services/outlines.service';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -38,10 +38,7 @@ export function FormCreateOutline({ closeModal }: { closeModal: () => void }) {
   return (
     <form className="space-y-4">
       <div>
-        <Label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="title" className="block text-sm font-medium">
           Title
         </Label>
         <div className="mt-1">
@@ -58,10 +55,7 @@ export function FormCreateOutline({ closeModal }: { closeModal: () => void }) {
       </div>
 
       <div>
-        <Label
-          htmlFor="size"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="size" className="block text-sm font-medium ">
           Number of Prompts
         </Label>
         <div className="mt-1 flex gap-2">
@@ -75,7 +69,7 @@ export function FormCreateOutline({ closeModal }: { closeModal: () => void }) {
             {quantities.map((number) => (
               <ToggleGroupItem
                 key={number.value}
-                className="flex gap-2 border border-slate-100 text-xs"
+                className="flex gap-2 border text-xs"
                 value={number.value}
                 aria-label={`Toggle ${number.label}`}
               >

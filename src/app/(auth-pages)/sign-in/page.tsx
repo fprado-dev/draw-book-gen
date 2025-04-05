@@ -1,5 +1,6 @@
 import { LoginForm } from '@/components/login-form';
 import { Message } from '@/components/signup-form';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { FormMessage } from '../components/auth-message';
 
 export default async function SignIn(props: {
@@ -12,6 +13,9 @@ export default async function SignIn(props: {
       <div className="relative z-10 w-full max-w-sm md:max-w-xl">
         <FormMessage message={searchParams} />
         <LoginForm />
+        <div className="mt-6 flex items-center justify-center">
+          <ThemeToggle />
+        </div>
       </div>
       <svg
         className="absolute bottom-0 top-0  z-0 h-screen w-full"

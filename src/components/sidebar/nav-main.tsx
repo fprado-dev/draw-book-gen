@@ -50,8 +50,8 @@ const navMain = [
         url: '/dashboard',
       },
       {
-        title: 'Billing',
-        url: '/dashboard/billing',
+        title: 'Usage',
+        url: '/dashboard/usage',
       },
       {
         title: 'Settings',

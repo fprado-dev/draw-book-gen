@@ -2,10 +2,10 @@
 
 import {
   TBook,
-  TBookType,
   TBookMeasurementUnit,
   TBookPaperColor,
   TBookStatus,
+  TBookType,
 } from '@/types/ebook';
 import { createClient } from '@/utils/supabase/server';
 
@@ -113,4 +113,77 @@ export const deleteBook = async (id: string) => {
     .eq('user_id', user?.id);
   if (error) throw error;
   return data;
+};
+
+
+export type TPage = {
+  id: string;
+  book_id: string;
+  user_id: string;
+  image_url: string;
+  sequence_number: number;
+};
+export const getAllPagesByBookId = async (bookId: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
+  const { data, error } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('user_id', user?.id)
+    .eq('book_id', bookId)
+    .order('sequence_number', { ascending: true });
+
+  if (error) throw error;
+  return {
+    pages: data as TPage[],
+  };
+};
+
+export const onCreatePage = async (bookId: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
+
+  // Get the current highest sequence number for this book
+  const { data: existingPages } = await supabase
+    .from('pages')
+    .select('sequence_number')
+    .eq('book_id', bookId)
+    .eq('user_id', user?.id)
+    .order('sequence_number', { ascending: false })
+    .limit(1);
+
+  const nextSequenceNumber =
+    existingPages && existingPages[0]
+      ? existingPages[0].sequence_number + 1
+      : 1;
+
+  // Insert new page with sequence number
+  const { data: newPage, error: insertError } = await supabase
+    .from('pages')
+    .insert([
+      {
+        book_id: bookId,
+        user_id: user?.id,
+        sequence_number: nextSequenceNumber,
+      },
+    ])
+    .select()
+    .single();
+
+  if (insertError) throw insertError;
+
+  // Update book's last_viewed timestamp
+  const { error: updateError } = await supabase
+    .from('books')
+    .update({ last_viewed: new Date().toISOString() })
+    .eq('id', bookId)
+    .eq('user_id', user?.id);
+
+  if (updateError) throw updateError;
+
+  return newPage as TPage;
 };

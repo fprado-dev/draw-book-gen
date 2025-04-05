@@ -1,22 +1,22 @@
-import { BentoCard } from '@/components/ui/bento-card';
-import { formatOutlineCard } from '../utils/format-card';
-import { TOutlines } from '@/types/outlines';
-import { useSidebar } from '@/components/ui/sidebar';
-import { SkeletonOutline } from './skeleton-outline';
-import { EmptyState } from '@/components/ui/empty-state';
-import { deleteOutline, getAllOutlines } from '@/services/outlines.service';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { mainQueryClient } from '@/components/providers';
-import { AlertDialogConfirmation } from './alert-dialog-confirmation';
-import { useState } from 'react';
+import { BentoCard } from '@/components/ui/bento-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useSidebar } from '@/components/ui/sidebar';
+import { deleteOutline, getAllOutlines } from '@/services/outlines.service';
+import { TOutlines } from '@/types/outlines';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { formatOutlineCard } from '../utils/format-card';
+import { AlertDialogConfirmation } from './alert-dialog-confirmation';
 import { FormUpdateOutline } from './form-update';
+import { SkeletonOutline } from './skeleton-outline';
 import { ViewPromptSheet } from './view-prompt-sheet';
 
 export function OutlinesList() {
@@ -82,7 +82,7 @@ export function OutlinesList() {
       />
       <Sheet onOpenChange={setUpdateSheet} open={isOpenUpdateSheet}>
         <SheetContent className="px-4 py-4">
-          <SheetTitle>Create New Outline</SheetTitle>
+          <SheetTitle>Update Outline</SheetTitle>
           <SheetDescription>
             Make changes to your Outline details below. The title serves as the
             main identifier for your outline, so ensure it remains clear and

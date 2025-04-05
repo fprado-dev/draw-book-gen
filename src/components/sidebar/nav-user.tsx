@@ -6,6 +6,18 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 
+import { signOutAction } from '@/app/actions';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { User } from '@supabase/supabase-js';
+import {
+  BadgeCheck,
+  Bell,
+  ChevronsUpDown,
+  CreditCard,
+  LogOut,
+  Sparkles,
+} from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,18 +27,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { User } from '@supabase/supabase-js';
-import { signOutAction } from '@/app/actions';
 
 export function NavUser({ user }: { user: User | null }) {
   const isMobile = useIsMobile();
@@ -91,22 +91,22 @@ export function NavUser({ user }: { user: User | null }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <Sparkles className="mr-2 h-4 w-4 text-slate-500" />
+                <Sparkles className="mr-2 h-4 w-4" />
                 Upgrade to Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <BadgeCheck className="mr-2 h-4 w-4 text-slate-500" />
+                <BadgeCheck className="mr-2 h-4 w-4" />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <CreditCard className="mr-2 h-4 w-4 text-slate-500" />
+                <CreditCard className="mr-2 h-4 w-4" />
                 Billing
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Bell className="mr-2 h-4 w-4 text-slate-500" />
+                <Bell className="mr-2 h-4 w-4" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -116,7 +116,7 @@ export function NavUser({ user }: { user: User | null }) {
                 signOutAction();
               }}
             >
-              <LogOut className="mr-2 h-4 w-4 text-slate-500" />
+              <LogOut className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

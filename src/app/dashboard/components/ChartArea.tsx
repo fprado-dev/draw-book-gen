@@ -1,16 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useQuery } from '@tanstack/react-query';
-import { User } from '@supabase/supabase-js';
 import {
   DailyImageStats,
   DailyOutlinesStats,
   getDailyImageStats,
   getDailyOutlineStats,
 } from '@/services/dashboard.service';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
 import {
   Card,
@@ -42,15 +41,15 @@ const chartConfig = {
   },
   images: {
     label: 'AI Images',
-    color: 'hsl(var(--primary))',
+    color: 'hsl(var(--chart-1))',
   },
   outlines: {
     label: 'AI Outlines',
-    color: 'hsl(var(--primary))',
+    color: 'hsl(var(--chart-2))',
   },
 } satisfies ChartConfig;
 
-export function ChartAreaInteractive({ user }: { user: User }) {
+export function ChartAreaInteractive() {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = useState('30d');
 
@@ -64,8 +63,8 @@ export function ChartAreaInteractive({ user }: { user: User }) {
     queryKey: ['get-daily-ai-stats'],
     queryFn: async () => {
       const [imageStats, outlineStats] = await Promise.all([
-        getDailyImageStats({ user }),
-        getDailyOutlineStats({ user }),
+        getDailyImageStats(),
+        getDailyOutlineStats(),
       ]);
 
       const mergedData = mergeData({ imageStats, outlineStats });
@@ -112,7 +111,6 @@ export function ChartAreaInteractive({ user }: { user: User }) {
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
   };
-
   const filteredData = chartData?.filter((item) => {
     const date = new Date(item.date);
     const referenceDate = new Date();
@@ -198,31 +196,31 @@ export function ChartAreaInteractive({ user }: { user: User }) {
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="aspect-auto h-[300px] w-full"
         >
           <AreaChart data={filteredData}>
             <defs>
               <linearGradient id="fillImages" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--primary)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--primary)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
               <linearGradient id="fillOutlines" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--primary-secondary)"
+                  stopColor="var(--chart-2)"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--primary-secondary)"
+                  stopColor="var(--chart-2)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -262,7 +260,7 @@ export function ChartAreaInteractive({ user }: { user: User }) {
               animateNewValues
               animationDuration={2000}
               fill="url(#fillImages)"
-              stroke="var(--primary)"
+              stroke="var(--chart-1)"
               stackId="a"
             />
             <Area
@@ -271,7 +269,7 @@ export function ChartAreaInteractive({ user }: { user: User }) {
               animationDuration={2000}
               animateNewValues
               fill="url(#fillOutlines)"
-              stroke="var(--primary-secondary)"
+              stroke="var(--chart-2)"
               stackId="b"
             />
             <ChartLegend content={<ChartLegendContent />} />
@@ -279,8 +277,8 @@ export function ChartAreaInteractive({ user }: { user: User }) {
         </ChartContainer>
       </CardContent>
       {!chartData ||
-        (chartData.length <= 5 && (
-          <div className="roun left-o absolute top-0 flex h-full w-full items-center justify-center rounded-xl bg-slate-100/80">
+        (chartData.length <= 1 && (
+          <div className="left-o bg-primary-foreground/40 dark:bg-primary-foreground/70 absolute top-0 flex h-full w-full items-center justify-center rounded-xl">
             <div className="text-muted-foreground text-center">
               <p>No AI usage data available yet!</p>
               <p className="mt-2 text-sm">

@@ -1,7 +1,12 @@
+import { useSidebar } from '@/components/ui/sidebar';
+
 export function SkeletonBook() {
+  const { open } = useSidebar();
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-      {[...Array(4)].map((_, index) => (
+    <div
+      className={`grid grid-cols-1 gap-4 ${open ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}
+    >
+      {[...Array(open ? 3 : 4)].map((_, index) => (
         <div
           key={index}
           className="bg-card text-card-foreground animate-pulse rounded-lg border p-4 shadow-sm"

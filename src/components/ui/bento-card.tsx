@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
-import { Button } from './button';
 import {
+  EditIcon,
   EllipsisVerticalIcon,
   EyeIcon,
   Trash2Icon,
-  EditIcon,
 } from 'lucide-react';
+import { Button } from './button';
 
 export interface BentoItem<T> {
   id: string;
@@ -45,15 +45,15 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
     <div
       className={cn(
         'group relative overflow-hidden rounded-xl p-4 transition-all duration-300',
-        'border border-gray-100 bg-white dark:border-white/10 dark:bg-black',
-        'hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:hover:shadow-[0_2px_12px_rgba(255,255,255,0.03)]',
-        'bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px] will-change-transform hover:-translate-y-0.5',
+        'dark:border-primary-foreground  border-accent-foreground/5 border dark:bg-black',
+        'hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:hover:shadow-[0_2px_12px_rgba(255,255,255,0.08)]',
+        'bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px] will-change-transform hover:-translate-y-0.5 dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08)_1px,transparent_1px)]',
         item.colSpan || 'col-span-1',
         item.colSpan === 2 ? 'md:col-span-2' : '',
         {
           '-translate-y-0.5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]':
             item.hasPersistentHover,
-          'dark:shadow-[0_2px_12px_rgba(255,255,255,0.03)]':
+          'dark:shadow-[0_2px_12px_rgba(255,255,255,0.08)]':
             item.hasPersistentHover,
         }
       )}
@@ -73,7 +73,7 @@ function BentoCard<T>({ item, onDelete, onView, onEdit }: BentoGridProps<T>) {
           <div className="flex items-center gap-2">
             {item.icon && (
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-lg bg-black/5 transition-all duration-300 group-hover:bg-gradient-to-br dark:bg-white/10`}
+                className={`bg-primary-foreground/10 flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 group-hover:bg-gradient-to-br `}
               >
                 {' '}
                 {item.icon}

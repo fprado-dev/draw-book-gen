@@ -13,3 +13,10 @@ export const useIsPublicRoute = () => {
 
   return publicRoutes.includes(pathname);
 };
+
+export const useIsEditorRoute = () => {
+  const pathname = usePathname();
+  const bookRoutePattern =
+    /^\/books\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+  return bookRoutePattern.test(pathname);
+};

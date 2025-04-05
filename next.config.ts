@@ -5,21 +5,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'sphmbocvwmutmvceihez.supabase.co',
+        hostname: 'hisxtgeirxvxlbpczvpb.supabase.co',
       },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy:
-      "default-src 'self'; script-src 'none'; img-src 'self' https://sphmbocvwmutmvceihez.supabase.co data:; sandbox;",
+      "default-src 'self'; script-src 'none'; img-src 'self' https://hisxtgeirxvxlbpczvpb.supabase.co data:; sandbox;",
   },
   // Optimize font loading to prevent preloading warnings
 
