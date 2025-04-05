@@ -116,11 +116,6 @@ export const deleteBook = async (id: string) => {
 };
 
 
-
-type TgetPagesByBookId = {
-  bookId: string;
-};
-
 export type TPage = {
   id: string;
   book_id: string;
@@ -146,7 +141,6 @@ export const getAllPagesByBookId = async (bookId: string) => {
   };
 };
 
-
 export const onCreatePage = async (bookId: string) => {
   const supabase = await createClient();
   const {
@@ -162,9 +156,10 @@ export const onCreatePage = async (bookId: string) => {
     .order('sequence_number', { ascending: false })
     .limit(1);
 
-  const nextSequenceNumber = existingPages && existingPages[0]
-    ? existingPages[0].sequence_number + 1
-    : 1;
+  const nextSequenceNumber =
+    existingPages && existingPages[0]
+      ? existingPages[0].sequence_number + 1
+      : 1;
 
   // Insert new page with sequence number
   const { data: newPage, error: insertError } = await supabase
@@ -192,4 +187,3 @@ export const onCreatePage = async (bookId: string) => {
 
   return newPage as TPage;
 };
-

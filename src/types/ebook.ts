@@ -259,8 +259,6 @@ export interface TBookPageLimits {
   };
 }
 
-
-
 export type AspectRatio =
   | '16:9'
   | '21:9'
@@ -278,7 +276,6 @@ export type AspectRatio =
 export type TBookSizeToAspectRatio = {
   [key in TBookSize]: AspectRatio;
 };
-
 
 // Implementação do mapeamento (exemplo de uso)
 const bookSizeAspectRatioMap: TBookSizeToAspectRatio = {
@@ -300,9 +297,9 @@ const bookSizeAspectRatioMap: TBookSizeToAspectRatio = {
   '8.5x8.5': '1:1',
 };
 // Obter ratio para um tamanho específico
-const ratioPara6x9 = bookSizeAspectRatioMap['6x9']; // Tipo inferido: '2:3'
+// const ratioPara6x9 = bookSizeAspectRatioMap['6x9']; // Tipo inferido: '2:3'
 
 // Validação em funções
-function validateAspectRatio(size: TBookSize, ratio: AspectRatio): boolean {
+export function validateAspectRatio(size: TBookSize, ratio: AspectRatio): boolean {
   return bookSizeAspectRatioMap[size] === ratio;
 }

@@ -17,33 +17,56 @@ import {
   Save,
   Share2,
   Undo,
-  Wand2
+  Wand2,
 } from 'lucide-react';
 
-export function FloatingToolbar({ setIsAISheetOpen }: { setIsAISheetOpen: (open: boolean) => void; }) {
+export function FloatingToolbar({
+  setIsAISheetOpen,
+}: {
+  setIsAISheetOpen: (open: boolean) => void;
+}) {
   return (
-    <div className="absolute right-4 top-4 flex flex-col items-center gap-2 rounded-lg p-2 border">
+    <div className="absolute right-4 top-4 flex flex-col items-center gap-2 rounded-lg border p-2">
       <Button
         size="icon"
         variant="ghost"
         title="Generate AI Image"
         onClick={() => setIsAISheetOpen(true)}
-        className='hover:text-muted-foreground'
+        className="hover:text-muted-foreground"
       >
         <Wand2 className="h-4 w-4 " />
       </Button>
-      <Button size="icon" variant="ghost" title="Undo" className='hover:text-muted-foreground'>
+      <Button
+        size="icon"
+        variant="ghost"
+        title="Undo"
+        className="hover:text-muted-foreground"
+      >
         <Undo className="h-4 w-4" />
       </Button>
-      <Button size="icon" variant="ghost" title="Redo" className='hover:text-muted-foreground'>
+      <Button
+        size="icon"
+        variant="ghost"
+        title="Redo"
+        className="hover:text-muted-foreground"
+      >
         <Redo className="h-4 w-4 " />
       </Button>
-      <Button size="icon" variant="ghost" title="Save" className='hover:text-muted-foreground'>
+      <Button
+        size="icon"
+        variant="ghost"
+        title="Save"
+        className="hover:text-muted-foreground"
+      >
         <Save className="h-4 w-4 " />
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="icon" variant="ghost" className='hover:text-muted-foreground'>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="hover:text-muted-foreground"
+          >
             <MoreHorizontal className="h-4 w-4 " />
           </Button>
         </DropdownMenuTrigger>

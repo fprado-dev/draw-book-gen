@@ -8,7 +8,6 @@ type UpdatePageSequenceParams = {
 };
 
 export const deletePage = async (pageId: string) => {
-  console.log('pageId', pageId);
   const supabase = await createClient();
   const {
     data: { user },
@@ -52,7 +51,9 @@ export const deletePage = async (pageId: string) => {
   }
 };
 
-export const updatePageSequence = async (updates: UpdatePageSequenceParams[]) => {
+export const updatePageSequence = async (
+  updates: UpdatePageSequenceParams[]
+) => {
   const supabase = await createClient();
   const {
     data: { user },

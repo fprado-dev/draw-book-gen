@@ -1,22 +1,39 @@
-import { Button } from "@/components/ui/button";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from '@/components/ui/button';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TPage } from '@/services/book.service';
-import { closestCenter, DndContext, DragEndEvent, SensorDescriptor } from '@dnd-kit/core';
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  SensorDescriptor,
+  SensorOptions,
+} from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import { SkeletonPages } from "./skeleton-pages";
-import { SortablePage } from "./sortable-page";
+import { SkeletonPages } from './skeleton-pages';
+import { SortablePage } from './sortable-page';
 
 type TAppSidebar = {
-  sensors: SensorDescriptor<any>[];
+  sensors: SensorDescriptor<SensorOptions>[];
   handleDragEnd: (event: DragEndEvent) => void;
   setActiveId: (id: string) => void;
-  data: {
+  data:
+  | {
     pages: TPage[];
-  } | undefined;
+  }
+  | undefined;
   handleCreatePage: (bookId: string) => void;
   handleDeletePage: (pageId: string) => void;
   handleOnSelectItem: (pageId: string) => void;
@@ -25,24 +42,36 @@ type TAppSidebar = {
   isLoading: boolean;
   activeId: string | null;
 };
-export function AppSidebar({ sensors, bookId, isLoading, handleDragEnd, setActiveId, data, handleCreatePage, handleDeletePage, handleOnSelectItem, selectedPageId }: TAppSidebar) {
-
-
+export function AppSidebar({
+  sensors,
+  bookId,
+  isLoading,
+  handleDragEnd,
+  setActiveId,
+  data,
+  handleCreatePage,
+  handleDeletePage,
+  handleOnSelectItem,
+  selectedPageId,
+}: TAppSidebar) {
   return (
-    <Sidebar >
+    <Sidebar>
       <SidebarHeader className="px-6">
         <Button
           size="sm"
-          className="w-full mt-3 "
-
+          className="mt-3 w-full "
           onClick={() => handleCreatePage(bookId)}
         >
           New Page
           <Plus className="h-4 w-4" />
         </Button>
-        {isLoading ? <Skeleton className="h-8 mx-4 mt-2" /> : <span className="text-muted-foreground text-xs text-center mt-2">{`${data?.pages && data?.pages.length === 1 ? `${data?.pages.length} Page` : `${data?.pages.length} Pages`} created!`}</span>}
+        {isLoading ? (
+          <Skeleton className="mx-4 mt-2 h-8" />
+        ) : (
+          <span className="text-muted-foreground mt-2 text-center text-xs">{`${data?.pages && data?.pages.length === 1 ? `${data?.pages.length} Page` : `${data?.pages.length} Pages`} created!`}</span>
+        )}
       </SidebarHeader>
-      <SidebarContent className='p-0'>
+      <SidebarContent className="p-0">
         <div className="flex flex-col items-center justify-center">
           <DndContext
             sensors={sensors}
@@ -54,12 +83,11 @@ export function AppSidebar({ sensors, bookId, isLoading, handleDragEnd, setActiv
             <SortableContext
               items={data?.pages || []}
               strategy={verticalListSortingStrategy}
-
             >
-
-              {isLoading ? <SkeletonPages /> : (
-
-                <SidebarMenu className='gap-4 items-center justify-center py-4'>
+              {isLoading ? (
+                <SkeletonPages />
+              ) : (
+                <SidebarMenu className="items-center justify-center gap-4 py-4">
                   <AnimatePresence>
                     {data?.pages &&
                       data.pages.length > 0 &&
@@ -69,11 +97,13 @@ export function AppSidebar({ sensors, bookId, isLoading, handleDragEnd, setActiv
                           layout
                           initial={{ y: 100, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          exit={{ y: "100%", opacity: 0 }}
-                          transition={{ duration: .3, delay: index * 0.1, }}
-
+                          exit={{ y: '100%', opacity: 0 }}
+                          transition={{ duration: 0.3, delay: index * 0.1 }}
                         >
-                          <SidebarMenuItem key={index} onClick={() => handleOnSelectItem(page.id)}>
+                          <SidebarMenuItem
+                            key={index}
+                            onClick={() => handleOnSelectItem(page.id)}
+                          >
                             <SortablePage
                               id={`page-${page.sequence_number}`}
                               currentId={page.id}
@@ -84,7 +114,6 @@ export function AppSidebar({ sensors, bookId, isLoading, handleDragEnd, setActiv
                             />
                           </SidebarMenuItem>
                         </motion.div>
-
                       ))}
                   </AnimatePresence>
                 </SidebarMenu>
@@ -93,7 +122,6 @@ export function AppSidebar({ sensors, bookId, isLoading, handleDragEnd, setActiv
           </DndContext>
         </div>
       </SidebarContent>
-
     </Sidebar>
   );
 }

@@ -34,14 +34,18 @@ type AIImageSheetProps = {
   onClick: (url: string) => void;
 };
 
-export function AIImageSheet({ open, onOpenChange, onClick }: AIImageSheetProps) {
+export function AIImageSheet({
+  open,
+  onOpenChange,
+  onClick,
+}: AIImageSheetProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('generate-image');
   const [promptText, setPromptText] = useState('');
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="px-4 min-w-xl" side="right">
+      <SheetContent className="min-w-xl px-4" side="right">
         <SheetHeader className="p-0 py-4">
           <SheetTitle>Generate AI Image</SheetTitle>
           <SheetDescription>
@@ -131,15 +135,17 @@ export function AIImageSheet({ open, onOpenChange, onClick }: AIImageSheetProps)
             </div>
           </TabsContent>
 
-          <TabsContent value="gallery" className="space-y-4 py-4 h-10/12 px-2">
+          <TabsContent value="gallery" className="h-10/12 space-y-4 px-2 py-4">
             <TabGalleryImages onSelectItemFromGallery={onClick} />
           </TabsContent>
 
           <TabsContent value="outlines" className="space-y-4 py-4">
-            <TabOutlines onDescriptionSelect={(description) => {
-              setPromptText(description);
-              setActiveTab('generate-image');
-            }} />
+            <TabOutlines
+              onDescriptionSelect={(description) => {
+                setPromptText(description);
+                setActiveTab('generate-image');
+              }}
+            />
           </TabsContent>
         </Tabs>
       </SheetContent>

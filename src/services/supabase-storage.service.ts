@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { createClient } from '@/utils/supabase/server';
 
@@ -21,7 +21,7 @@ export const getGeneratedImages = async () => {
       const url = await getPublicUrl(image.name);
       return {
         ...image,
-        url
+        url,
       };
     })
   );

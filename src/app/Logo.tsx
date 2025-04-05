@@ -11,12 +11,7 @@ const SvgComponent = (props: SVGProps<SVGSVGElement>) => (
   //     </clipPath>
   //   </defs>
   // </svg>
-  <svg
-    className="w-64"
-    viewBox="0 0 3241 1040"
-    fill="none"
-    {...props}
-  >
+  <svg className="w-64" viewBox="0 0 3241 1040" fill="none" {...props}>
     <g clipPath="url(#a)">
       <path
         fill="var(--primary)"
