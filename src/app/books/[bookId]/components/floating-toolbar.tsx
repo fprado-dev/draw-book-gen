@@ -10,6 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { handleCreatePDF } from '@/lib/generate-pdf';
+import { getAllPagesByBookId, getBookById } from '@/services/book.service';
+import { useQuery } from '@tanstack/react-query';
 import {
   Download,
   MoreHorizontal,
@@ -19,12 +22,35 @@ import {
   Undo,
   Wand2,
 } from 'lucide-react';
+import { useParams } from 'next/navigation';
 
 export function FloatingToolbar({
   setIsAISheetOpen,
 }: {
   setIsAISheetOpen: (open: boolean) => void;
 }) {
+  const params = useParams();
+  const { data } = useQuery({
+    queryKey: ['pages-by-book-id', params.bookId],
+    queryFn: () => getAllPagesByBookId(params.bookId! as string),
+  });
+
+  const { data: book } = useQuery({
+    queryKey: ['pages-by-book-id', params.bookId],
+    queryFn: () => getBookById(params.bookId! as string),
+  });
+
+  const handleExportPDF = async () => {
+    if (data?.pages) {
+      const images = data.pages.map((page, index) => ({
+        url: page.image_url,
+        bookId: params.bookId! as string,
+        id: page.id,
+        order: page.sequence_number
+      }));
+      await handleCreatePDF(images, 'Book Export', book!);
+    }
+  };
   return (
     <div className="absolute right-4 top-4 flex flex-col items-center gap-2 rounded-lg border p-2">
       <Button
@@ -74,9 +100,9 @@ export function FloatingToolbar({
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportPDF}>
               <Download className="mr-2 h-4 w-4" />
-              <span>Export</span>
+              <span>Export PDF</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Share2 className="mr-2 h-4 w-4" />

@@ -1,10 +1,16 @@
-import { GeneratedImage } from '@/contexts/BookImagesContext';
 import { TBook } from '@/types/ebook';
 import jsPDF from 'jspdf';
 
+
+type TGeneratedImage = {
+  url: string;
+  bookId: string;
+  id: string;
+  order: number;
+};
 // Function to create and download PDF with correct KDP dimensions
 export const handleCreatePDF = async (
-  images: GeneratedImage[],
+  images: TGeneratedImage[],
   bookTitle: string,
   book: TBook
 ) => {
@@ -12,7 +18,7 @@ export const handleCreatePDF = async (
     // Get book size dimensions in inches
     const bookSizeDimensions: Record<
       string,
-      { width: number; height: number }
+      { width: number; height: number; }
     > = {
       '5x8': { width: 5, height: 8 },
       '5.25x8': { width: 5.25, height: 8 },
