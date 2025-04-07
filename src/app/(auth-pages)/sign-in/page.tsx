@@ -9,7 +9,9 @@ export default async function SignIn(props: {
   const searchParams = await props.searchParams;
 
   return (
-    <div className="bg-background relative flex min-h-svh w-full flex-col items-center justify-center p-6 md:p-10">
+    <div className="bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.08)_1px,transparent_1px)]  bg-[length:10px_10px] transition-all
+      duration-300 will-change-transform
+      hover:-translate-y-0.5 hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:bg-black dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08)_1px,transparent_1px)] dark:hover:shadow-[0_2px_12px_rgba(255,255,255,0.08)]relative flex min-h-svh w-full flex-col items-center justify-center p-6 md:p-10">
       <div className="relative z-10 w-full max-w-sm md:max-w-xl">
         <FormMessage message={searchParams} />
         <LoginForm />

@@ -1,6 +1,5 @@
 'use client';
 
-import { Sparkles, TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -9,9 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Sparkles, TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
 
-import { QueryClient, useQuery } from '@tanstack/react-query';
 import { getUserStats } from '@/services/dashboard.service';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 const queryClient = new QueryClient();
@@ -20,8 +20,8 @@ export function StatsCards() {
   const { data: statsInfos, isLoading } = useQuery({
     queryKey: ['get-user-stats'],
     queryFn: async () => {
-      const { totalBooks, totalImages, totalOutlines } = await getUserStats();
-      return { totalBooks, totalImages, totalOutlines };
+      const { totalBooks, totalImages, totalOutlines, totalPages } = await getUserStats();
+      return { totalBooks, totalImages, totalOutlines, totalPages };
     },
   });
 
@@ -78,7 +78,7 @@ export function StatsCards() {
         <CardHeader className="relative">
           <CardDescription>Total Pages</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            {0}
+            {statsInfos?.totalPages}
           </CardTitle>
           <div className="absolute right-4 top-0">
             <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">

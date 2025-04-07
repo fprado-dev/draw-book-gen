@@ -7,6 +7,7 @@ export interface UserStats {
   totalBooks: number;
   totalImages: number;
   totalOutlines: number;
+  totalPages: number;
 }
 
 export interface DailyImageStats {
@@ -33,6 +34,14 @@ export async function getUserStats(): Promise<UserStats> {
 
     if (booksError) throw booksError;
 
+    // Get Pages count
+    const { count: pagesCount, error: pagesError } = await supabase
+      .from('pages')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user?.id);
+
+    if (pagesError) throw pagesError;
+
     // Get Outlines count
     const { count: outlinesCount, error: outlinesError } = await supabase
       .from('outlines')
@@ -56,6 +65,7 @@ export async function getUserStats(): Promise<UserStats> {
       totalBooks: booksCount || 0,
       totalImages: userImages.length || 0,
       totalOutlines: outlinesCount || 0,
+      totalPages: pagesCount || 0,
     };
   } catch (error) {
     console.error('Error fetching user stats:', error);
@@ -215,7 +225,7 @@ type THandleStripeCheckout = {
 
 export async function handleStripeCheckout({
   planId,
-}: THandleStripeCheckout): Promise<{ url: string; id: string }> {
+}: THandleStripeCheckout): Promise<{ url: string; id: string; }> {
   const supabase = await createClient();
 
   try {
@@ -234,7 +244,7 @@ export async function handleStripeCheckout({
   }
 }
 
-export async function handleStripeCustomerPortal(): Promise<{ url: string }> {
+export async function handleStripeCustomerPortal(): Promise<{ url: string; }> {
   const supabase = await createClient();
 
   const { data, error } = await supabase.functions.invoke(
