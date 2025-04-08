@@ -225,7 +225,7 @@ type THandleStripeCheckout = {
 
 export async function handleStripeCheckout({
   planId,
-}: THandleStripeCheckout): Promise<{ url: string; id: string; }> {
+}: THandleStripeCheckout): Promise<{ url: string; id: string }> {
   const supabase = await createClient();
 
   try {
@@ -244,7 +244,7 @@ export async function handleStripeCheckout({
   }
 }
 
-export async function handleStripeCustomerPortal(): Promise<{ url: string; }> {
+export async function handleStripeCustomerPortal(): Promise<{ url: string }> {
   const supabase = await createClient();
 
   const { data, error } = await supabase.functions.invoke(

@@ -115,7 +115,6 @@ export const deleteBook = async (id: string) => {
   return data;
 };
 
-
 export type TPage = {
   id: string;
   book_id: string;
@@ -175,7 +174,6 @@ export const onCreatePage = async (bookId: string) => {
     .single();
 
   if (insertError) throw insertError;
-
 
   return newPage as TPage;
 };

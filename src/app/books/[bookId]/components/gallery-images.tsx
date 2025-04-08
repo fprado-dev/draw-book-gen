@@ -46,12 +46,14 @@ function TabGalleryImages({
         </div>
       )}
       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
-        {data?.map((image: { name: string; url: string; }, index: number) => (
+        {data?.map((image: { name: string; url: string }, index: number) => (
           <Card key={image.name} className="w-full gap-1 overflow-hidden p-1">
             <CardContent className="p-0">
               <div className="relative h-72 w-full">
                 {index < 4 && (
-                  <Badge className="absolute right-2 top-2 z-10 bg-primary text-primary-foreground">New</Badge>
+                  <Badge className="bg-primary text-primary-foreground absolute right-2 top-2 z-10">
+                    New
+                  </Badge>
                 )}
                 <Image
                   src={image.url}

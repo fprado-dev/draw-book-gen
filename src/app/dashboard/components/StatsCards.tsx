@@ -20,7 +20,8 @@ export function StatsCards() {
   const { data: statsInfos, isLoading } = useQuery({
     queryKey: ['get-user-stats'],
     queryFn: async () => {
-      const { totalBooks, totalImages, totalOutlines, totalPages } = await getUserStats();
+      const { totalBooks, totalImages, totalOutlines, totalPages } =
+        await getUserStats();
       return { totalBooks, totalImages, totalOutlines, totalPages };
     },
   });

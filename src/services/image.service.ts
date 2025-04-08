@@ -6,7 +6,6 @@ type GenerateImageParams = {
   prompt: string;
   style?: string;
   aspectRatio?: string;
-
 };
 
 type GenerateImageResponse = {
@@ -15,7 +14,9 @@ type GenerateImageResponse = {
   output: string[];
 };
 
-export async function generateImage(params: GenerateImageParams): Promise<GenerateImageResponse> {
+export async function generateImage(
+  params: GenerateImageParams
+): Promise<GenerateImageResponse> {
   try {
     const headersList = await headers();
     const getUrl =
@@ -43,7 +44,8 @@ export async function generateImage(params: GenerateImageParams): Promise<Genera
     return {
       success: false,
       output: [],
-      error: error instanceof Error ? error.message : 'An unknown error occurred',
+      error:
+        error instanceof Error ? error.message : 'An unknown error occurred',
     };
   }
 }

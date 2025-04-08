@@ -2,7 +2,13 @@ import { mainQueryClient } from '@/components/providers';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { generateImage } from '@/services/image.service';
 import { saveGeneratedImage } from '@/services/supabase-storage.service';
@@ -26,19 +32,16 @@ function TabGenerateAIImage({
   const [selectedStyle, setSelectedStyle] = useState('');
   const [isCreatingImage, setIsCreatingImage] = useState(false);
 
-
-
-
   const handleCreateImage = async () => {
     try {
       setIsCreatingImage(true);
       const { output, success } = await generateImage({
         prompt: prompt,
         style: selectedStyle,
-        aspectRatio: bookSizeAspectRatioMap[book.size]
+        aspectRatio: bookSizeAspectRatioMap[book.size],
       });
       if (success) {
-        output.forEach(async image => {
+        output.forEach(async (image) => {
           await saveGeneratedImage(image);
         });
         queryClient.invalidateQueries({ queryKey: ['gallery-images'] });
@@ -47,17 +50,15 @@ function TabGenerateAIImage({
         toast.success('Image generated successfully!');
       }
     } catch (error) {
+      console.error('Failed to generate image:', error);
       toast.error('Failed to generate image. Please try again.');
       setIsCreatingImage(false);
     }
   };
 
-
-
-
   return (
     <ScrollArea className="h-[700px] w-full bg-red-200/5 px-4 py-4">
-      <div className='flex flex-col gap-4'>
+      <div className="flex flex-col gap-4">
         <div className="space-y-2">
           <Label>Prompt</Label>
           <Textarea
@@ -84,11 +85,12 @@ function TabGenerateAIImage({
         <Button
           className="w-full"
           disabled={!prompt || isCreatingImage}
-          onClick={handleCreateImage}>
+          onClick={handleCreateImage}
+        >
           {isCreatingImage ? 'Generating...' : 'Generate Image'}
         </Button>
       </div>
-    </ScrollArea >
+    </ScrollArea>
   );
 }
 

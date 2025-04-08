@@ -30,10 +30,10 @@ type TAppSidebar = {
   handleDragEnd: (event: DragEndEvent) => void;
   setActiveId: (id: string) => void;
   data:
-  | {
-    pages: TPage[];
-  }
-  | undefined;
+    | {
+        pages: TPage[];
+      }
+    | undefined;
   handleCreatePage: (bookId: string) => void;
   handleDeletePage: (pageId: string) => void;
   isDeleting: boolean;
@@ -77,7 +77,6 @@ export function AppSidebar({
               <Plus className="h-4 w-4" />
             </>
           )}
-
         </Button>
         {isLoading ? (
           <Skeleton className="mx-4 mt-2 h-8" />
@@ -111,13 +110,17 @@ export function AppSidebar({
                           layout
                           initial={{ y: 100, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          exit={{ y: '50%', opacity: 0, transition: { duration: 0.1 } }}
+                          exit={{
+                            y: '50%',
+                            opacity: 0,
+                            transition: { duration: 0.1 },
+                          }}
                           transition={{ duration: 0.3, delay: index * 0.1 }}
                         >
                           <SidebarMenuItem
                             key={index}
                             onClick={() => handleOnSelectItem(page.id)}
-                            className='relative'
+                            className="relative"
                           >
                             <SortablePage
                               id={`page-${page.sequence_number}`}
@@ -128,7 +131,6 @@ export function AppSidebar({
                               isSelected={selectedPageId === page.id}
                               isDeleting={isDeleting}
                             />
-
                           </SidebarMenuItem>
                         </motion.div>
                       ))}

@@ -50,17 +50,17 @@ export function SortablePage({
 
   return (
     <div className="relative transition-all">
-
       <div
         style={style}
         className="relative h-80 w-52 cursor-pointer overflow-hidden rounded-md transition-shadow hover:shadow-md"
       >
-        {isDeleting && isSelected && <div className='flex w-full h-full items-center justify-center backdrop-blur-md bg-primary/15 dark:bg-primary-foreground/15 absolute top-0 left-0 z-10'>
-          <span>Deleting...</span>
-        </div>}
+        {isDeleting && isSelected && (
+          <div className="bg-primary/15 dark:bg-primary-foreground/15 absolute left-0 top-0 z-10 flex h-full w-full items-center justify-center backdrop-blur-md">
+            <span>Deleting...</span>
+          </div>
+        )}
 
         <div className="absolute right-2 top-2  z-10 flex gap-2 ">
-
           <Button
             variant="secondary"
             size="icon"

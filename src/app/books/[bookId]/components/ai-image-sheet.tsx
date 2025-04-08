@@ -54,7 +54,12 @@ export function AIImageSheet({
           </TabsList>
 
           <TabsContent value="generate-image" className="space-y-4 py-4">
-            <TabGenerateAIImage book={book!} prompt={promptText} setPromptText={setPromptText} setActiveTab={setActiveTab} />
+            <TabGenerateAIImage
+              book={book!}
+              prompt={promptText}
+              setPromptText={setPromptText}
+              setActiveTab={setActiveTab}
+            />
           </TabsContent>
 
           <TabsContent value="gallery" className="h-10/12 space-y-4 px-2 py-4">

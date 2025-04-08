@@ -1,6 +1,5 @@
 import { SVGProps } from 'react';
 const SvgComponent = (props: SVGProps<SVGSVGElement>) => (
-
   <svg className="w-64" viewBox="0 0 3241 1040" fill="none" {...props}>
     <g clipPath="url(#a)">
       <path

@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   getAllPagesByBookId,
   onCreatePage,
-  TPage
+  TPage,
 } from '@/services/book.service';
 import {
   deletePage,
@@ -45,11 +45,7 @@ export default function BookPages() {
   const { data, isLoading } = useQuery({
     queryKey: ['pages-by-book-id', params.bookId],
     queryFn: () => getAllPagesByBookId(params.bookId! as string),
-
   });
-
-
-
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -89,17 +85,20 @@ export default function BookPages() {
     mutationFn: onCreatePage,
     mutationKey: ['delete-page', params.bookId],
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pages-by-book-id'] }).finally(() => {
-        const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>(['pages-by-book-id', params.bookId]);
-        toast.success('Page created successfully');
-        setSelectedPage(updatedData?.pages[updatedData.pages.length - 1]!);
-
-      });
+      queryClient
+        .invalidateQueries({ queryKey: ['pages-by-book-id'] })
+        .finally(() => {
+          const updatedData = queryClient.getQueryData<{ pages: TPage[] }>([
+            'pages-by-book-id',
+            params.bookId,
+          ]);
+          toast.success('Page created successfully');
+          setSelectedPage(updatedData?.pages[updatedData.pages.length - 1]!);
+        });
     },
     onError: () => {
       toast.error('Failed to create page');
     },
-
   });
 
   const handleCreatePage = async (bookId: string) => {
@@ -110,15 +109,20 @@ export default function BookPages() {
     mutationFn: deletePage,
     mutationKey: ['delete-page'],
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pages-by-book-id'] }).then(() => {
-        const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>(['pages-by-book-id', params.bookId]);
-        if (updatedData?.pages && updatedData.pages.length > 0) {
-          setSelectedPage(updatedData.pages[updatedData.pages.length - 1]!);
-          toast.success('Page deleted successfully');
-        } else {
-          setSelectedPage(null);
-        }
-      });
+      queryClient
+        .invalidateQueries({ queryKey: ['pages-by-book-id'] })
+        .then(() => {
+          const updatedData = queryClient.getQueryData<{ pages: TPage[] }>([
+            'pages-by-book-id',
+            params.bookId,
+          ]);
+          if (updatedData?.pages && updatedData.pages.length > 0) {
+            setSelectedPage(updatedData.pages[updatedData.pages.length - 1]!);
+            toast.success('Page deleted successfully');
+          } else {
+            setSelectedPage(null);
+          }
+        });
     },
   });
 
@@ -137,7 +141,7 @@ export default function BookPages() {
         await queryClient.invalidateQueries({
           queryKey: ['pages-by-book-id', params.bookId],
         });
-        const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>([
+        const updatedData = queryClient.getQueryData<{ pages: TPage[] }>([
           'pages-by-book-id',
           params.bookId,
         ]);

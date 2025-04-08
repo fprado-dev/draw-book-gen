@@ -77,7 +77,7 @@ STRICTLY PROHIBIT:
 
 
 const buildFullPrompt = (userPrompt: string, style: string) =>
-  `${trigger_word_model}, ${system_message}: ${userPrompt} in ${style} style. 
+  `${trigger_word_model}, ${system_message}: ${userPrompt} in ${style} style. ${masterConfiguration}
   Artwork must feature bold uniform outlines, easy-to-color distinct sections, and playful simplified forms.`;
 
 export async function POST(request: Request) {
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       prompt: fullPrompt,
       aspect_ratio: aspectRatio,
       output_format: 'jpg',
-      num_outputs: 1,
+      num_outputs: 4,
       lora_scale: 0.8
     };
 
@@ -109,6 +109,7 @@ export async function POST(request: Request) {
     if (result.status === 'failed') {
       throw new Error('Image generation failed');
     }
+    console.log(result);
     // Return the image URL in the response
     // TODO: Add a way to download the image to
     return NextResponse.json({
