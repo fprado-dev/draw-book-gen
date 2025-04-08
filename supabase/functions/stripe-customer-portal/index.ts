@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: stripe_customer_id,
-    return_url: 'http://localhost:3000/dashboard/usage?status=ok',
+    return_url: `${Deno.env.get('BASE_URL') || 'http://localhost:3000'}/dashboard/usage?status=ok`,
   });
 
   return new Response(JSON.stringify({ url: session.url }), {

@@ -41,3 +41,30 @@ export const getPublicUrl = async (path: string) => {
 
   return publicUrl;
 };
+
+export const saveGeneratedImage = async (imageUrl: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth?.getUser();
+
+  if (!user) throw new Error('User not authenticated');
+
+  // Download the image
+  const response = await fetch(imageUrl);
+  const imageBlob = await response.blob();
+
+  // Generate a unique filename
+  const filename = `${Date.now()}.jpg`;
+  const filePath = `${user.id}/${filename}`;
+
+  // Upload to Supabase Storage
+  const { error: uploadError } = await supabase.storage
+    .from('users-generated-images')
+    .upload(filePath, imageBlob);
+
+  if (uploadError) throw uploadError;
+
+  // Get the public URL of the uploaded image
+  return await getPublicUrl(filename);
+};

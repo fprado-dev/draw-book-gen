@@ -13,6 +13,7 @@ type SortablePageProps = {
   sequence_number: number;
   image_url: string;
   onDelete: (id: string) => void;
+  isDeleting: boolean;
   isSelected?: boolean;
 };
 
@@ -21,6 +22,7 @@ export function SortablePage({
   sequence_number,
   image_url,
   onDelete,
+  isDeleting,
   isSelected,
 }: SortablePageProps) {
   const {
@@ -52,6 +54,12 @@ export function SortablePage({
         style={style}
         className="relative h-80 w-52 cursor-pointer overflow-hidden rounded-md transition-shadow hover:shadow-md"
       >
+        {isDeleting && isSelected && (
+          <div className="bg-primary/15 dark:bg-primary-foreground/15 absolute left-0 top-0 z-10 flex h-full w-full items-center justify-center backdrop-blur-md">
+            <span>Deleting...</span>
+          </div>
+        )}
+
         <div className="absolute right-2 top-2  z-10 flex gap-2 ">
           <Button
             variant="secondary"
@@ -89,7 +97,7 @@ export function SortablePage({
             >
               <Button
                 size="icon"
-                className={`z-10 h-6 w-6 p-2 ${isSelected ? 'bg-primary text-white' : 'text-primary bg-white'}`}
+                className={`z-10 h-6 w-6 p-2 ${isSelected && 'bg-primary'}`}
               >
                 <Check className="h-3 w-3" />
               </Button>

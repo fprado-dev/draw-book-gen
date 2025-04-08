@@ -115,7 +115,6 @@ export const deleteBook = async (id: string) => {
   return data;
 };
 
-
 export type TPage = {
   id: string;
   book_id: string;
@@ -175,15 +174,6 @@ export const onCreatePage = async (bookId: string) => {
     .single();
 
   if (insertError) throw insertError;
-
-  // Update book's last_viewed timestamp
-  const { error: updateError } = await supabase
-    .from('books')
-    .update({ last_viewed: new Date().toISOString() })
-    .eq('id', bookId)
-    .eq('user_id', user?.id);
-
-  if (updateError) throw updateError;
 
   return newPage as TPage;
 };

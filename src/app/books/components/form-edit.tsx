@@ -29,7 +29,7 @@ type TFormUpdateBook = {
 
 const bookTypes: TBookType[] = ['paperback', 'hardcover'];
 
-const bookMeasurementUnits: TBookMeasurementUnit[] = ['inches', 'millimeters'];
+const bookMeasurementUnits: TBookMeasurementUnit[] = ['inches', 'cm'];
 
 const bookPaperColor: TBookPaperColor[] = ['white', 'cream'];
 

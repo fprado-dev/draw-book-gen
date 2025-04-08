@@ -21,7 +21,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { Loader, Plus } from 'lucide-react';
 import { SkeletonPages } from './skeleton-pages';
 import { SortablePage } from './sortable-page';
 
@@ -30,17 +30,19 @@ type TAppSidebar = {
   handleDragEnd: (event: DragEndEvent) => void;
   setActiveId: (id: string) => void;
   data:
-  | {
-    pages: TPage[];
-  }
-  | undefined;
+    | {
+        pages: TPage[];
+      }
+    | undefined;
   handleCreatePage: (bookId: string) => void;
   handleDeletePage: (pageId: string) => void;
+  isDeleting: boolean;
   handleOnSelectItem: (pageId: string) => void;
   selectedPageId: string | null;
   bookId: string;
   isLoading: boolean;
   activeId: string | null;
+  isCreating: boolean;
 };
 export function AppSidebar({
   sensors,
@@ -50,7 +52,9 @@ export function AppSidebar({
   setActiveId,
   data,
   handleCreatePage,
+  isCreating,
   handleDeletePage,
+  isDeleting,
   handleOnSelectItem,
   selectedPageId,
 }: TAppSidebar) {
@@ -62,8 +66,17 @@ export function AppSidebar({
           className="mt-3 w-full "
           onClick={() => handleCreatePage(bookId)}
         >
-          New Page
-          <Plus className="h-4 w-4" />
+          {isCreating ? (
+            <>
+              Creating...
+              <Loader className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Create Page
+              <Plus className="h-4 w-4" />
+            </>
+          )}
         </Button>
         {isLoading ? (
           <Skeleton className="mx-4 mt-2 h-8" />
@@ -97,12 +110,17 @@ export function AppSidebar({
                           layout
                           initial={{ y: 100, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          exit={{ y: '100%', opacity: 0 }}
+                          exit={{
+                            y: '50%',
+                            opacity: 0,
+                            transition: { duration: 0.1 },
+                          }}
                           transition={{ duration: 0.3, delay: index * 0.1 }}
                         >
                           <SidebarMenuItem
                             key={index}
                             onClick={() => handleOnSelectItem(page.id)}
+                            className="relative"
                           >
                             <SortablePage
                               id={`page-${page.sequence_number}`}
@@ -111,6 +129,7 @@ export function AppSidebar({
                               image_url={page.image_url}
                               onDelete={handleDeletePage}
                               isSelected={selectedPageId === page.id}
+                              isDeleting={isDeleting}
                             />
                           </SidebarMenuItem>
                         </motion.div>
