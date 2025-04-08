@@ -154,7 +154,6 @@ export const handleCreatePDF = async (pages: TPage[], book: TBook) => {
 
     if (!dimensions) throw new Error(`Invalid book size: ${book.size}`);
 
-
     // Create PDF with correct dimensions
     const pdf = new jsPDF({
       orientation: 'portrait',

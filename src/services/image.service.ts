@@ -1,6 +1,7 @@
 'use server';
 
 import { headers } from 'next/headers';
+import { saveGeneratedImage } from './supabase-storage.service';
 
 type GenerateImageParams = {
   prompt: string;
@@ -11,7 +12,6 @@ type GenerateImageParams = {
 type GenerateImageResponse = {
   success: boolean;
   error?: string;
-  output: string[];
 };
 
 export async function generateImage(
@@ -33,17 +33,20 @@ export async function generateImage(
     });
 
     const data = await response.json();
-
+    if (data.success) {
+      const imagesUrl = data.output as string[];
+      imagesUrl.forEach(async (image) => {
+        await saveGeneratedImage(image);
+      });
+    }
     return {
       success: data.success,
-      output: data.output as string[],
       error: data.error,
     };
   } catch (error) {
     console.error('Error generating image:', error);
     return {
       success: false,
-      output: [],
       error:
         error instanceof Error ? error.message : 'An unknown error occurred',
     };

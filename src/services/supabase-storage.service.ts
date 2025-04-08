@@ -64,7 +64,4 @@ export const saveGeneratedImage = async (imageUrl: string) => {
     .upload(filePath, imageBlob);
 
   if (uploadError) throw uploadError;
-
-  // Get the public URL of the uploaded image
-  return await getPublicUrl(filename);
 };
