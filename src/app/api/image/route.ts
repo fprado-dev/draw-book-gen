@@ -96,7 +96,7 @@ export async function POST(request: Request) {
     };
 
     const prediction = await replicate.predictions.create({
-      version: '6136f7a0938f52e109178509185b6d3a057c121d2e6ab3db327156986c12ea8d',
+      model: "aillustra-dev/aillustra-color:6136f7a0938f52e109178509185b6d3a057c121d2e6ab3db327156986c12ea8d",
       input
     });
 
