@@ -13,7 +13,7 @@ export interface TBook {
 }
 
 export type TBookType = 'paperback' | 'hardcover';
-export type TBookMeasurementUnit = 'inches' | 'millimeters';
+export type TBookMeasurementUnit = 'inches' | 'cm';
 export type TBookStatus = 'draft' | 'published' | 'archived';
 export type TBookPaperColor = 'white' | 'cream';
 
@@ -35,7 +35,7 @@ export type TBookSize =
   | '8.25x8.25'
   | '8.5x8.5';
 
-export interface TBookPageDimensionsWithoutBleed {
+export type TBookPageDimensionsWithoutBleed = {
   '5x8': {
     inches: { width: 5; height: 8; };
     cm: { width: 12.7; height: 20.32; };
@@ -100,7 +100,7 @@ export interface TBookPageDimensionsWithoutBleed {
     inches: { width: 8.5; height: 8.5; };
     cm: { width: 21.59; height: 21.59; };
   };
-}
+};
 
 export interface TBookPageDimensionsWithBleed {
   '5x8': {
@@ -271,14 +271,14 @@ export type AspectRatio =
   | '4:3'
   | '9:16'
   | '9:21'
-  | 'N/A'; // Para casos sem correspondência exata
+  | '1:1';
 
 export type TBookSizeToAspectRatio = {
   [key in TBookSize]: AspectRatio;
 };
 
 // Implementação do mapeamento (exemplo de uso)
-const bookSizeAspectRatioMap: TBookSizeToAspectRatio = {
+export const bookSizeAspectRatioMap: TBookSizeToAspectRatio = {
   '5x8': '2:3',
   '5.25x8': '2:3',
   '5.5x8.5': '2:3',

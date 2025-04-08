@@ -43,7 +43,6 @@ export const getPublicUrl = async (path: string) => {
 };
 
 export const saveGeneratedImage = async (imageUrl: string) => {
-  console.log('imageUrl', imageUrl);
   const supabase = await createClient();
   const {
     data: { user },

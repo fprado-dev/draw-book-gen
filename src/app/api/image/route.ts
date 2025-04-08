@@ -6,23 +6,13 @@ const replicate = new Replicate({
   auth: process.env.NEXT_PUBLIC_REPLICATE_API_KEY || '',
 });
 
-// Task 1 - Improved configurations
-// const enhancedConfigurations = `black and white line art, crisp continuous outlines (2-3pt weight), simple interior lines for coloring guidance, high contrast edges, no shading/crosshatching/gradients. Distinct separated elements with breathing space, minimal intricate details, child-friendly complexity. Pure white background (#FFFFFF) with zero grayscale/color. All components must be fully enclosed by outlines.`;
 
-const trigger_word_model = "a_photo_of_coloring_book";
+const trigger_word_model = "AILLUSTRA";
 
-// const enhancedConfigurations = `black and white illustrations, clean and accurate lines, 
-// anatomically correct figures with proportional body parts. 
-// Strict rules: no extra limbs (exactly 2 arms/legs), no misaligned heads/bodies, 
-// no crossed/mismatched eyes. Smooth continuous outlines (1.5-2pt weight), uniform line thickness, 
-// complete figures fully contained within frame. Simple expressions with minimal detail, balanced composition with central focus. 
-// Pure white background (#FFFFFF), no color/shading/grayscale/gradients. 
-// Error prevention: no floating elements, overlapping body parts, or cropped figures`;
 
 // Improved System Message
 const system_message = `Generate a black and white coloring book illustration that is simple, clear, and child-friendly. Prioritize clarity and avoid complex details.`;
-// const system_message = "You are a professional children's book illustrator creating coloring book pages";
-// Task 2 - Optimized prompt construction
+
 
 const masterConfiguration = `black and white line-art illustration for coloring books with:
 // CORE PRINCIPLES
@@ -87,25 +77,26 @@ STRICTLY PROHIBIT:
 
 
 const buildFullPrompt = (userPrompt: string, style: string) =>
-  `${trigger_word_model}, ${system_message}: ${userPrompt} in ${style} style. ${masterConfiguration}
+  `${trigger_word_model}, ${system_message}: ${userPrompt} in ${style} style. 
   Artwork must feature bold uniform outlines, easy-to-color distinct sections, and playful simplified forms.`;
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { prompt, style } = body;
+    const { prompt, style, aspectRatio } = body;
 
     const fullPrompt = buildFullPrompt(prompt, style);
 
     const input = {
       prompt: fullPrompt,
-      aspect_ratio: '2:3',
+      aspect_ratio: aspectRatio,
       output_format: 'jpg',
-      num_outputs: 4,
+      num_outputs: 1,
+      lora_scale: 0.8
     };
 
     const prediction = await replicate.predictions.create({
-      version: 'e1d236ff01af02678c094f2749673423139d08349d36e260aadecae64e843988',
+      version: '6136f7a0938f52e109178509185b6d3a057c121d2e6ab3db327156986c12ea8d',
       input
     });
 

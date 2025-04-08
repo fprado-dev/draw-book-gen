@@ -8,6 +8,9 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getBookById } from '@/services/book.service';
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import TabGalleryImages from './gallery-images';
 import TabGenerateAIImage from './generate-ai-image';
@@ -26,8 +29,12 @@ export function AIImageSheet({
 }: AIImageSheetProps) {
   const [activeTab, setActiveTab] = useState('generate-image');
   const [promptText, setPromptText] = useState('');
+  const params = useParams();
 
-
+  const { data: book } = useQuery({
+    queryKey: ['book-by-id', params.bookId],
+    queryFn: () => getBookById(params.bookId! as string),
+  });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -47,7 +54,7 @@ export function AIImageSheet({
           </TabsList>
 
           <TabsContent value="generate-image" className="space-y-4 py-4">
-            <TabGenerateAIImage prompt={promptText} setPromptText={setPromptText} onSelectItemFromGallery={onClick} />
+            <TabGenerateAIImage book={book!} prompt={promptText} setPromptText={setPromptText} setActiveTab={setActiveTab} />
           </TabsContent>
 
           <TabsContent value="gallery" className="h-10/12 space-y-4 px-2 py-4">

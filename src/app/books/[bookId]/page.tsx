@@ -141,8 +141,6 @@ export default function BookPages() {
     [params.bookId, queryClient, selectedPage?.id]
   );
 
-
-
   const isEmptyState = useMemo(
     () => data?.pages?.length! <= 0,
     [data?.pages?.length]

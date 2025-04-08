@@ -5,9 +5,8 @@ import { headers } from 'next/headers';
 type GenerateImageParams = {
   prompt: string;
   style?: string;
-  negativePrompt?: string;
-  seed?: number;
-  steps?: number;
+  aspectRatio?: string;
+
 };
 
 type GenerateImageResponse = {

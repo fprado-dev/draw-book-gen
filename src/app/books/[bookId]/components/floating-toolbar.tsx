@@ -36,19 +36,14 @@ export function FloatingToolbar({
   });
 
   const { data: book } = useQuery({
-    queryKey: ['pages-by-book-id', params.bookId],
+    queryKey: ['book-by-id', params.bookId],
     queryFn: () => getBookById(params.bookId! as string),
   });
 
   const handleExportPDF = async () => {
     if (data?.pages) {
-      const images = data.pages.map((page, index) => ({
-        url: page.image_url,
-        bookId: params.bookId! as string,
-        id: page.id,
-        order: page.sequence_number
-      }));
-      await handleCreatePDF(images, 'Book Export', book!);
+      console.log({ book });
+      await handleCreatePDF(data.pages, book!);
     }
   };
   return (
