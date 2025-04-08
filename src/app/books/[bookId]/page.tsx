@@ -92,7 +92,6 @@ export default function BookPages() {
       queryClient.invalidateQueries({ queryKey: ['pages-by-book-id'] }).finally(() => {
         const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>(['pages-by-book-id', params.bookId]);
         toast.success('Page created successfully');
-        console.log(updatedData);
         setSelectedPage(updatedData?.pages[updatedData.pages.length - 1]!);
 
       });

@@ -42,7 +42,6 @@ export function FloatingToolbar({
 
   const handleExportPDF = async () => {
     if (data?.pages) {
-      console.log({ book });
       await handleCreatePDF(data.pages, book!);
     }
   };

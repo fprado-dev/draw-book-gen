@@ -109,7 +109,6 @@ export async function POST(request: Request) {
     if (result.status === 'failed') {
       throw new Error('Image generation failed');
     }
-    console.log(result);
     // Return the image URL in the response
     // TODO: Add a way to download the image to
     return NextResponse.json({

@@ -58,8 +58,6 @@ export const saveGeneratedImage = async (imageUrl: string) => {
   const filename = `${Date.now()}.jpg`;
   const filePath = `${user.id}/${filename}`;
 
-  console.log('filePath', filePath);
-  console.log('imageBlob', imageBlob);
 
   // Upload to Supabase Storage
   const { error: uploadError } = await supabase.storage
