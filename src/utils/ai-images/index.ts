@@ -1,11 +1,8 @@
-
-
 // Trigger Word for the Model
-const trigger_word_model = "AILLUSTRA";
+const trigger_word_model = 'AILLUSTRA';
 
 // Improved System Message
 const system_message = `You're a Masterpiece Illustrator and you task is Generate a outline black and with white background coloring book illustration that is simple, clear. Prioritize clarity and avoid complex details.`;
-
 
 const masterConfiguration = `
 // STYLE GUIDELINES
@@ -87,7 +84,6 @@ STRICTLY PROHIBIT:
 - NO COPYRIGHT NOTICES
 - NO TRADEMARKS
 `;
-
 
 // Build the Full Prompt
 export const buildFullPrompt = (userPrompt: string, style: string) =>

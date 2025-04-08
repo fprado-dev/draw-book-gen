@@ -7,9 +7,6 @@ const replicate = new Replicate({
   auth: process.env.NEXT_PUBLIC_REPLICATE_API_KEY || '',
 });
 
-
-
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -22,17 +19,18 @@ export async function POST(request: Request) {
       aspect_ratio: aspectRatio,
       output_format: 'jpg',
       num_outputs: 4,
-      lora_scale: 0.8
+      lora_scale: 0.8,
     };
 
     const prediction = await replicate.predictions.create({
-      version: "6136f7a0938f52e109178509185b6d3a057c121d2e6ab3db327156986c12ea8d",
-      input
+      version:
+        '6136f7a0938f52e109178509185b6d3a057c121d2e6ab3db327156986c12ea8d',
+      input,
     });
 
     let result = await replicate.predictions.get(prediction.id);
     while (result.status !== 'succeeded' && result.status !== 'failed') {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       result = await replicate.predictions.get(prediction.id);
     }
 
@@ -52,7 +50,8 @@ export async function POST(request: Request) {
       {
         output: null,
         success: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'An unknown error occurred',
       },
       { status: 500 }
     );

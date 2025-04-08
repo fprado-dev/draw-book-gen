@@ -1,6 +1,5 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
 import { headers } from 'next/headers';
 import { saveGeneratedImage } from './supabase-storage.service';
 
@@ -18,8 +17,6 @@ type GenerateImageResponse = {
 export async function generateImage(
   params: GenerateImageParams
 ): Promise<GenerateImageResponse> {
-  const supabase = await createClient();
-  const { data: user } = await supabase.auth.getUser();
   try {
     const headersList = await headers();
     const getUrl =

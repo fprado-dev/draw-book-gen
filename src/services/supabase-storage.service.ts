@@ -64,5 +64,4 @@ export const saveGeneratedImage = async (imageUrl: string) => {
     .upload(filePath, imageBlob);
 
   if (uploadError) throw uploadError;
-
 };
