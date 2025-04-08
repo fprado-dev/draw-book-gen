@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { generateImage } from '@/services/image.service';
-import { saveGeneratedImage } from '@/services/supabase-storage.service';
 import { bookSizeAspectRatioMap, TBook } from '@/types/ebook';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -35,15 +34,12 @@ function TabGenerateAIImage({
   const handleCreateImage = async () => {
     try {
       setIsCreatingImage(true);
-      const { output, success } = await generateImage({
+      const { success } = await generateImage({
         prompt: prompt,
         style: selectedStyle,
         aspectRatio: bookSizeAspectRatioMap[book.size],
       });
       if (success) {
-        output.forEach(async (image) => {
-          await saveGeneratedImage(image);
-        });
         queryClient.invalidateQueries({ queryKey: ['gallery-images'] });
         setIsCreatingImage(false);
         setActiveTab('gallery');
