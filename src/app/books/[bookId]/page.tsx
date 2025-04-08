@@ -29,6 +29,7 @@ import { ArrowLeft, FilePlus } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { AIImageSheet } from './components/ai-image-sheet';
 import { FloatingToolbar } from './components/floating-toolbar';
 import { AppSidebar } from './components/sidebar-pages';
@@ -44,25 +45,10 @@ export default function BookPages() {
   const { data, isLoading } = useQuery({
     queryKey: ['pages-by-book-id', params.bookId],
     queryFn: () => getAllPagesByBookId(params.bookId! as string),
+
   });
 
 
-
-
-  const deletePageMutation = useMutation({
-    mutationFn: deletePage,
-    mutationKey: ['delete-page'],
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pages-by-book-id'] }).then(() => {
-        const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>(['pages-by-book-id', params.bookId]);
-        if (updatedData?.pages && updatedData.pages.length > 0) {
-          setSelectedPage(updatedData.pages[0]);
-        } else {
-          setSelectedPage(null);
-        }
-      });
-    },
-  });
 
 
   const sensors = useSensors(
@@ -99,16 +85,43 @@ export default function BookPages() {
     [data?.pages, params.bookId, queryClient]
   );
 
-  const handleCreatePage = useCallback(
-    async (bookId: string) => {
-      const data: TPage = await onCreatePage(bookId!);
-      setSelectedPage(data);
-      queryClient.invalidateQueries({
-        queryKey: ['pages-by-book-id', params.bookId],
+  const onCreatePageMutation = useMutation({
+    mutationFn: onCreatePage,
+    mutationKey: ['delete-page', params.bookId],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pages-by-book-id'] }).finally(() => {
+        const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>(['pages-by-book-id', params.bookId]);
+        toast.success('Page created successfully');
+        console.log(updatedData);
+        setSelectedPage(updatedData?.pages[updatedData.pages.length - 1]!);
+
       });
     },
-    [params.bookId, queryClient]
-  );
+    onError: () => {
+      toast.error('Failed to create page');
+    },
+
+  });
+
+  const handleCreatePage = async (bookId: string) => {
+    onCreatePageMutation.mutate(bookId);
+  };
+
+  const deletePageMutation = useMutation({
+    mutationFn: deletePage,
+    mutationKey: ['delete-page'],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pages-by-book-id'] }).then(() => {
+        const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>(['pages-by-book-id', params.bookId]);
+        if (updatedData?.pages && updatedData.pages.length > 0) {
+          setSelectedPage(updatedData.pages[updatedData.pages.length - 1]!);
+          toast.success('Page deleted successfully');
+        } else {
+          setSelectedPage(null);
+        }
+      });
+    },
+  });
 
   const handleDeletePage = async (pageId: string) => {
     deletePageMutation.mutate(pageId);
@@ -146,6 +159,9 @@ export default function BookPages() {
     [data?.pages?.length]
   );
 
+  if (data?.pages && data.pages.length > 0 && !selectedPage) {
+    setSelectedPage(data.pages[0]);
+  }
   return (
     <SidebarProvider>
       <AIImageSheet
@@ -159,7 +175,9 @@ export default function BookPages() {
         bookId={params.bookId! as string}
         data={data}
         handleCreatePage={handleCreatePage}
+        isCreating={onCreatePageMutation.isPending}
         handleDeletePage={handleDeletePage}
+        isDeleting={deletePageMutation.isPending}
         handleOnSelectItem={handleOnSelectItem}
         handleDragEnd={handleDragEnd}
         setActiveId={setActiveId}
