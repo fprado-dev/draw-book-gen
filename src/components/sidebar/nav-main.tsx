@@ -41,8 +41,8 @@ const navMain = [
       },
       {
         title: 'AI Images',
-        url: '#',
-        isDisabled: true,
+        url: '/ai-images',
+        isDisabled: false,
       },
     ],
   },
