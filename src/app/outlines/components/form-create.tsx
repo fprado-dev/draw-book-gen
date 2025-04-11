@@ -23,7 +23,7 @@ const quantities = [
     value: '20',
   },
 ];
-export function FormCreateOutline({ closeModal }: { closeModal: () => void; }) {
+export function FormCreateOutline({ closeModal }: { closeModal: () => void }) {
   const [outlineQuantity, setOutlineQuantity] = useState('5');
   const [outline, setOutlinePrompt] = useState('');
   const queryClient = useQueryClient(mainQueryClient);
@@ -90,8 +90,13 @@ export function FormCreateOutline({ closeModal }: { closeModal: () => void; }) {
         <Button
           className="w-full"
           disabled={!prompt || outlineMutation.isPending}
-          onClick={handleSubmit}>
-          {outlineMutation.isPending ? (<CreatingLoadingAnimation isCreating={outlineMutation.isPending} />) : "Generate Outlines"}
+          onClick={handleSubmit}
+        >
+          {outlineMutation.isPending ? (
+            <CreatingLoadingAnimation isCreating={outlineMutation.isPending} />
+          ) : (
+            'Generate Outlines'
+          )}
         </Button>
       </div>
     </div>

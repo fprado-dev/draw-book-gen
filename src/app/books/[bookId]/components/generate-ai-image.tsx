@@ -21,11 +21,13 @@ function TabGenerateAIImage({
   prompt,
   setPromptText,
   setActiveTab,
+  setIsGenerating,
   book,
 }: {
   prompt: string;
   setPromptText: (prompt: string) => void;
   setActiveTab: (tab: string) => void;
+  setIsGenerating: (isGenerating: boolean) => void;
   book: TBook;
 }) {
   const queryClient = useQueryClient(mainQueryClient);
@@ -35,6 +37,7 @@ function TabGenerateAIImage({
   const handleCreateImage = async () => {
     try {
       setIsCreatingImage(true);
+      setIsGenerating(true);
       const { success } = await generateImage({
         prompt: prompt,
         style: selectedStyle,
@@ -43,6 +46,7 @@ function TabGenerateAIImage({
       if (success) {
         queryClient.invalidateQueries({ queryKey: ['gallery-images'] });
         setIsCreatingImage(false);
+        setIsGenerating(false);
         setActiveTab('gallery');
         toast.success('Image generated successfully!');
       }
@@ -50,6 +54,7 @@ function TabGenerateAIImage({
       console.error('Failed to generate image:', error);
       toast.error('Failed to generate image. Please try again.');
       setIsCreatingImage(false);
+      setIsGenerating(false);
     }
   };
 
@@ -80,21 +85,20 @@ function TabGenerateAIImage({
           </Select>
         </div>
 
-
         <Button
           className="w-full"
           disabled={!prompt || isCreatingImage}
-          onClick={handleCreateImage}>
-          {isCreatingImage ? (<CreatingLoadingAnimation isCreating={isCreatingImage} />) : "Generate Image"}
+          onClick={handleCreateImage}
+        >
+          {isCreatingImage ? (
+            <CreatingLoadingAnimation isCreating={isCreatingImage} />
+          ) : (
+            'Generate Image'
+          )}
         </Button>
-
       </div>
     </ScrollArea>
   );
 }
 
 export default TabGenerateAIImage;
-
-
-
-

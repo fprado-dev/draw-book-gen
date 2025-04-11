@@ -6,7 +6,7 @@ import {
   SheetContent,
   SheetFooter,
   SheetHeader,
-  SheetTitle
+  SheetTitle,
 } from '@/components/ui/sheet';
 import { AIGalleryImage } from '@/services/ai-gallery.service';
 import { formatDistance } from 'date-fns';
@@ -32,17 +32,15 @@ export function ImageDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-
-      <SheetContent className="w-full flex items-center sm:max-w-2xl mx-auto py-4">
+      <SheetContent className="mx-auto flex w-full items-center py-4 sm:max-w-2xl">
         <SheetHeader className="space-y-4">
-          <SheetTitle className='text-xs text-muted-foreground'>
-            Created {formatDistance(image.created_at, new Date(), { addSuffix: true })}
+          <SheetTitle className="text-muted-foreground text-xs">
+            Created{' '}
+            {formatDistance(image.created_at, new Date(), { addSuffix: true })}
           </SheetTitle>
-
         </SheetHeader>
 
-
-        <div className="relative aspect-[2/3]  w-[500px] bg-red-200 border rounded-lg mx-auto overflow-clip">
+        <div className="relative mx-auto  aspect-[2/3] w-[500px] overflow-clip rounded-lg border bg-red-200">
           <Image
             src={image.url}
             alt={image.name}
@@ -50,14 +48,13 @@ export function ImageDetailSheet({
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-
         </div>
         <SheetFooter>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
-              className='text-xs'
+              className="text-xs"
               onClick={() => onDownload?.(image)}
             >
               Download
@@ -66,8 +63,7 @@ export function ImageDetailSheet({
             <Button
               variant="destructive"
               size="sm"
-              className='text-xs cursor-pointer'
-
+              className="cursor-pointer text-xs"
               onClick={() => onDelete?.(image)}
             >
               Delete
@@ -76,7 +72,6 @@ export function ImageDetailSheet({
           </div>
         </SheetFooter>
       </SheetContent>
-
     </Sheet>
   );
 }

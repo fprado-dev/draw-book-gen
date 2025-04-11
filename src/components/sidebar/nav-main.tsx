@@ -37,7 +37,6 @@ const navMain = [
         title: 'Outlines',
         url: '/outlines',
         isDisabled: false,
-
       },
       {
         title: 'AI Images',
@@ -56,20 +55,16 @@ const navMain = [
         title: 'Overview',
         url: '/dashboard',
         isDisabled: false,
-
-
       },
       {
         title: 'Usage',
         url: '/dashboard/usage',
         isDisabled: false,
-
       },
       {
         title: 'Settings',
         url: '/dashboard/settings',
         isDisabled: false,
-
       },
     ],
   },
@@ -98,13 +93,28 @@ export function NavMain() {
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub >
+                <SidebarMenuSub>
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild isActive={pathName === subItem.url}>
-                        <Link href={subItem.url} className={subItem.isDisabled ? "cursor-not-allowed" : ""}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={pathName === subItem.url}
+                      >
+                        <Link
+                          href={subItem.url}
+                          className={
+                            subItem.isDisabled ? 'cursor-not-allowed' : ''
+                          }
+                        >
                           <span>{subItem.title}</span>
-                          {subItem.isDisabled && <Badge variant="outline" className='ml-1 bg-primary text-white'>soon</Badge>}
+                          {subItem.isDisabled && (
+                            <Badge
+                              variant="outline"
+                              className="bg-primary ml-1 text-white"
+                            >
+                              soon
+                            </Badge>
+                          )}
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>

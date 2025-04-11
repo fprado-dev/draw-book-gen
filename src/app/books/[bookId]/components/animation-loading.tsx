@@ -1,28 +1,26 @@
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 // Define the states as an object
 const optionsState = {
-  starting: "Initializing ",
-  sending: "Sending prompt...",
-  loading: "Loading model...",
-  waiting: "Waiting for response...",
-  processing: "Processing data...",
-  verifying: "Verifying results...",
-  almost: "Almost there...",
-  done: "Finished",
+  starting: 'Initializing...',
+  sending: 'Sending prompt...',
+  loading: 'Loading model...',
+  waiting: 'Waiting for response...',
+  processing: 'Processing data...',
+  verifying: 'Verifying results...',
+  almost: 'Almost there...',
+  done: 'Finished',
   // Add more states here as needed, e.g.:
-
-
 };
 
 // Define one-time states (appear only once)
-const oneTimeStates = ["starting", "sending", "loading"];
+const oneTimeStates = ['starting', 'sending', 'loading'];
 
-function CreatingLoadingAnimation({ isCreating }: { isCreating: boolean; }) {
+function CreatingLoadingAnimation({ isCreating }: { isCreating: boolean }) {
   // Separate one-time and looping states
   const loopingStates = Object.keys(optionsState).filter(
-    (key) => !oneTimeStates.includes(key) && key !== "done"
+    (key) => !oneTimeStates.includes(key) && key !== 'done'
   );
   const initialTexts = [...oneTimeStates, ...loopingStates];
 
@@ -33,7 +31,7 @@ function CreatingLoadingAnimation({ isCreating }: { isCreating: boolean; }) {
   useEffect(() => {
     // When isCreating is false, show "done" and stop
     if (!isCreating) {
-      setTexts(["done"]);
+      setTexts(['done']);
       setCurrentTextIndex(0);
       return;
     }
@@ -56,11 +54,12 @@ function CreatingLoadingAnimation({ isCreating }: { isCreating: boolean; }) {
 
     // Cleanup interval on unmount or when isCreating changes
     return () => clearInterval(interval);
-  }, [isCreating]);
+  }, [isCreating, loopingStates.length]);
 
   // Get the current text to display
   const currentTextKey = texts[currentTextIndex];
-  const currentText = optionsState[currentTextKey as keyof typeof optionsState] || "";
+  const currentText =
+    optionsState[currentTextKey as keyof typeof optionsState] || '';
 
   // Animation variants for letter bounce effect
   const letterVariants = {
@@ -69,7 +68,7 @@ function CreatingLoadingAnimation({ isCreating }: { isCreating: boolean; }) {
       y: 0,
       opacity: 1,
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 300,
         damping: 20,
         delay: i * 0.05,
@@ -78,8 +77,8 @@ function CreatingLoadingAnimation({ isCreating }: { isCreating: boolean; }) {
   };
 
   return (
-    <motion.span className="text-sm text-white">
-      {currentText.split("").map((letter, index) => (
+    <motion.span className="text-sm ">
+      {currentText.split('').map((letter, index) => (
         <motion.span
           key={`${currentTextKey}-${index}`}
           variants={letterVariants}

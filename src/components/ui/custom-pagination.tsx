@@ -16,14 +16,18 @@ interface CustomPaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export function CustomPagination({ page, totalPages, onPageChange }: CustomPaginationProps) {
+export function CustomPagination({
+  page,
+  totalPages,
+  onPageChange,
+}: CustomPaginationProps) {
   const generatePaginationItems = () => {
     const items = [];
     const maxVisiblePages = 5;
     const halfMaxVisiblePages = Math.floor(maxVisiblePages / 2);
 
     let startPage = Math.max(1, page - halfMaxVisiblePages);
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -99,7 +103,9 @@ export function CustomPagination({ page, totalPages, onPageChange }: CustomPagin
 
   return (
     <Pagination>
-      <PaginationContent className='cursor-pointer'>{generatePaginationItems()}</PaginationContent>
+      <PaginationContent className="cursor-pointer">
+        {generatePaginationItems()}
+      </PaginationContent>
     </Pagination>
   );
 }

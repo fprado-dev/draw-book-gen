@@ -20,8 +20,8 @@ interface ConfirmOptions {
 
 export function useConfirmDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  const [options, setOptions] = useState<ConfirmOptions | null>(null);
-  const [resolve, setResolve] = useState<(value: boolean) => void>(() => { });
+  const [, setOptions] = useState<ConfirmOptions | null>(null);
+  const [resolve, setResolve] = useState<(value: boolean) => void>(() => {});
 
   const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
     setOptions(options);
@@ -42,7 +42,7 @@ export function useConfirmDialog() {
   }, [resolve]);
 
   const ConfirmDialog = useCallback(
-    ({ options }: { options: ConfirmOptions; }) => {
+    ({ options }: { options: ConfirmOptions }) => {
       return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
           <DialogContent>

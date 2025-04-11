@@ -29,6 +29,7 @@ export function AIImageSheet({
 }: AIImageSheetProps) {
   const [activeTab, setActiveTab] = useState('generate-image');
   const [promptText, setPromptText] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
   const params = useParams();
 
   const { data: book } = useQuery({
@@ -36,8 +37,13 @@ export function AIImageSheet({
     queryFn: () => getBookById(params.bookId! as string),
   });
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (isGenerating && !newOpen) return;
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="min-w-xl px-4" side="right">
         <SheetHeader className="p-0 py-4">
           <SheetTitle>Generate AI Image</SheetTitle>
@@ -59,6 +65,7 @@ export function AIImageSheet({
               prompt={promptText}
               setPromptText={setPromptText}
               setActiveTab={setActiveTab}
+              setIsGenerating={setIsGenerating}
             />
           </TabsContent>
 

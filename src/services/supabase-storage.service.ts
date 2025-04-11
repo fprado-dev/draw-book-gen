@@ -37,8 +37,7 @@ export const getPublicUrl = async (path: string) => {
 
   const publicUrl = supabase.storage
     .from('users-generated-images')
-    .getPublicUrl(`${user?.id}/${path}`
-    ).data.publicUrl;
+    .getPublicUrl(`${user?.id}/${path}`).data.publicUrl;
 
   return publicUrl;
 };

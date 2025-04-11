@@ -21,7 +21,10 @@ function TabGalleryImages({
     return (
       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="group flex flex-col gap-2 relative aspect-square overflow-hidden">
+          <div
+            key={index}
+            className="group relative flex aspect-square flex-col gap-2 overflow-hidden"
+          >
             <Skeleton className="h-full w-full animate-pulse" />
           </div>
         ))}
@@ -42,7 +45,7 @@ function TabGalleryImages({
         </div>
       )}
       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
-        {data?.map((image: { name: string; url: string; }, index: number) => (
+        {data?.map((image: { name: string; url: string }, index: number) => (
           <Card key={image.name} className="w-full gap-1 overflow-hidden p-1">
             <CardContent className="p-0">
               <div className="relative h-72 w-full">

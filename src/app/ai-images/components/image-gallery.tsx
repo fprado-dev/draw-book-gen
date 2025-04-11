@@ -5,7 +5,11 @@ import { CustomPagination } from '@/components/ui/custom-pagination';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useConfirmDialog } from '@/hooks/use-confirm-dialog';
-import { AIGalleryImage, deleteAIImage, getAIGalleryImages } from '@/services/ai-gallery.service';
+import {
+  AIGalleryImage,
+  deleteAIImage,
+  getAIGalleryImages,
+} from '@/services/ai-gallery.service';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
@@ -18,7 +22,10 @@ function ImageGallerySkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
-        <div key={index} className="group flex flex-col gap-2 relative aspect-square overflow-hidden">
+        <div
+          key={index}
+          className="group relative flex aspect-square flex-col gap-2 overflow-hidden"
+        >
           <Skeleton className="h-full w-full animate-pulse" />
         </div>
       ))}
@@ -28,7 +35,9 @@ function ImageGallerySkeleton() {
 
 export function ImageGallery() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedImage, setSelectedImage] = useState<AIGalleryImage | null>(null);
+  const [selectedImage, setSelectedImage] = useState<AIGalleryImage | null>(
+    null
+  );
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const queryClient = useQueryClient();
   const { confirm, ConfirmDialog } = useConfirmDialog();
@@ -70,10 +79,10 @@ export function ImageGallery() {
   };
 
   const handleDelete = async (image: AIGalleryImage): Promise<void> => {
-    console.log('handleDelete', image);
     const confirmed = await confirm({
       title: 'Delete Image',
-      description: 'Are you sure you want to delete this image? This action cannot be undone.',
+      description:
+        'Are you sure you want to delete this image? This action cannot be undone.',
       confirmText: 'Delete',
       cancelText: 'Cancel',
     });
@@ -96,7 +105,7 @@ export function ImageGallery() {
         {data.images.map((image: AIGalleryImage) => (
           <Card
             key={image.id}
-            className="group relative aspect-square overflow-hidden cursor-pointer"
+            className="group relative aspect-square cursor-pointer overflow-hidden"
             onClick={() => {
               setSelectedImage(image);
               setIsDetailOpen(true);
@@ -132,12 +141,15 @@ export function ImageGallery() {
         onDownload={handleDownload}
         onDelete={handleDelete}
       />
-      <ConfirmDialog options={{
-        title: 'Delete Image',
-        description: 'Are you sure you want to delete this image? This action cannot be undone.',
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
-      }} />
+      <ConfirmDialog
+        options={{
+          title: 'Delete Image',
+          description:
+            'Are you sure you want to delete this image? This action cannot be undone.',
+          confirmText: 'Delete',
+          cancelText: 'Cancel',
+        }}
+      />
     </>
   );
 }

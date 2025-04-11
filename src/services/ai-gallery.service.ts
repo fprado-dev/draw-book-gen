@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { createClient } from '@/utils/supabase/server';
 import { getPublicUrl } from './supabase-storage.service';
@@ -26,10 +26,11 @@ export const getAIGalleryImages = async ({
   images: AIGalleryImage[];
   totalCount: number;
 }> => {
-
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
   const offset = (page - 1) * limit;
@@ -41,13 +42,11 @@ export const getAIGalleryImages = async ({
       offset: offset,
       sortBy: { column: 'created_at', order: 'desc' },
     });
-  console.log(data);
   if (error) throw error;
 
   const images = await Promise.all(
     data.map(async (image) => {
-      let imageUrl = await getPublicUrl(image.name);
-
+      const imageUrl = await getPublicUrl(image.name);
 
       return {
         id: image.id,
@@ -82,7 +81,9 @@ export const getAIGalleryImages = async ({
 export const downloadAIImage = async (imageName: string): Promise<Blob> => {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
   const { data, error } = await supabase.storage
@@ -96,10 +97,15 @@ export const downloadAIImage = async (imageName: string): Promise<Blob> => {
 /**
  * Toggles favorite status for an AI-generated image
  */
-export const toggleImageFavorite = async (imageId: string, favorite: boolean): Promise<void> => {
+export const toggleImageFavorite = async (
+  imageId: string,
+  favorite: boolean
+): Promise<void> => {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
   const { error } = await supabase
@@ -117,7 +123,9 @@ export const toggleImageFavorite = async (imageId: string, favorite: boolean): P
 export const deleteAIImage = async (imageName: string): Promise<void> => {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
   const { error } = await supabase.storage

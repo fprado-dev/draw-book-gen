@@ -5,15 +5,9 @@ import { Button } from '@/components/ui/button';
 import { type ComponentProps } from 'react';
 import { useFormStatus } from 'react-dom';
 
-type Props = ComponentProps<typeof Button> & {
-  pendingText?: string;
-};
+type Props = ComponentProps<typeof Button> & {};
 
-export function LoadingButton({
-  children,
-  pendingText = 'Submitting...',
-  ...props
-}: Props) {
+export function LoadingButton({ children, ...props }: Props) {
   const { pending } = useFormStatus();
 
   return (
