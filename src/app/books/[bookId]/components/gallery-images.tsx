@@ -21,13 +21,12 @@ function TabGalleryImages({
     return (
       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
         {Array.from({ length: 6 }).map((_, index) => (
-          <Card key={index} className="w-full overflow-hidden">
-            <CardContent>
-              <div className="relative h-40">
-                <Skeleton className="h-full w-full rounded-lg" />
-              </div>
-            </CardContent>
-          </Card>
+          <div
+            key={index}
+            className="group relative flex aspect-square flex-col gap-2 overflow-hidden"
+          >
+            <Skeleton className="h-full w-full animate-pulse" />
+          </div>
         ))}
       </div>
     );

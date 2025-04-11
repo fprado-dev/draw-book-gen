@@ -1,11 +1,13 @@
+import CreatingLoadingAnimation from '@/app/books/[bookId]/components/animation-loading';
 import { mainQueryClient } from '@/components/providers';
-import { SubmitButton } from '@/components/submit-button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { createOutline } from '@/services/outlines.service';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 const quantities = [
   {
@@ -23,32 +25,37 @@ const quantities = [
 ];
 export function FormCreateOutline({ closeModal }: { closeModal: () => void }) {
   const [outlineQuantity, setOutlineQuantity] = useState('5');
+  const [outline, setOutlinePrompt] = useState('');
   const queryClient = useQueryClient(mainQueryClient);
 
-  const handleSubmit = (e: FormData) => {
-    const title = e.get('title') as string;
-    createOutline({
-      title,
-      outlineQuantity,
-    });
-    queryClient.invalidateQueries({ queryKey: ['outlines'] });
-    closeModal();
+  const outlineMutation = useMutation({
+    mutationFn: createOutline,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['outlines'] });
+      closeModal();
+    },
+    onError: () => {
+      toast.error('Failed to generate image. Please try again.');
+    },
+  });
+  const handleSubmit = () => {
+    outlineMutation.mutate({ title: outline, outlineQuantity });
   };
 
   return (
-    <form className="space-y-4">
+    <div className="space-y-4">
       <div>
-        <Label htmlFor="title" className="block text-sm font-medium">
-          Title
+        <Label htmlFor="outline" className="block text-sm font-medium">
+          Outline
         </Label>
         <div className="mt-1">
           <Input
             type="text"
-            name="title"
+            name="outline"
             className="text-xs placeholder:text-xs"
-            id="title"
-            placeholder="Book title"
-            autoComplete="title"
+            id="outline"
+            onChange={(e) => setOutlinePrompt(e.target.value)}
+            placeholder="Book Outline"
             required
           />
         </div>
@@ -80,14 +87,18 @@ export function FormCreateOutline({ closeModal }: { closeModal: () => void }) {
         </div>
       </div>
       <div>
-        <SubmitButton
+        <Button
           className="w-full"
-          pendingText="Creating..."
-          formAction={handleSubmit}
+          disabled={!prompt || outlineMutation.isPending}
+          onClick={handleSubmit}
         >
-          Create Outline
-        </SubmitButton>
+          {outlineMutation.isPending ? (
+            <CreatingLoadingAnimation isCreating={outlineMutation.isPending} />
+          ) : (
+            'Generate Outlines'
+          )}
+        </Button>
       </div>
-    </form>
+    </div>
   );
 }
