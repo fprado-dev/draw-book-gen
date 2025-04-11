@@ -88,7 +88,7 @@ export default function BookPages() {
       queryClient
         .invalidateQueries({ queryKey: ['pages-by-book-id'] })
         .finally(() => {
-          const updatedData = queryClient.getQueryData<{ pages: TPage[] }>([
+          const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>([
             'pages-by-book-id',
             params.bookId,
           ]);
@@ -96,8 +96,10 @@ export default function BookPages() {
           setSelectedPage(updatedData?.pages[updatedData.pages.length - 1]!);
         });
     },
-    onError: () => {
-      toast.error('Failed to create page');
+    onError: (error) => {
+      toast.error('Failed to create book.', {
+        description: error.message,
+      });
     },
   });
 
@@ -112,7 +114,7 @@ export default function BookPages() {
       queryClient
         .invalidateQueries({ queryKey: ['pages-by-book-id'] })
         .then(() => {
-          const updatedData = queryClient.getQueryData<{ pages: TPage[] }>([
+          const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>([
             'pages-by-book-id',
             params.bookId,
           ]);
@@ -141,7 +143,7 @@ export default function BookPages() {
         await queryClient.invalidateQueries({
           queryKey: ['pages-by-book-id', params.bookId],
         });
-        const updatedData = queryClient.getQueryData<{ pages: TPage[] }>([
+        const updatedData = queryClient.getQueryData<{ pages: TPage[]; }>([
           'pages-by-book-id',
           params.bookId,
         ]);

@@ -66,6 +66,7 @@ export default async function RootLayout({
         </ThemeProvider>
         <Toaster
           position="top-center"
+          richColors
           toastOptions={{
             closeButton: true,
           }}
