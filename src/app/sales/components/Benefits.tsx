@@ -1,6 +1,5 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { BadgeDollarSign, Bot, LucideTypeOutline, PencilRuler, Store, TypeOutline } from "lucide-react";
-import { useEffect, useState } from "react";
 
 export const Benefits = () => {
   // Container variants for staggered children animations
@@ -103,19 +102,19 @@ export const Benefits = () => {
 
   return (
     <section className="benefits-section h-screen">
-      <div className="container mx-auto px-4">
+      <div className="flex flex-col gap-8 mx-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-center mb-16"
+          className="text-center flex flex-col items-center justify-center gap-4"
         >
-          <AnimatedTitle />
+          <h2 className="text-4xl text-primary tracking-tighter font-bold">Why Choose us</h2>
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-xl text-gray-600 max-w-3xl mx-auto"
+            className="text-base text-muted-foreground max-w-3xl text-balance"
           >
             Transform your ideas into professional coloring books with our specialized AI technology.
             No design skills needed, just your creativity.
@@ -175,70 +174,6 @@ export const Benefits = () => {
 export default Benefits;
 
 
-// Component section with animated changing text
-const AnimatedTitle = () => {
-  const words = ["Aillustra", "Grow", "Profit", "Create", "Publish"];
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWordIndex((prevIndex: number) => (prevIndex + 1) % words.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Letter animation variants
-  const letterVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: (i: number) => ({
-      y: 0,
-      opacity: 1,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    }),
-    exit: (i: number) => ({
-      y: -20,
-      opacity: 0,
-      transition: {
-        delay: i * 0.03,
-        duration: 0.2,
-        ease: "easeIn"
-      }
-    })
-  };
-
-  return (
-    <h2 className="text-4xl w-full justify-center  flex gap-2 font-bold text-gray-800 mb-4">
-      <span className="text-primary"> Why Choose</span>
-      <span className="relative inline-block min-w-[180px] h-[50px] ">
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={words[currentWordIndex]}
-            className="absolute left-0 text-transparent bg-clip-text bg-gradient-to-r from-[var(--chart-1)] to-[var(--chart-2)]"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            {words[currentWordIndex].split("").map((letter, index) => (
-              <motion.span
-                key={`${letter}-${index}`}
-                custom={index}
-                variants={letterVariants}
-                style={{ display: "inline-block" }}
-              >
-                {letter}
-              </motion.span>
-            ))}
-          </motion.span>
-        </AnimatePresence>
-      </span>
-    </h2>
-  );
-};
 
 
 
