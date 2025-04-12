@@ -3,14 +3,7 @@
 import { useScroll, Variants } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect } from "react";
-import Benefits from "./components/Benefits";
-import { Demo } from "./components/Demo";
-import { FAQ } from "./components/FAQ";
-import { FinalCTA } from "./components/FinalCTA";
 import { HeroSection } from "./components/Hero";
-import { HowItWorks } from "./components/HowItWorks";
-import { Pricing } from "./components/Pricing";
-import TestimonialsPage from "./components/Testimonials";
 
 export default function Page() {
   const { setTheme } = useTheme();
@@ -70,13 +63,13 @@ export default function Page() {
   return (
     <div className="min-h-screen relative bg-primary-foreground bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
       <HeroSection />
-      <Benefits />
+      {/* <Benefits />
       <HowItWorks />
       <TestimonialsPage />
       <Demo />
       <Pricing />
       <FAQ />
-      <FinalCTA />
+      <FinalCTA /> */}
       {/* <Footer /> */}
     </div>
   );

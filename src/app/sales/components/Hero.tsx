@@ -105,64 +105,16 @@ export const HeroSection = () => {
       >
         {/* Logo with parallax effect */}
         <motion.div
-          className="flex flex-col items-center gap-8 justify-center w-full max-w-6xl mx-auto"
+          className="flex flex-col items-center gap-8 min-2xl:gap-12 justify-center w-full max-w-6xl mx-auto"
           variants={logoVariant}
         >
-          <motion.div
-            // style={{
-            //   x: mousePosition.x * 50,
-            //   y: mousePosition.y * 50
-            // }}
-            className="relative flex items-center justify-center overflow-hidden w-full max-w-3xs md:max-w-sm">
-            <Image
-              src={LogoUrl}
-              alt="Aillustra Logo"
-              width={420}
-              height={120}
-              className="relative z-10 w-full h-auto"
-            />
-          </motion.div>
+          {renderLogo(mousePosition)}
 
 
-          <motion.p
-            variants={textVariant}
-            className="text-sm sm:text-xl md:text-2xl text-muted-foreground text-center max-w-2xl px-4"
-          >
-            Transform your ideas into magical illustrations with AI - Your creative journey starts here!
-
-          </motion.p>
+          {renderHeadline()}
 
           {/* CTA buttons with hover animations */}
-          <div className='flex gap-4 w-full justify-center'>
-            <motion.div
-
-              className="flex sm:flex-row gap-4"
-            >
-              <motion.button
-                className="cursor-pointer px-4 sm:px-8 py-2 sm:py-2 bg-primary text-white rounded-full shadow-lg flex items-center justify-center min-w-[100px]"
-                variants={buttonsVariant}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Wand2 className="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
-                <span className='text-xs'>Start Creating Now</span>
-              </motion.button>
-            </motion.div>
-            <motion.div
-              className="flex sm:flex-row gap-4"
-
-            >
-              <motion.button
-                variants={buttonsVariant}
-                className="cursor-pointer  px-4 sm:px-8 py-2 sm:py-2 border-primary border bg-transparent text-primary rounded-full shadow-lg flex items-center justify-center min-w-[100px]"
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <Video className="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
-                <span className='text-xs'>Watch Demo</span>
-              </motion.button>
-            </motion.div>
-          </div>
+          {renderCTA()}
         </motion.div>
 
 
@@ -190,32 +142,7 @@ export const HeroSection = () => {
 
 
         {/* Floating features */}
-        <motion.div
-          variants={benefitsVariant}
-          className="flex flex-col items-center gap-4 justify-center w-full max-w-6xl mx-auto px-4">
-          <motion.div
-            className="flex flex-wrap justify-center gap-2 md:gap-4 max-w-3xl"
-
-          >
-            {[
-              { text: "AI-Powered Design", icon: <Sparkles className='w-3 h-3 sm:w-4 sm:h-4' /> },
-              { text: "KDP Ready", icon: <Store className='w-3 h-3 sm:w-4 sm:h-4' /> },
-              { text: "$10,000+ Monthly Potential", icon: <BadgeDollarSign className='w-3 h-3 sm:w-4 sm:h-4' /> }
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                className="bg-white/80 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full shadow-md text-primary flex items-center text-xs sm:text-base"
-
-
-              >
-                <span className="mr-2">{feature.icon}</span>
-                <span className="font-medium">{feature.text}</span>
-              </motion.div>
-            ))}
-
-          </motion.div>
-
-        </motion.div>
+        <FloatingFeatures />
 
         {/* Scroll indicator */}
         <motion.div
@@ -296,4 +223,97 @@ const scrollIndicatorVariant: Variants = {
   },
 };
 
+
+function renderCTA() {
+  return <div className='flex gap-4 w-full justify-center'>
+    <motion.div
+
+      className="flex sm:flex-row gap-4"
+    >
+      <motion.button
+        className="cursor-pointer px-4 sm:px-8 py-2 sm:py-2 bg-primary text-white rounded-full shadow-lg flex items-center justify-center min-w-[100px] "
+        variants={buttonsVariant}
+        whileHover="hover"
+        whileTap="tap"
+      >
+        <Wand2 className="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
+        <span className='text-xs min-2xl:text-sm'>Start Creating Now</span>
+      </motion.button>
+    </motion.div>
+    <motion.div
+      className="flex sm:flex-row gap-4"
+
+    >
+      <motion.button
+        variants={buttonsVariant}
+        className="cursor-pointer  px-4 sm:px-8 py-2 sm:py-2 border-primary border bg-transparent text-primary rounded-full shadow-lg flex items-center justify-center min-w-[100px]"
+        whileHover="hover"
+        whileTap="tap"
+      >
+        <Video className="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
+        <span className='text-xs min-2xl:text-sm'>Watch Demo</span>
+      </motion.button>
+    </motion.div>
+  </div>;
+}
+
+function renderHeadline() {
+  return <motion.p
+    variants={textVariant}
+    className="text-muted-foreground text-center px-4 text-pretty tracking-tighter text-sm lg:text-base max-w-sm sm:max-w-lg md:max-w-lg lg:max-w-xl   "
+  >
+    Unleash your creativity with AI-powered illustrations.
+    Create stunning coloring books in minutes, not hours.
+    Turn your artistic vision into profitable books today!
+
+  </motion.p>;
+}
+
+function renderLogo(mousePosition: { x: number; y: number; }) {
+  return (
+    <motion.div
+      style={{
+        x: mousePosition.x * 50,
+        y: mousePosition.y * 50
+      }}
+      className='relative w-full h-20 max-w-3xs lg:max-w-2xs lg:h-24 xl:max-w-2xs xl:h-24'
+    // className="w-full max-sm:max-wxs sm:bg-purple-200 md:bg-amber-400 lg:bg-blue-200 xl:bg-amber-700 2xl:bg-green-300 "
+    >
+      <Image
+        src={LogoUrl}
+        alt="Aillustra Logo"
+        fill
+        priority
+        sizes='(100vw: 100%)'
+      // className="relative z-10"
+      />
+    </motion.div>
+  );
+}
+
+function FloatingFeatures() {
+  return (
+    <motion.div
+      className="flex w-full flex-wrap items-center justify-center  gap-2"
+      variants={benefitsVariant}
+    >
+      {[
+        { text: "AI-Powered Design", icon: <Sparkles className='w-3 h-3 sm:w-4 sm:h-4' /> },
+        { text: "KDP Ready", icon: <Store className='w-3 h-3 sm:w-4 sm:h-4' /> },
+        { text: "$10k+ Monthly Potential", icon: <BadgeDollarSign className='w-3 h-3 sm:w-4 sm:h-4' /> }
+      ].map((feature, index) => (
+        <motion.div
+          key={index}
+          className="bg-white/80 backdrop-blur-sm rounded-full shadow-md text-primary flex items-center px-3 py-2 text-xs"
+
+
+        >
+          <span className="mr-2">{feature.icon}</span>
+          <span className="font-medium">{feature.text}</span>
+        </motion.div>
+      ))}
+
+    </motion.div>
+  );
+}
 
