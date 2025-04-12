@@ -78,7 +78,7 @@ export const HowItWorks = () => {
   }, [isInView, timelineControls, stepsControls]);
 
   return (
-    <section className="py-20 min-h-screen bg-gradient-to-b from-gray-50 to-white" ref={timelineRef}>
+    <section className="h-screen" ref={timelineRef}>
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

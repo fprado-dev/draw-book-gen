@@ -102,7 +102,7 @@ export const Benefits = () => {
   ];
 
   return (
-    <section className="benefits-section py-16 bg-gradient-to-b from-white to-blue-50">
+    <section className="benefits-section h-screen">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

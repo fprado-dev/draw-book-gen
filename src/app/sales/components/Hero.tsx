@@ -53,8 +53,8 @@ const thumbnails = [
 ];
 
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ChevronDown, Sparkles, Video, Wand2 } from 'lucide-react';
+import { motion, useScroll, Variants } from 'framer-motion';
+import { BadgeDollarSign, ChevronDown, Sparkles, Store, Video, Wand2 } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Marquee from 'react-fast-marquee';
@@ -62,12 +62,6 @@ import Marquee from 'react-fast-marquee';
 export const HeroSection = () => {
   // For scroll progress tracking
   const { scrollYProgress } = useScroll();
-  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
-
-  // For animated text
-  const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const animatedTexts = ["Imagination", "Creativity", "Artistry", "Passion"];
 
   // For mouse parallax effect
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -88,20 +82,18 @@ export const HeroSection = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Cycle through animated text
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTextIndex(prev => (prev + 1) % animatedTexts.length);
-    }, 3000);
 
-    return () => clearInterval(interval);
-  }, []);
+
 
   return (
-    <section className="relative min-h-screen overflow-hidde">
+    <motion.section
+      initial="offscreen"
+      whileInView="onscreen"
+      viewport={{ amount: 0.3 }}
+      className="relative h-screen w-full">
       {/* Progress indicator */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-[#7f4a88] origin-left z-50"
+        className="fixed top-0 left-0 right-0 h-1 bg-primary origin-left z-50"
         style={{ scaleX: scrollYProgress }}
       />
 
@@ -109,145 +101,199 @@ export const HeroSection = () => {
 
       {/* Main content */}
       <motion.div
-        className="relative z-10 flex flex-col gap-4 items-center justify-center min-h-screen px-4"
+        className="relative h-full flex flex-col items-center justify-evenly"
       >
         {/* Logo with parallax effect */}
         <motion.div
-          className=" flex flex-col items-center justify-center gap-8"
-          style={{
-            x: mousePosition.x * 20,
-            y: mousePosition.y * 20
-          }}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="flex flex-col items-center gap-8 justify-center w-full max-w-6xl mx-auto"
+          variants={logoVariant}
         >
-          <div className="relative flex items-center justify-center overflow-hidden">
+          <motion.div
+            // style={{
+            //   x: mousePosition.x * 50,
+            //   y: mousePosition.y * 50
+            // }}
+            className="relative flex items-center justify-center overflow-hidden w-full max-w-3xs md:max-w-sm">
             <Image
-              src={LogoUrl} // Replace with your logo path
+              src={LogoUrl}
               alt="Aillustra Logo"
               width={420}
               height={120}
-              className="relative z-10"
+              className="relative z-10 w-full h-auto"
             />
-          </div>
+          </motion.div>
+
 
           <motion.p
-            className="text-xl md:text-2xl text-gray-600"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            variants={textVariant}
+            className="text-sm sm:text-xl md:text-2xl text-muted-foreground text-center max-w-2xl px-4"
           >
-            No design skills required. Create professional coloring books with AI in minutes.
+            Transform your ideas into magical illustrations with AI - Your creative journey starts here!
+
           </motion.p>
 
-          <div className='flex gap-4'>
-            {/* CTA buttons with hover animations */}
+          {/* CTA buttons with hover animations */}
+          <div className='flex gap-4 w-full justify-center'>
             <motion.div
-              className="flex flex-col sm:flex-row gap-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+
+              className="flex sm:flex-row gap-4"
             >
               <motion.button
-                className="px-8 py-4 bg-[#7f4a88] text-white rounded-full shadow-lg flex items-center justify-center"
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 10px 25px rgba(127, 74, 136, 0.3)"
-                }}
-                whileTap={{ scale: 0.98 }}
+                className="cursor-pointer px-4 sm:px-8 py-2 sm:py-2 bg-primary text-white rounded-full shadow-lg flex items-center justify-center min-w-[100px]"
+                variants={buttonsVariant}
+                whileHover="hover"
+                whileTap="tap"
               >
-                <Wand2 className="mr-2" size={20} />
-                <span>Start Creating Now</span>
+                <Wand2 className="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
+                <span className='text-xs'>Start Creating Now</span>
               </motion.button>
-
-
             </motion.div>
             <motion.div
-              className="flex flex-col sm:flex-row gap-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+              className="flex sm:flex-row gap-4"
+
             >
               <motion.button
-                className="px-8 py-4 border border-primary bg-primary-foreground text-primary rounded-full shadow-lg flex items-center justify-center"
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 10px 25px rgba(127, 74, 136, 0.3)"
-                }}
-                whileTap={{ scale: 0.98 }}
+                variants={buttonsVariant}
+                className="cursor-pointer  px-4 sm:px-8 py-2 sm:py-2 border-primary border bg-transparent text-primary rounded-full shadow-lg flex items-center justify-center min-w-[100px]"
+                whileHover="hover"
+                whileTap="tap"
               >
-                <Video className="mr-2" size={20} />
-                <span>Watch Demo</span>
+                <Video className="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
+                <span className='text-xs'>Watch Demo</span>
               </motion.button>
-
-
             </motion.div>
           </div>
         </motion.div>
 
 
-        <motion.div className='mt-24' initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+        {/* Thumbnails with parallax effect */}
+        <motion.div
+          className='w-full'
+          variants={thumbnailsVariant}
         >
-
-
-          <Marquee autoFill className='' pauseOnHover speed={60} gradient={true} direction="left">
+          <Marquee autoFill pauseOnHover speed={60} gradient={true} direction="left">
             {thumbnails.map((img, i) => (
-              <div key={`left-${i}`} className="mx-2">
+              <motion.div
+
+                key={`left-${i}`} className="mx-2">
                 <Image
                   src={img.image}
                   alt={`Thumbnail ${i}`}
-                  width={180}
-                  height={280}
-                  className="rounded-lg border"
+                  width={140}
+                  height={220}
+                  className="rounded-lg border sm:w-[160px] sm:h-[250px] md:w-[180px] md:h-[280px] object-cover"
                 />
-              </div>
+              </motion.div>
             ))}
           </Marquee>
         </motion.div>
 
 
         {/* Floating features */}
-        <div className="absolute top-10 left-0 right-0 flex flex-col items-center gap-4 justify-center">
+        <motion.div
+          variants={benefitsVariant}
+          className="flex flex-col items-center gap-4 justify-center w-full max-w-6xl mx-auto px-4">
           <motion.div
-            className="flex flex-wrap justify-center gap-4 max-w-3xl px-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
+            className="flex flex-wrap justify-center gap-2 md:gap-4 max-w-3xl"
+
           >
             {[
-              { text: "AI-Powered Design", icon: <Sparkles size={16} /> },
-              { text: "KDP Ready", icon: <Sparkles size={16} /> },
-              { text: "$10,000+ Monthly Potential", icon: <Sparkles size={16} /> }
+              { text: "AI-Powered Design", icon: <Sparkles className='w-3 h-3 sm:w-4 sm:h-4' /> },
+              { text: "KDP Ready", icon: <Store className='w-3 h-3 sm:w-4 sm:h-4' /> },
+              { text: "$10,000+ Monthly Potential", icon: <BadgeDollarSign className='w-3 h-3 sm:w-4 sm:h-4' /> }
             ].map((feature, index) => (
               <motion.div
                 key={index}
-                className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md text-[#7f4a88] flex items-center"
-                whileHover={{ y: -5, boxShadow: "0 10px 25px rgba(127, 74, 136, 0.2)" }}
+                className="bg-white/80 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full shadow-md text-primary flex items-center text-xs sm:text-base"
+
+
               >
                 <span className="mr-2">{feature.icon}</span>
                 <span className="font-medium">{feature.text}</span>
               </motion.div>
             ))}
+
           </motion.div>
 
-        </div>
+        </motion.div>
 
         {/* Scroll indicator */}
         <motion.div
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-[#7f4a88]"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+          variants={scrollIndicatorVariant}
+          initial="offscreen"
+          whileInView="onscreen"
+          viewport={{ amount: 0.3 }}
+          className="text-primary animate-bounce"
         >
-          <ChevronDown size={24} />
+          <ChevronDown className='w-8 h-8 text-primary' />
         </motion.div>
+
       </motion.div>
-    </section>
+
+    </motion.section>
   );
 };
 
 
+
+const logoVariant: Variants = {
+  offscreen: {
+    opacity: 0, y: -100
+  },
+  onscreen: {
+    opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" }
+  },
+};
+
+const textVariant: Variants = {
+  offscreen: {
+    opacity: 0, y: -20
+  },
+  onscreen: {
+    opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" }
+  },
+};
+
+const buttonsVariant: Variants = {
+  offscreen: {
+    opacity: 0, y: -10
+  },
+  onscreen: {
+    opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut", delay: 0.3 }
+  },
+  hover: {
+    scale: 1.05, transition: { duration: 0.2, ease: "easeInOut" }
+  },
+  tap: {
+    scale: 0.95, transition: { duration: 0.1, ease: "easeInOut" }
+  }
+};
+
+const thumbnailsVariant: Variants = {
+  offscreen: {
+    opacity: 0, y: -10
+  },
+  onscreen: {
+    opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut", delay: 0.6 }
+  },
+};
+
+const benefitsVariant: Variants = {
+  offscreen: {
+    opacity: 0, y: -50
+  },
+  onscreen: {
+    opacity: 1, y: 0, transition: { duration: 1.5, ease: "easeOut", delay: 0.3 }
+  },
+};
+
+const scrollIndicatorVariant: Variants = {
+  offscreen: {
+    opacity: 0, y: -50
+  },
+  onscreen: {
+    opacity: 1, y: 0, transition: { duration: 1.5, ease: "easeOut", delay: 0.3 }
+  },
+};
 
 
