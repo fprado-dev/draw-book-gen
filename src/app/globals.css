@@ -40,6 +40,18 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+
+  --color-affair-50: #fbf7fc;
+  --color-affair-100: #f5eff8;
+  --color-affair-200: #ecdef0;
+  --color-affair-300: #ddc3e4;
+  --color-affair-400: #c99fd3;
+  --color-affair-500: #b078bd;
+  --color-affair-600: #9459a0;
+  --color-affair-700: #7f4a88;
+  --color-affair-800: #653c6c;
+  --color-affair-900: #56355a;
+  --color-affair-950: #341a38;
 }
 
 .dark {
@@ -112,6 +124,19 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Add affair colors to theme */
+  --color-affair-50: var(--color-affair-50);
+  --color-affair-100: var(--color-affair-100);
+  --color-affair-200: var(--color-affair-200);
+  --color-affair-300: var(--color-affair-300);
+  --color-affair-400: var(--color-affair-400);
+  --color-affair-500: var(--color-affair-500);
+  --color-affair-600: var(--color-affair-600);
+  --color-affair-700: var(--color-affair-700);
+  --color-affair-800: var(--color-affair-800);
+  --color-affair-900: var(--color-affair-900);
+  --color-affair-950: var(--color-affair-950);
 }
 
 @layer base {
@@ -121,6 +146,141 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Define affair color utility classes */
+  .bg-affair-50 {
+    background-color: var(--color-affair-50);
+  }
+
+  .bg-affair-100 {
+    background-color: var(--color-affair-100);
+  }
+
+  .bg-affair-200 {
+    background-color: var(--color-affair-200);
+  }
+
+  .bg-affair-300 {
+    background-color: var(--color-affair-300);
+  }
+
+  .bg-affair-400 {
+    background-color: var(--color-affair-400);
+  }
+
+  .bg-affair-500 {
+    background-color: var(--color-affair-500);
+  }
+
+  .bg-affair-600 {
+    background-color: var(--color-affair-600);
+  }
+
+  .bg-affair-700 {
+    background-color: var(--color-affair-700);
+  }
+
+  .bg-affair-800 {
+    background-color: var(--color-affair-800);
+  }
+
+  .bg-affair-900 {
+    background-color: var(--color-affair-900);
+  }
+
+  .bg-affair-950 {
+    background-color: var(--color-affair-950);
+  }
+
+  /* Text color utilities */
+  .text-affair-50 {
+    color: var(--color-affair-50);
+  }
+
+  .text-affair-100 {
+    color: var(--color-affair-100);
+  }
+
+  .text-affair-200 {
+    color: var(--color-affair-200);
+  }
+
+  .text-affair-300 {
+    color: var(--color-affair-300);
+  }
+
+  .text-affair-400 {
+    color: var(--color-affair-400);
+  }
+
+  .text-affair-500 {
+    color: var(--color-affair-500);
+  }
+
+  .text-affair-600 {
+    color: var(--color-affair-600);
+  }
+
+  .text-affair-700 {
+    color: var(--color-affair-700);
+  }
+
+  .text-affair-800 {
+    color: var(--color-affair-800);
+  }
+
+  .text-affair-900 {
+    color: var(--color-affair-900);
+  }
+
+  .text-affair-950 {
+    color: var(--color-affair-950);
+  }
+
+  /* Border color utilities */
+  .border-affair-50 {
+    border-color: var(--color-affair-50);
+  }
+
+  .border-affair-100 {
+    border-color: var(--color-affair-100);
+  }
+
+  .border-affair-200 {
+    border-color: var(--color-affair-200);
+  }
+
+  .border-affair-300 {
+    border-color: var(--color-affair-300);
+  }
+
+  .border-affair-400 {
+    border-color: var(--color-affair-400);
+  }
+
+  .border-affair-500 {
+    border-color: var(--color-affair-500);
+  }
+
+  .border-affair-600 {
+    border-color: var(--color-affair-600);
+  }
+
+  .border-affair-700 {
+    border-color: var(--color-affair-700);
+  }
+
+  .border-affair-800 {
+    border-color: var(--color-affair-800);
+  }
+
+  .border-affair-900 {
+    border-color: var(--color-affair-900);
+  }
+
+  .border-affair-950 {
+    border-color: var(--color-affair-950);
   }
 }
 
