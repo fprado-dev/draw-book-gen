@@ -1,11 +1,11 @@
-import { motion, Variants } from "framer-motion";
+import { motion, Variants } from 'framer-motion';
 import {
   BookOpen,
   BotIcon,
   Keyboard,
   ShoppingBag,
-  Sliders
-} from "lucide-react";
+  Sliders,
+} from 'lucide-react';
 
 export const HowItWorks = () => {
   // Header variants
@@ -16,9 +16,9 @@ export const HowItWorks = () => {
       y: 0,
       transition: {
         duration: 0.7,
-        delay: 0.1
-      }
-    }
+        delay: 0.1,
+      },
+    },
   };
 
   // Floating background shapes
@@ -30,9 +30,9 @@ export const HowItWorks = () => {
       transition: {
         duration: 2,
         repeat: Infinity,
-        repeatType: "reverse"
-      }
-    }
+        repeatType: 'reverse',
+      },
+    },
   };
 
   return (
@@ -40,26 +40,26 @@ export const HowItWorks = () => {
       initial="offscreen"
       whileInView="onscreen"
       viewport={{ amount: 0.1 }}
-      className="howitworks-section min-h-screen flex items-center justify-center py-10 relative overflow-hidden"
+      className="howitworks-section relative flex min-h-screen items-center justify-center overflow-hidden py-10"
     >
       {/* Animated background shapes */}
       <motion.div
-        className="absolute top-9 left-10 w-64 h-64 rounded-full bg-affair-200 blur-3xl"
+        className="bg-affair-200 absolute left-10 top-9 h-64 w-64 rounded-full blur-3xl"
         variants={shapeVariants}
       />
       <motion.div
-        className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-affair-300 blur-3xl"
+        className="bg-affair-300 absolute bottom-20 right-10 h-80 w-80 rounded-full blur-3xl"
         variants={shapeVariants}
         transition={{ delay: 0.5 }}
       />
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container relative z-10 mx-auto px-4">
         <motion.div
           variants={headerVariants}
-          className="text-center flex flex-col items-center justify-center gap-6 mb-16"
+          className="mb-16 flex flex-col items-center justify-center gap-6 text-center"
         >
           <motion.h2
-            className="text-4xl md:text-6xl lg:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-affair-700 to-affair-500 tracking-tight px-4"
+            className="from-affair-700 to-affair-500 bg-gradient-to-r bg-clip-text px-4 text-4xl font-extrabold tracking-tight text-transparent md:text-6xl lg:text-8xl"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.3 }}
@@ -73,15 +73,15 @@ export const HowItWorks = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ amount: 0.3 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-pretty text-sm md:text-lg text-affair-800 max-w-md md:max-w-2xl leading-relaxed"
-
+            className="text-affair-800 max-w-md text-pretty text-sm leading-relaxed md:max-w-2xl md:text-lg"
           >
-            Unleash your creativity into stunning coloring books with our cutting-edge AI technology.
-            watch your ideas transform into professional designs instantly.
+            Unleash your creativity into stunning coloring books with our
+            cutting-edge AI technology. watch your ideas transform into
+            professional designs instantly.
           </motion.p>
 
           <motion.div
-            className="w-24 h-1 bg-gradient-to-r from-affair-700 to-affair-500 rounded-full mt-2"
+            className="from-affair-700 to-affair-500 mt-2 h-1 w-24 rounded-full bg-gradient-to-r"
             initial={{ width: 0 }}
             whileInView={{ width: 96 }}
             viewport={{ amount: 0.3 }}
@@ -90,9 +90,14 @@ export const HowItWorks = () => {
         </motion.div>
 
         {/* Bento Grid with Masonry Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10 max-w-7xl mx-auto py-0">
+        <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-4 py-0 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {steps.map((step, index) => (
-            <Step key={step.title} size={steps.length} {...step} index={index} />
+            <Step
+              key={step.title}
+              size={steps.length}
+              {...step}
+              index={index}
+            />
           ))}
         </div>
       </div>
@@ -102,47 +107,47 @@ export const HowItWorks = () => {
 
 const steps = [
   {
-    title: "Describe Your Vision",
+    title: 'Describe Your Vision',
     description:
-      "Enter a detailed description of the coloring book you want to create. Specify themes, styles, and target audience.",
+      'Enter a detailed description of the coloring book you want to create. Specify themes, styles, and target audience.',
     icon: <Keyboard />,
     hasStackedCards: true,
   },
   {
-    title: "AI Generation",
+    title: 'AI Generation',
     description:
-      "Our Aillustra-dev AI model processes your description and generates professional coloring book illustrations with clean, well-defined lines.",
+      'Our Aillustra-dev AI model processes your description and generates professional coloring book illustrations with clean, well-defined lines.',
     icon: <BotIcon />,
     hasStackedCards: false,
   },
   {
-    title: "Review & Refine",
+    title: 'Review & Refine',
     description:
       "Preview your generated illustrations, make adjustments, and regenerate any pages until you're completely satisfied with the results.",
     icon: <Sliders />,
     hasStackedCards: false,
   },
   {
-    title: "Compile Your Book",
+    title: 'Compile Your Book',
     description:
-      "Arrange your illustrations, add a cover page, and organize your coloring book with our intuitive drag-and-drop interface.",
+      'Arrange your illustrations, add a cover page, and organize your coloring book with our intuitive drag-and-drop interface.',
     icon: <BookOpen />,
     hasStackedCards: false,
   },
   {
-    title: "Publish & Distribute",
+    title: 'Publish & Distribute',
     description:
-      "Export your coloring book in print-ready formats optimized for Amazon KDP and other publishing platforms with a single click.",
+      'Export your coloring book in print-ready formats optimized for Amazon KDP and other publishing platforms with a single click.',
     icon: <ShoppingBag />,
     hasStackedCards: true,
   },
   {
-    title: "Distribute & Sell",
+    title: 'Distribute & Sell',
     description:
-      "Once your coloring book is published, you can distribute it through various channels, including Amazon KDP, bookstores, and online platforms.",
+      'Once your coloring book is published, you can distribute it through various channels, including Amazon KDP, bookstores, and online platforms.',
     icon: <ShoppingBag />,
     hasStackedCards: false,
-  }
+  },
 ];
 
 const Step = ({
@@ -164,10 +169,10 @@ const Step = ({
       opacity: 0,
       y: 50,
     },
-    onscreen: (delay: number) => ({
+    onscreen: () => ({
       opacity: 1,
       y: 0,
-    })
+    }),
   };
 
   return (
@@ -177,19 +182,19 @@ const Step = ({
       whileInView="onscreen"
       viewport={{ amount: 0.1 }}
       custom={index * 0.1}
-      className="flex flex-col gap-8 md:gap-16 border p-4 md:p-6 relative group/feature transition-all duration-200 hover:shadow-lg bg-white overflow-x-hidden"
+      className="group/feature relative flex flex-col gap-8 overflow-x-hidden border bg-white p-4 transition-all duration-200 hover:shadow-lg md:gap-16 md:p-6"
     >
       <div>
-        <div className="mb-4 relative z-10 text-[#7f4a88] dark:text-[#e39774]">
+        <div className="relative z-10 mb-4 text-[#7f4a88] dark:text-[#e39774]">
           {icon}
         </div>
-        <div className="text-lg font-bold mb-2 relative z-10">
-          <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-[#7f4a88] dark:bg-[#e39774] group-hover/feature:bg-[#e39774] dark:group-hover/feature:bg-[#7f4a88] transition-all duration-200 origin-center" />
-          <span className="group-hover/feature:translate-x-2 pl-4 transition duration-200 inline-block text-neutral-800 dark:text-neutral-100">
+        <div className="relative z-10 mb-2 text-lg font-bold">
+          <div className="absolute inset-y-0 left-0 h-6 w-1 origin-center rounded-br-full rounded-tr-full bg-[#7f4a88] transition-all duration-200 group-hover/feature:h-8 group-hover/feature:bg-[#e39774] dark:bg-[#e39774] dark:group-hover/feature:bg-[#7f4a88]" />
+          <span className="inline-block pl-4 text-neutral-800 transition duration-200 group-hover/feature:translate-x-2 dark:text-neutral-100">
             {index + 1}. {title}
           </span>
         </div>
-        <p className="text-sm text-neutral-600 dark:text-neutral-300 relative z-10">
+        <p className="relative z-10 text-sm text-neutral-600 dark:text-neutral-300">
           {description}
         </p>
       </div>

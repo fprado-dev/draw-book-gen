@@ -63,13 +63,14 @@ export function FormCreateBook({ closeModal }: TFormCreateBook) {
   const queryClient = useQueryClient(mainQueryClient);
 
   const createBookMutation = useMutation({
-    mutationFn: (e: FormData) => onCreateBook(
-      e,
-      status as TBookStatus,
-      paperColor as TBookPaperColor,
-      bookType as TBookType,
-      unit as TBookMeasurementUnit
-    ),
+    mutationFn: (e: FormData) =>
+      onCreateBook(
+        e,
+        status as TBookStatus,
+        paperColor as TBookPaperColor,
+        bookType as TBookType,
+        unit as TBookMeasurementUnit
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] });
       closeModal();

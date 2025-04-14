@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'avatar.iran.liara.run',
-      }
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

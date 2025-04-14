@@ -24,7 +24,7 @@ export function Navigation() {
       setIsScrolled(window.scrollY > 50);
 
       // Find the current section
-      const sections = menuItems.map(item => item.id);
+      const sections = menuItems.map((item) => item.id);
       for (const section of sections) {
         const element = document.getElementById(section);
         if (element) {
@@ -46,9 +46,9 @@ export function Navigation() {
       <motion.nav
         initial={{ y: 0, opacity: 0, transition: { duration: 1 } }}
         animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
-        className="fixed top-2 left-1/2 -translate-x-1/2 z-50"
+        className="fixed left-1/2 top-2 z-50 -translate-x-1/2"
       >
-        <div className="flex items-center gap-4 p-2 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg">
+        <div className="flex items-center gap-4 rounded-full border border-white/20 bg-white/10 p-2 shadow-lg backdrop-blur-lg">
           {menuItems.map((item) => (
             <ScrollLink
               key={item.id}
@@ -57,23 +57,26 @@ export function Navigation() {
               smooth={true}
               offset={0}
               duration={500}
-              className="relative group"
+              className="group relative"
             >
               <div
-                className={`w-2 h-2 rounded-full flex items-center justify-center transition-all duration-300
-                  ${activeSection === item.id ? 'bg-primary shadow-lg scale-110' : 'bg-white/20 hover:bg-white/30'}
+                className={`flex h-2 w-2 items-center justify-center rounded-full transition-all duration-300
+                  ${activeSection === item.id ? 'bg-primary scale-110 shadow-lg' : 'bg-white/20 hover:bg-white/30'}
                   cursor-pointer touch-manipulation`}
               >
-                <div className={`w-2 h-2 rounded-full ${activeSection === item.id ? 'bg-primary' : 'bg-affair-400'}`} />
+                <div
+                  className={`h-2 w-2 rounded-full ${activeSection === item.id ? 'bg-primary' : 'bg-affair-400'}`}
+                />
               </div>
-              <div className="absolute left-full ml-2 py-1 px-2 rounded bg-white/10 backdrop-blur-lg
-                opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                whitespace-nowrap text-sm pointer-events-none">
+              <div
+                className="pointer-events-none absolute left-full ml-2 whitespace-nowrap rounded bg-white/10 px-2
+                py-1 text-sm opacity-0 backdrop-blur-lg
+                transition-opacity duration-200 group-hover:opacity-100"
+              >
                 {item.label}
               </div>
             </ScrollLink>
           ))}
-
         </div>
       </motion.nav>
     );
@@ -83,7 +86,7 @@ export function Navigation() {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-affair-50/20 backdrop-blur-2xl shadow-sm' : 'bg-transparent'}`}
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-affair-50/20 shadow-sm backdrop-blur-2xl' : 'bg-transparent'}`}
     >
       <div className="container mx-auto px-4 py-4">
         <ul className="flex items-center justify-center space-x-8">
@@ -96,16 +99,14 @@ export function Navigation() {
                 activeClass="active"
                 offset={0}
                 duration={500}
-                className={`cursor-pointer text-sm font-medium transition-colors hover:text-primary ${activeSection === item.id ? 'text-primary' : 'text-muted-foreground'}`}
+                className={`hover:text-primary cursor-pointer text-sm font-medium transition-colors ${activeSection === item.id ? 'text-primary' : 'text-muted-foreground'}`}
               >
                 {item.label}
               </ScrollLink>
             </li>
           ))}
-
         </ul>
       </div>
     </motion.nav>
   );
-
 }
