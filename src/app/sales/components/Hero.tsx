@@ -53,20 +53,19 @@ const thumbnails = [
 ];
 
 
-import { motion, useScroll, Variants } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { motion, Variants } from 'framer-motion';
 import { BadgeDollarSign, ChevronDown, Sparkles, Store, Video, Wand2 } from 'lucide-react';
 import Image from 'next/image';
+import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Marquee from 'react-fast-marquee';
 
 export const HeroSection = () => {
-  // For scroll progress tracking
-  const { scrollYProgress } = useScroll();
 
-  // For mouse parallax effect
+
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Thumbnail data
 
 
   // Update mouse position for parallax effect
@@ -91,11 +90,7 @@ export const HeroSection = () => {
       whileInView="onscreen"
       viewport={{ amount: 0.3 }}
       className="relative h-screen w-full">
-      {/* Progress indicator */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-primary origin-left z-50"
-        style={{ scaleX: scrollYProgress }}
-      />
+
 
 
 
@@ -235,6 +230,7 @@ function renderCTA() {
         variants={buttonsVariant}
         whileHover="hover"
         whileTap="tap"
+        onClick={() => redirect("/sign-in")}
       >
         <Wand2 className="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
         <span className='text-xs min-2xl:text-sm'>Start Creating Now</span>
@@ -260,7 +256,7 @@ function renderCTA() {
 function renderHeadline() {
   return <motion.p
     variants={textVariant}
-    className="text-muted-foreground text-center px-4 text-pretty tracking-tighter text-sm lg:text-base max-w-sm sm:max-w-lg md:max-w-lg lg:max-w-xl   "
+    className="text-muted-foreground text-center px-4 text-pretty tracking-tighter text-sm lg:text-lg max-w-sm sm:max-w-lg md:max-w-lg lg:max-w-2xl   "
   >
     Unleash your creativity with AI-powered illustrations.
     Create stunning coloring books in minutes, not hours.
@@ -270,14 +266,14 @@ function renderHeadline() {
 }
 
 function renderLogo(mousePosition: { x: number; y: number; }) {
+  const isMobile = useIsMobile();
   return (
     <motion.div
-      style={{
+      style={!isMobile ? {
         x: mousePosition.x * 50,
         y: mousePosition.y * 50
-      }}
-      className='relative w-full h-20 max-w-3xs lg:max-w-2xs lg:h-24 xl:max-w-2xs xl:h-24'
-    // className="w-full max-sm:max-wxs sm:bg-purple-200 md:bg-amber-400 lg:bg-blue-200 xl:bg-amber-700 2xl:bg-green-300 "
+      } : {}}
+      className='relative w-full h-20 max-w-3xs lg:max-w-2xs lg:h-24 xl:max-w-md xl:h-32'
     >
       <Image
         src={LogoUrl}

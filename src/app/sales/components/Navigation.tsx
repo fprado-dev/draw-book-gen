@@ -1,18 +1,15 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { motion } from 'framer-motion';
-import { Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link as ScrollLink } from 'react-scroll';
 
 const menuItems = [
   { id: 'hero', label: 'Home' },
   { id: 'benefits', label: 'Benefits' },
-  { id: 'howItWorks', label: 'How It Works' },
-  { id: 'demo', label: 'Demo' },
   { id: 'pricing', label: 'Pricing' },
+  { id: 'howItWorks', label: 'How It Works' },
   { id: 'faq', label: 'FAQ' },
   { id: 'finalCta', label: 'Get Started' },
 ];
@@ -20,6 +17,7 @@ const menuItems = [
 export function Navigation() {
   const [activeSection, setActiveSection] = useState('hero');
   const [isScrolled, setIsScrolled] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,15 +41,52 @@ export function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  if (isMobile) {
+    return (
+      <motion.nav
+        initial={{ y: 0, opacity: 0, transition: { duration: 1 } }}
+        animate={{ y: 0, opacity: 1, transition: { duration: 1 } }}
+        className="fixed top-2 left-1/2 -translate-x-1/2 z-50"
+      >
+        <div className="flex items-center gap-4 p-2 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg">
+          {menuItems.map((item) => (
+            <ScrollLink
+              key={item.id}
+              to={item.id}
+              spy={true}
+              smooth={true}
+              offset={0}
+              duration={500}
+              className="relative group"
+            >
+              <div
+                className={`w-2 h-2 rounded-full flex items-center justify-center transition-all duration-300
+                  ${activeSection === item.id ? 'bg-primary shadow-lg scale-110' : 'bg-white/20 hover:bg-white/30'}
+                  cursor-pointer touch-manipulation`}
+              >
+                <div className={`w-2 h-2 rounded-full ${activeSection === item.id ? 'bg-primary' : 'bg-affair-400'}`} />
+              </div>
+              <div className="absolute left-full ml-2 py-1 px-2 rounded bg-white/10 backdrop-blur-lg
+                opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                whitespace-nowrap text-sm pointer-events-none">
+                {item.label}
+              </div>
+            </ScrollLink>
+          ))}
+
+        </div>
+      </motion.nav>
+    );
+  }
+
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-affair-50/20 backdrop-blur-2xl shadow-sm' : 'bg-transparent'}`}
     >
       <div className="container mx-auto px-4 py-4">
-        {/* Desktop Navigation */}
-        <ul className="hidden md:flex items-center justify-center space-x-8">
+        <ul className="flex items-center justify-center space-x-8">
           {menuItems.map((item) => (
             <li key={item.id}>
               <ScrollLink
@@ -59,7 +94,7 @@ export function Navigation() {
                 spy={true}
                 smooth={true}
                 activeClass="active"
-                offset={-80}
+                offset={0}
                 duration={500}
                 className={`cursor-pointer text-sm font-medium transition-colors hover:text-primary ${activeSection === item.id ? 'text-primary' : 'text-muted-foreground'}`}
               >
@@ -67,49 +102,10 @@ export function Navigation() {
               </ScrollLink>
             </li>
           ))}
+
         </ul>
-
-        {/* Mobile Navigation */}
-        <div className="md:hidden flex justify-end">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="size-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-white/20 backdrop-blur-lg border-l border-white/30 shadow-xl">
-              <nav className="flex flex-col gap-4">
-                {menuItems.map((item) => {
-                  const setOpen = (open: boolean) => {
-                    const trigger = document.querySelector('[data-state]');
-                    if (trigger) {
-                      trigger.setAttribute('data-state', open ? 'open' : 'closed');
-                    }
-                  };
-
-                  return (
-                    <ScrollLink
-                      key={item.id}
-                      to={item.id}
-                      spy={true}
-                      smooth={true}
-                      offset={-80}
-                      duration={500}
-                      onClick={() => setOpen(false)}
-                      className={`cursor-pointer text-lg font-medium transition-all duration-300 hover:text-primary p-3 rounded-lg
-                        ${activeSection === item.id ? 'text-primary bg-white/10' : 'text-muted-foreground'}
-                        hover:bg-white/20 hover:shadow-md hover:scale-105 active:scale-95`}
-                    >
-                      {item.label}
-                    </ScrollLink>
-                  );
-                })}
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
       </div>
     </motion.nav>
   );
+
 }
