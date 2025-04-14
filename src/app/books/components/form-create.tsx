@@ -18,9 +18,10 @@ import {
   TBookStatus,
   TBookType,
 } from '@/types/ebook';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Archive, BookDashed, BookOpenCheck } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 type TFormCreateBook = {
   closeModal: () => void;
@@ -61,16 +62,30 @@ export function FormCreateBook({ closeModal }: TFormCreateBook) {
 
   const queryClient = useQueryClient(mainQueryClient);
 
+  const createBookMutation = useMutation({
+    mutationFn: (e: FormData) =>
+      onCreateBook(
+        e,
+        status as TBookStatus,
+        paperColor as TBookPaperColor,
+        bookType as TBookType,
+        unit as TBookMeasurementUnit
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      closeModal();
+      toast.success('Book created successfully!');
+    },
+    onError: (error) => {
+      toast.error('Failed to create book.', {
+        description: error.message,
+      });
+      console.error('Book creation error:', error.message);
+    },
+  });
+
   const handleSubmit = (e: FormData) => {
-    onCreateBook(
-      e,
-      status as TBookStatus,
-      paperColor as TBookPaperColor,
-      bookType as TBookType,
-      unit as TBookMeasurementUnit
-    );
-    queryClient.invalidateQueries({ queryKey: ['books'] });
-    closeModal();
+    createBookMutation.mutate(e);
   };
   return (
     <form className="space-y-4">

@@ -39,7 +39,7 @@ export const onCreateBook = async (
     ])
     .single();
 
-  if (error) throw error;
+  if (error) throw error.message;
   return data;
 };
 
@@ -173,7 +173,8 @@ export const onCreatePage = async (bookId: string) => {
     .select()
     .single();
 
-  if (insertError) throw insertError;
+  console.log(insertError?.message);
+  if (insertError) throw insertError.message;
 
   return newPage as TPage;
 };

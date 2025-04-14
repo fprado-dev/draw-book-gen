@@ -96,8 +96,10 @@ export default function BookPages() {
           setSelectedPage(updatedData?.pages[updatedData.pages.length - 1]!);
         });
     },
-    onError: () => {
-      toast.error('Failed to create page');
+    onError: (error) => {
+      toast.error('Failed to create book.', {
+        description: error.message,
+      });
     },
   });
 
