@@ -44,11 +44,13 @@ function TabGenerateAIImage({
         aspectRatio: bookSizeAspectRatioMap[book.size],
       });
       if (success) {
-        queryClient.invalidateQueries({ queryKey: ['gallery-images'] });
-        setIsCreatingImage(false);
-        setIsGenerating(false);
-        setActiveTab('gallery');
-        toast.success('Image generated successfully!');
+        queryClient.refetchQueries({ queryKey: ['gallery-images'] }).then(() => {
+          setIsCreatingImage(false);
+          setIsGenerating(false);
+          setActiveTab('gallery');
+          toast.success('Image generated successfully!');
+        });
+
       }
     } catch (error) {
       console.error('Failed to generate image:', error);

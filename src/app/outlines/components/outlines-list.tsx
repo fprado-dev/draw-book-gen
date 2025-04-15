@@ -96,7 +96,7 @@ export function OutlinesList() {
       </Sheet>
       {isLoadingOutlines && <SkeletonOutline />}
       <div
-        className={`grid grid-cols-1 gap-4 md:grid-cols-2 ${open ? 'lg:grid-cols-3 xl:grid-cols-3' : 'lg:grid-cols-4 xl:grid-cols-4'} `}
+        className={`grid gap-4  @max-xl:grid-cols-1 @min-xl:@max-3xl:grid-cols-2 @min-3xl:@max-7xl:grid-cols-3 grid-cols-4`}
       >
         {outlines?.data &&
           outlines?.data.length > 0 &&

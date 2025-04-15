@@ -9,6 +9,7 @@ import {
 import { signOutAction } from '@/app/actions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { User } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   BadgeCheck,
   Bell,
@@ -17,6 +18,7 @@ import {
   LogOut,
   Sparkles,
 } from 'lucide-react';
+import { mainQueryClient } from '../providers';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
   DropdownMenu,
@@ -28,8 +30,9 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-export function NavUser({ user }: { user: User | null }) {
+export function NavUser({ user }: { user: User | null; }) {
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient(mainQueryClient);
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -114,6 +117,7 @@ export function NavUser({ user }: { user: User | null }) {
             <DropdownMenuItem
               onClick={async () => {
                 signOutAction();
+                queryClient.clear();
               }}
             >
               <LogOut className="mr-2 h-4 w-4" />
