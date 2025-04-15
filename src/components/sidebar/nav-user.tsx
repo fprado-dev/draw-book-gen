@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-export function NavUser({ user }: { user: User | null; }) {
+export function NavUser({ user }: { user: User | null }) {
   const isMobile = useIsMobile();
   const queryClient = useQueryClient(mainQueryClient);
   return (

@@ -12,7 +12,6 @@ import {
   SheetDescription,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useSidebar } from '@/components/ui/sidebar';
 import { TBook } from '@/types/ebook';
 import { useRouter } from 'next/navigation';
 import { formatBookCard } from '../utils/format-card';
@@ -22,7 +21,6 @@ import { SkeletonBook } from './skeleton-book';
 
 export function BooksList() {
   const router = useRouter();
-  const { open } = useSidebar();
 
   const queryClient = useQueryClient(mainQueryClient);
 
@@ -101,7 +99,7 @@ export function BooksList() {
       </Sheet>
       {isLoading && <SkeletonBook />}
       <div
-        className={`grid gap-4  @max-xl:grid-cols-1 @min-xl:@max-3xl:grid-cols-2 @min-3xl:@max-7xl:grid-cols-3 grid-cols-4`}
+        className={`@max-xl:grid-cols-1 @min-xl:@max-3xl:grid-cols-2  @min-3xl:@max-7xl:grid-cols-3 grid grid-cols-4 gap-4`}
       >
         {data?.books &&
           data.books.length > 0 &&
