@@ -3,26 +3,24 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+import { mainQueryClient } from '@/components/providers';
 import { BentoCard } from '@/components/ui/bento-card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { mainQueryClient } from '@/components/providers';
-import { AlertDialogConfirmation } from './alert-dialog-confirmation';
-import { SkeletonBook } from './skeleton-book';
-import { formatBookCard } from '../utils/format-card';
-import { TBook } from '@/types/ebook';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { FormUpdateBook } from './form-edit';
+import { TBook } from '@/types/ebook';
 import { useRouter } from 'next/navigation';
-import { useSidebar } from '@/components/ui/sidebar';
+import { formatBookCard } from '../utils/format-card';
+import { AlertDialogConfirmation } from './alert-dialog-confirmation';
+import { FormUpdateBook } from './form-edit';
+import { SkeletonBook } from './skeleton-book';
 
 export function BooksList() {
   const router = useRouter();
-  const { open } = useSidebar();
 
   const queryClient = useQueryClient(mainQueryClient);
 
@@ -101,7 +99,7 @@ export function BooksList() {
       </Sheet>
       {isLoading && <SkeletonBook />}
       <div
-        className={`grid grid-cols-1 gap-4 md:grid-cols-2 ${open ? 'lg:grid-cols-3 xl:grid-cols-3' : 'lg:grid-cols-4 xl:grid-cols-4'}`}
+        className={`@max-xl:grid-cols-1 @min-xl:@max-3xl:grid-cols-2  @min-3xl:@max-7xl:grid-cols-3 grid grid-cols-4 gap-4`}
       >
         {data?.books &&
           data.books.length > 0 &&

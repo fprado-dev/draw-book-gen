@@ -223,7 +223,7 @@ export function FormUpdateBook({ closeModal, book }: TFormUpdateBook) {
           pendingText="Creating..."
           formAction={handleSubmit}
         >
-          Create
+          Update
         </SubmitButton>
       </div>
     </form>

@@ -7,7 +7,6 @@ import {
   SheetDescription,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useSidebar } from '@/components/ui/sidebar';
 import { deleteOutline, getAllOutlines } from '@/services/outlines.service';
 import { TOutlines } from '@/types/outlines';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -20,7 +19,6 @@ import { SkeletonOutline } from './skeleton-outline';
 import { ViewPromptSheet } from './view-prompt-sheet';
 
 export function OutlinesList() {
-  const { open } = useSidebar();
   const queryClient = useQueryClient(mainQueryClient);
   const [outlineToDelete, setOutlineToDelete] = useState<TOutlines>();
   const [isOpenDialogDelete, setDialogDelete] = useState(false);
@@ -96,7 +94,7 @@ export function OutlinesList() {
       </Sheet>
       {isLoadingOutlines && <SkeletonOutline />}
       <div
-        className={`grid grid-cols-1 gap-4 md:grid-cols-2 ${open ? 'lg:grid-cols-3 xl:grid-cols-3' : 'lg:grid-cols-4 xl:grid-cols-4'} `}
+        className={`@max-xl:grid-cols-1 @min-xl:@max-3xl:grid-cols-2  @min-3xl:@max-7xl:grid-cols-3 grid grid-cols-4 gap-4`}
       >
         {outlines?.data &&
           outlines?.data.length > 0 &&

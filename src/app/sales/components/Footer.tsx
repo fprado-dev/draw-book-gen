@@ -29,7 +29,6 @@ export const Footer = () => {
     },
   };
 
-
   return (
     <motion.footer
       initial="offscreen"

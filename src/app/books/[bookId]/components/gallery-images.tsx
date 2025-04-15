@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getGeneratedImages } from '@/services/supabase-storage.service';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
+import { useEffect } from 'react';
 
 function TabGalleryImages({
   onSelectItemFromGallery,
@@ -17,6 +18,12 @@ function TabGalleryImages({
     queryFn: getGeneratedImages,
   });
 
+  useEffect(() => {
+    console.log('Mounted');
+    return () => {
+      console.log('Unmounted');
+    };
+  }, []);
   if (isLoading || isFetching) {
     return (
       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">

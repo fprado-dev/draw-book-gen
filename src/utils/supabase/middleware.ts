@@ -1,5 +1,5 @@
 const protectedRoutes = ['/dashboard', '/books', '/outlines'];
-const authRoutes = ['/sign-in', '/sign-up'];
+const authRoutes = ['/sign-in', '/sign-up', '/sales'];
 
 import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';

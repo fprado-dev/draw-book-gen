@@ -278,16 +278,16 @@ function renderHeadline() {
   );
 }
 
-function RenderLogo(mousePosition: { x: number; y: number; }) {
+function RenderLogo(mousePosition: { x: number; y: number }) {
   const isMobile = useIsMobile();
   return (
     <motion.div
       style={
         !isMobile
           ? {
-            x: mousePosition.x * 50,
-            y: mousePosition.y * 50,
-          }
+              x: mousePosition.x * 50,
+              y: mousePosition.y * 50,
+            }
           : {}
       }
       className="max-w-3xs lg:max-w-2xs relative h-20 w-full lg:h-24 xl:h-32 xl:max-w-md"
@@ -298,7 +298,7 @@ function RenderLogo(mousePosition: { x: number; y: number; }) {
         fill
         priority
         sizes="(100vw: 100%)"
-      // className="relative z-10"
+        // className="relative z-10"
       />
     </motion.div>
   );

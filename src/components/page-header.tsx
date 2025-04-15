@@ -16,9 +16,9 @@ export function PageHeader({
   ...props
 }: PageHeaderProps) {
   return (
-    <div className="flex items-start justify-between gap-4 py-4 md:gap-6 md:py-6">
+    <div className="@max-lg:flex-col flex  flex-row items-start justify-between gap-4 py-4 md:gap-6 md:py-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-primary text-3xl font-bold">{titleText}</h1>
+        <h1 className="text-primary text-2xl font-bold">{titleText}</h1>
         <p className="text-muted-foreground">{description}</p>
       </div>
       {button_text && (

@@ -6,7 +6,6 @@ import { Video, Wand2 } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 const CTAPage = () => {
-
   // Animation variants
   const headerVariants: Variants = {
     offscreen: { opacity: 0, y: -20 },
